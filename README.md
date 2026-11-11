@@ -1,5 +1,7 @@
 # embalses
 
+[![The site: a map of Spain coloured by how full each basin is, beside the national level and its year chart](docs/img/embalses-home.png)](https://lakehousebox.github.io/embalses/)
+
 **Where is it raining in Spain, and is that rain reaching the reservoirs?**
 
 A live, open dataset joining Spain's official rain gauges, river gauges and reservoirs, kept up to date inside [LakehouseBox](https://lakehousebox.com). It is published as a public Apache Iceberg catalog and read straight from the browser.
