@@ -62,5 +62,17 @@ Real-time values are provisional: the publishers haven't validated them.
 lhbox catalog create embalses
 lhbox migrate --catalog embalses      # creates the 20 tables from sql/migrations/, with partitioning and descriptions
 lhbox plan -f lakehouse.yaml          # shows what apply would create or change
-lhbox apply -f lakehouse.yaml         # connections, POST prefixes, the 13 scheduled sinks, table descriptions
+lhbox apply -f lakehouse.yaml         # connections, POST prefixes, the 14 scheduled sinks, table descriptions
 ```
+
+### With OpenTofu or Terraform
+
+[`main.tf`](main.tf) declares the same deployment for the [LakehouseBox provider](https://github.com/lakehousebox/terraform-provider-lakehousebox): the public catalog, the URL prefixes and the connection its scheduled SQL may use, the 14 sinks, `AGENTS.md` and every table description. Tables still come from `sql/migrations/` with `lhbox migrate`, so no apply can drop a table or its rows.
+
+```sh
+export LHBOX_API_KEY=...     # `lhbox login` makes one
+tofu init                    # skip while using a development override (see below)
+tofu plan
+```
+
+The provider is at v0.1.0 and not yet listed on the OpenTofu and Terraform registries; until it is, install it from its GitHub release with a [development override](https://opentofu.org/docs/cli/config/config-file/#development-overrides-for-provider-developers). [`tools/tofu_adopt.sh`](tools/tofu_adopt.sh) imports a catalog that already exists and shows the plan.
