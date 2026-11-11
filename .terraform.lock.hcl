@@ -2,18 +2,18 @@
 # Manual edits may be lost in future updates.
 
 provider "registry.terraform.io/lakehousebox/lakehousebox" {
-  version     = "0.1.0"
-  constraints = "~> 0.1"
+  version     = "0.1.1"
+  constraints = "~> 0.1.1"
   hashes = [
-    "h1:jEZFjKWdAvEU18BO9Jj96zJAgKcU8bH9DZpGc9JU13k=",
-    "zh:22219727716fa20b58b4f967e9c71613d576be85d46012794ab633c8d3ec9cf6",
-    "zh:314fe7d2985f9957dbe427094524599ab706e5655f6eb7d39bec67629a3b97ec",
-    "zh:3a0816f29bba80bd5f2a6e3b538d0e581107f5076837f15db0feafd33b0a2e35",
-    "zh:5935922bc3f22428072ef414a2b2408a6dd792ac69e4fc4d8cda34a4d9246b4e",
-    "zh:62a0c177032f47f7c61f129892db3859dbeea32b7eed3f0980781c6aa68f10aa",
-    "zh:a7e20ffb220cb63a9175fe1049277cf05eca27f00f5c740aa61d2d3b7c3047bc",
-    "zh:cad40ca8a30ee967cae26c29abb0b2b3eed7965a7ad0ccdd8aaad0adc1edfd12",
-    "zh:ec4da71e1aaea98c328be78ea3b8c56631b2cc06f9e9091f7eb8a5a4490ff1f8",
+    "h1:I59FVeSMwk2oluP2/IcvBGC/iHEXhlfBii9uRhVJ7x0=",
+    "zh:6b0ca4b2d684a4bea727fbdbbdc374cbb5ca14d0c2e9ac07d6e780de9a94a011",
+    "zh:6dc5651ffecf40345a494e91ed78cd7199d3be9283c029ee37e066724e2561de",
+    "zh:a18277a6234978d0378475d33fa63d00347473fe562250e0bad61438fb823b51",
+    "zh:a957eb6c04aeaeab95f9f8b47f06548e961966724175b857e88ad1ef37885ba6",
+    "zh:bb0b536f57019703becbd5b7d2411b7d8f4decd4dfbc7778ae05e8be8acbad9d",
+    "zh:e38ed74558c879d9e4dc2a52d1675ee34cbc792f494fc410d2366f4820b607ab",
+    "zh:f6d7026c788804057dbf784b94a2a7fc0e2fd6d5fa7c7a213ae92de58a72aa96",
     "zh:f809ab383cca0a5f83072981c64208cbd7fa67e986a86ee02dd2c82333221e32",
+    "zh:fda48505499b38f8a606b49a8b56f5c26de82e16cf216d9ea0d3be41f6299b9f",
   ]
 }

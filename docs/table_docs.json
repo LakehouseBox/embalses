@@ -115,7 +115,8 @@
       "period_minutes": "Interval length in minutes (60 for AEMET).",
       "precipitation_mm": "Rain in the interval, mm (1 mm = 1 litre per m²).",
       "is_provisional": "True for real-time values not yet validated by the publisher.",
-      "source": "Key of the source (aemet-opendata, …)."
+      "source": "Key of the source (aemet-opendata, …).",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "obs.weather": {
@@ -133,7 +134,8 @@
       "wind_direction_deg": "Direction the wind comes from, degrees (0 = north).",
       "pressure_hpa": "Station-level air pressure, hPa.",
       "is_provisional": "True for real-time values not yet validated.",
-      "source": "Key of the source (aemet-opendata)."
+      "source": "Key of the source (aemet-opendata).",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "obs.reservoir_readings": {
@@ -148,7 +150,8 @@
       "inflow_m3s": "Water entering, m³/s, where published.",
       "outflow_m3s": "Water released through the dam, m³/s, where published.",
       "is_provisional": "True for real-time values not yet validated.",
-      "source": "Key of the source (saih-ebro, saih-guadalquivir, …)."
+      "source": "Key of the source (saih-ebro, saih-guadalquivir, …).",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "obs.river_flow": {
@@ -187,7 +190,8 @@
       "as_of": "End of the window: the latest hour at least half the gauges have reported (UTC).",
       "rain_mm": "Interpolated rain depth, mm.",
       "stations_used": "Gauges within 40 km that contributed.",
-      "nearest_station_km": "Distance to the nearest contributing gauge, km. Large values mean low confidence."
+      "nearest_station_km": "Distance to the nearest contributing gauge, km. Large values mean low confidence.",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "now.upstream_rain": {
@@ -201,7 +205,8 @@
       "rain_volume_hm3": "areal_rain_mm × upstream area ÷ 1000: water that fell, hm³. Not all of it reaches the reservoir.",
       "upstream_area_km2": "Upstream area the average is taken over, km².",
       "area_covered_pct": "Share of the upstream area with an interpolated value (gauges within 40 km), %.",
-      "stations_reporting": "Gauges inside the upstream area that reported in the window."
+      "stations_reporting": "Gauges inside the upstream area that reported in the window.",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "now.reservoir_status": {
@@ -250,7 +255,8 @@
       "fill_pct_10y_average": "Average district fill in the same week over 10 years, %.",
       "areal_rain_24h_mm": "Average interpolated rain over the district in 24 hours, mm.",
       "reservoirs_live": "Reservoirs with a live reading under 3 hours old.",
-      "reservoirs_total": "Bulletin reservoirs in the district."
+      "reservoirs_total": "Bulletin reservoirs in the district.",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "now.station_status": {

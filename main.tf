@@ -12,7 +12,7 @@
 terraform {
   required_providers {
     # The full address: the provider is on the Terraform registry (works with tofu and terraform); the OpenTofu registry listing is pending.
-    lakehousebox = { source = "registry.terraform.io/lakehousebox/lakehousebox", version = "~> 0.1" }
+    lakehousebox = { source = "registry.terraform.io/lakehousebox/lakehousebox", version = "~> 0.1.1" }
   }
 }
 
