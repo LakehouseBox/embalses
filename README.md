@@ -51,7 +51,7 @@ Official sources only, credited as their publishers ask:
 
 - **MITECO**: weekly reservoir bulletin (*Boletín Hidrológico*), dam inventory (*Inventario de Presas y Embalses*), SAIH station register, river basin districts.
 - **AEMET OpenData**: hourly and daily weather observations.
-- **SAIH real-time networks** of the river-basin authorities: Ebro, Guadalquivir, Segura, Miño-Sil and Cantábrico (more to come).
+- **SAIH real-time networks** of the river-basin authorities: Ebro, Guadalquivir, Guadiana, Segura, Miño-Sil and Cantábrico (more to come).
 - **HydroSHEDS** ([Lehner & Grill 2013](https://www.hydrosheds.org)): HydroBASINS and HydroRIVERS, CC BY 4.0.
 
 Real-time values are provisional: the publishers haven't validated them.

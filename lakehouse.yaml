@@ -23,6 +23,7 @@ catalogs:
     post_prefixes:                     # where scheduled SQL may send a request body (form POSTs of the SAIH viewers)
       - https://saihweb.chsegura.es/apps/iVisor/
       - https://visor.saichcantabrico.es/wp-admin/
+      - https://siraguadiana.com/backend/
 
     connections:
       # The AEMET key is the organisation's existing web integration, not a copy (tablemere#3001, G7).
@@ -38,6 +39,7 @@ catalogs:
       saih_segura: { table: obs.reservoir_readings, sql: sql/ingest/reservoir_readings_segura.sql, every: 15m, offset: 6m }
       saih_minosil: { table: obs.reservoir_readings, sql: sql/ingest/reservoir_readings_minosil.sql, every: 15m, offset: 8m }
       saih_cantabrico: { table: obs.reservoir_readings, sql: sql/ingest/reservoir_readings_cantabrico.sql, every: 15m, offset: 10m }
+      saih_guadiana: { table: obs.reservoir_readings, sql: sql/ingest/reservoir_readings_guadiana.sql, every: 1h, offset: 12m }   # one request per reservoir, so hourly
 
       miteco_reservoir_weekly:
         table: obs.reservoir_weekly
