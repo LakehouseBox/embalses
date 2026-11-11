@@ -126,6 +126,13 @@ textarea.sql { min-height: 120px; resize: vertical; }
 footer { border-top: 1px solid var(--line); background: var(--surface); padding: 28px 0 40px; font-size: 14px; color: var(--muted); }
 footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; } footer h3 { color: var(--ink); margin-bottom: 6px; } footer p { margin: 0 0 6px; }
 .skeleton { color: var(--faint); }
+.ficha { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+.ficha dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 18px; margin: 8px 0 0; }
+.ficha dt { font-size: 12px; color: var(--muted); } .ficha dd { margin: 0; font-weight: 600; font-size: 15px; }
+.labelrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.linkbtn { font: inherit; font-size: 13px; color: var(--brand); background: none; border: 0; padding: 2px 0; cursor: pointer; white-space: nowrap; }
+.linkbtn:hover { text-decoration: underline; }
+#t-res tbody tr { cursor: pointer; } #t-res tbody tr:hover { background: #f5f8fb; } #t-res tbody tr.on { background: #e8f1fc; }
 @media (max-width: 980px) { .grid2, .grid3, .gridb, .open, .hero .wrap, footer .cols { grid-template-columns: minmax(0, 1fr); } .hero p { border-left: 0; padding-left: 0; } nav.main { display: none; } .natl { grid-template-columns: minmax(0, 1fr); } .kv2 { border-left: 0; padding-left: 0; grid-auto-flow: column; } }
 @media (max-width: 560px) { .rain { grid-template-columns: minmax(0, 1fr); } .big { font-size: 52px; } }
 </style>
@@ -164,7 +171,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <p class="muted small" id="area-note" style="margin:6px 0 0" hidden></p>
     </div>
     <div class="card">
-      <div class="label" id="n-label">Nivel nacional de los embalses</div>
+      <div class="labelrow"><div class="label" id="n-label">Nivel nacional de los embalses</div><button class="linkbtn" id="share" title="Copia un enlace a esta vista">Copiar enlace</button></div><div class="muted small" id="n-sub" hidden></div>
       <div class="natl" style="margin-top:8px">
         <div><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div class="big num skeleton" id="n-pct">—</div><div><span class="chip" id="n-week"></span><div class="muted small">en la última semana</div></div></div><div class="meter"><i id="n-meter" style="width:0"></i></div></div>
         <div class="kv2 num"><div>Agua embalsada<b id="n-stored">—</b></div><div>Capacidad total<b id="n-cap">—</b></div></div>
@@ -175,6 +182,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
         <svg id="year" viewBox="0 0 560 250" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div>
       </div>
       <div class="muted small" id="n-date"></div>
+      <div class="ficha" id="ficha" hidden></div>
     </div>
   </div>
 
@@ -258,12 +266,14 @@ async function connect() {
   for (const s of ['INSTALL httpfs', 'LOAD httpfs', 'INSTALL iceberg', 'LOAD iceberg', CAT]) await conn.query(s);
 }
 const plain = v => typeof v === 'bigint' ? Number(v) : v instanceof Date ? v.toISOString() : (v && typeof v === 'object' && typeof v.toArray === 'function') ? Array.from(v.toArray(), plain) : v;
-async function q(sql) { const t = await conn.query(sql); const cols = t.schema.fields.map(f => f.name); return { cols, rows: t.toArray().map(r => Object.fromEntries(cols.map(c => [c, plain(r[c])]))) }; }
+let READY;   // resolves when DuckDB is attached; every query waits for it
+async function q(sql) { await READY; const t = await conn.query(sql); const cols = t.schema.fields.map(f => f.name); return { cols, rows: t.toArray().map(r => Object.fromEntries(cols.map(c => [c, plain(r[c])]))) }; }
 const SQL = {
   res: `SELECT reservoir_id, reservoir_name, basin_name, province, region, river_name, longitude AS lon, latitude AS lat,
        capacity_hm3, round(stored_volume_hm3, 1) AS stored_hm3, round(fill_pct, 1) AS fill_pct,
        fill_pct_same_week_last_year AS fill_last_year, fill_pct_10y_average AS fill_10y,
-       weekly_change_hm3, change_since_bulletin_hm3, data_source,
+       weekly_change_hm3, change_since_bulletin_hm3, change_24h_hm3, data_source, inflow_m3s, outflow_m3s,
+       strftime(latest_reading_at, '%Y-%m-%dT%H:%M:%SZ') AS reading_at,
        upstream_rain_24h_mm AS rain_24h_mm, upstream_rain_volume_24h_hm3 AS rain_24h_hm3
 FROM embalses."now".reservoir_status`,
   grid: `SELECT h3_cell, max(rain_mm) FILTER (WHERE time_window = '1h') AS rain_1h, max(rain_mm) FILTER (WHERE time_window = '6h') AS rain_6h,
@@ -272,6 +282,8 @@ FROM embalses."now".rain_grid GROUP BY 1`,
   gauges: `SELECT station_name, basin_name, longitude AS lon, latitude AS lat, rain_1h_mm, rain_6h_mm, rain_12h_mm, rain_24h_mm
 FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_24h_mm DESC LIMIT 80`,
   outlines: `SELECT layer, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
+  ficha: id => `SELECT dam_name, dam_type, uses, catchment_area_km2, surface_area_ha, mean_annual_inflow_hm3, is_hydroelectric, energy_capacity_gwh
+FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
 FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
 };
@@ -297,10 +309,18 @@ function assign() {   // each reservoir into its basin, comunidad and province (
     for (const a of AREAS[t]) a.key = mode(a.res.map(r => r[f]));
     for (const a of AREAS[t]) { a.res = a.key ? D.res.filter(r => r.lon != null && r[f] === a.key) : []; for (const r of a.res) r.in[t] = a.name; } }
   for (const t of ['b', 'c', 'p']) for (const a of AREAS[t]) { const cap = a.res.reduce((s, r) => s + (r.capacity_hm3 || 0), 0), sto = a.res.reduce((s, r) => s + (r.stored_hm3 || 0), 0);
+    if (t === 'p') a.parent = (AREAS.c.find(c => c.res.length && a.res.length && c.key === mode(a.res.map(r => r.region))) || AREAS.c.find(c => hit.isPointInPath(c.lonlat, a.cx, a.cy, 'evenodd')))?.name;
     a.cap = cap; a.stored = sto; a.fill = cap ? 100 * sto / cap : null; a.avg = cap ? a.res.reduce((s, r) => s + (r.fill_10y ?? r.fill_pct ?? 0) * r.capacity_hm3, 0) / cap : null; }
 }
-const inScope = r => scope.t === 'es' || (r.in && r.in[scope.t] === scope.k);
-const selArea = () => scope.t === 'es' ? null : AREAS[scope.t].find(a => a.name === scope.k);
+// scope: España, a basin (b), a comunidad (c), a province (p) or one reservoir (r, shown inside its parent area)
+const selRes = () => scope.t === 'r' ? D.res.find(r => r.reservoir_id === scope.k) : null;
+const AS = () => scope.t === 'r' ? scope.parent : scope;   // the area the map and the table show
+const inScope = r => AS().t === 'es' || (r.in && r.in[AS().t] === AS().k);
+const selArea = () => AS().t === 'es' ? null : AREAS[AS().t].find(a => a.name === AS().k);
+const children = name => AREAS.p.filter(p => p.parent === name && p.res.length);
+const overview = () => scope.t === 'es' || (scope.t === 'c' && children(scope.k).length > 1);   // coloured zones to pick from, not reservoirs
+const parentOf = sc => sc.t === 'r' ? sc.parent : sc.t === 'p' && group === 'c' ? { t: 'c', k: AREAS.p.find(a => a.name === sc.k)?.parent } : { t: 'es', k: null };
+const scopeName = sc => sc.t === 'es' ? 'España' : sc.t === 'r' ? (D.res.find(r => r.reservoir_id === sc.k)?.reservoir_name || '') : sc.k;
 
 // ───────── weekly series: national at start, a selected area on demand ─────────
 const SER = {}; let ST = null;
@@ -309,23 +329,24 @@ function stats(S) { const last = S[S.length - 1], prev = S[S.length - 2], Y = la
   for (const w of S) (byYear[w.d.getUTCFullYear()] ??= [])[wk(w.d)] = w.f;
   const avg10 = Array.from({ length: 52 }, (_, i) => { const v = []; for (let y = Y - 10; y < Y; y++) if (byYear[y]?.[i] != null) v.push(byYear[y][i]); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; });
   return { last, prev, Y, byYear, avg10, lw: wk(last.d) }; }
-async function series() { const a = selArea(), key = a ? a.type + ':' + a.name : 'es';
-  if (!SER[key]) { const ids = a ? a.res.map(r => r.reservoir_id) : null; if (a && !ids.length) return SER.es;
+async function series() { const a = selArea(), one = scope.t === 'r', key = one ? 'r:' + scope.k : a ? a.type + ':' + a.name : 'es';
+  if (!SER[key]) { const ids = one ? [+scope.k] : a ? a.res.map(r => r.reservoir_id) : null; if (!one && a && !ids.length) return SER.es;
     const { rows } = await q(SQL.weekly(ids ? `AND reservoir_id IN (${ids.join(',')})` : ''));
-    SER[key] = rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.s, c: r.c, f: r.c ? 100 * r.s / r.c : null })); }
+    SER[key] = toSeries(rows).filter(w => w.f != null); }
   return SER[key]; }
 let shownPct = null, pctRun = 0;
 function countTo(el, v) { const from = shownPct ?? v * 0.6, run = ++pctRun, t0 = performance.now(), put = x => el.innerHTML = `${fmt(x, 1)}<small> %</small>`; shownPct = v;
   if (CALM) return put(v);
   const step = now => { if (run !== pctRun) return; const t = Math.min(1, (now - t0) / 700); put(from + (v - from) * ease(t)); if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
 function numbers() { const { last, prev, Y, byYear, avg10, lw } = ST, ly = byYear[Y - 1]?.[lw], av = avg10[lw], dw = last.f - prev.f;
-  $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.k;
+  const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? `Embalse: ${scopeName(scope)}` : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
+  $('n-sub').hidden = !r; if (r) $('n-sub').textContent = [title(r.river_name), r.province, r.region, 'Cuenca: ' + (r.basin_name || '')].filter(Boolean).join(' · ');
   $('n-pct').className = 'big num'; countTo($('n-pct'), last.f); $('n-meter').style.width = Math.min(100, last.f) + '%';
   $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').textContent = `${dw < 0 ? '↓' : '↑'} ${signed(dw, 1)} p.p.`;
   $('n-stored').textContent = fmt(last.s) + ' hm³'; $('n-cap').textContent = fmt(last.c) + ' hm³';
   const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${d >= 0 ? '↑' : '↓'} ${signed(d, 1)} p.p. <span class="muted small" style="font-weight:400">(${fmt(v, 1)} %)</span>`; };
   cmp('n-ly', ly); cmp('n-avg', av); $('n-date').textContent = `Boletín oficial del ${dfmt(last.d)}. Fuente: MITECO.`;
-  $('year-title').textContent = scope.t === 'es' ? 'Evolución del nivel de los embalses en España' : `Evolución en ${scope.k}`; }
+  $('year-title').textContent = scope.t === 'es' ? 'Evolución del nivel de los embalses en España' : scope.t === 'r' ? `Evolución de ${scopeName(scope)}` : `Evolución en ${scope.k}`; }
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW = 560, VH = 250, m = { l: 40, r: 16, t: 22, b: 24 }, cur = byYear[Y] || [], ly = byYear[Y - 1] || [];
   const all = [...cur, ...ly, ...avg10].filter(v => v != null), y0 = Math.floor(Math.min(...all) / 10) * 10, y1 = Math.max(y0 + 20, Math.ceil(Math.max(...all) / 10) * 10), st = y1 - y0 > 50 ? 20 : 10;
@@ -352,7 +373,8 @@ let P, BB = ES, shownAreas = [], marks = [];
 const BAND = [0, 20, 30, 40, 50, 60, 70, 80], STEPS = [0.2, 1, 5, 10, 20, 40], bounds = new Map(); let gridIndex = new Map();
 const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v >= st[s]) i = s; return i; };
 let ANIM = 1, HOVER = null, animRun = 0;   // ANIM: 0→1 as the marks and labels of a view come in
-function target() { const a = selArea(); if (!a) return ES; const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); return { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
+function target() { const r = selRes(); if (r && r.lon != null) return { w: r.lon - 1.0, e: r.lon + 1.0, s: r.lat - 0.62, n: r.lat + 0.62 };
+  const a = selArea(); if (!a) return ES; const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); return { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
 function animate(from, to, ms = 750) {   // glide the view from one box to another, then let the marks grow in
   const run = ++animRun; if (CALM || !P) { ANIM = 1; fit(to); draw(); return; }
   const t0 = performance.now(), same = from === to, L = (a, b, e) => a + (b - a) * e;
@@ -365,33 +387,39 @@ function fit(bb = target()) { BB = bb;
   cv.width = Wd * dpr; cv.height = Hh * dpr; cv.style.height = Hh + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const gw = (BB.e - BB.w) * KX, gh = BB.n - BB.s, k = Math.min((Wd - 16) / gw, (Hh - 16) / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2;
   P = { k, ox, oy, W: Wd, H: Hh, x: lon => ox + (lon - BB.w) * KX * k, y: lat => oy + (BB.n - lat) * k };
-  shownAreas = AREAS[scope.t === 'es' ? group : scope.t].map(a => { const p = new Path2D(); for (const poly of polys(a.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? p.lineTo(P.x(x), P.y(y)) : p.moveTo(P.x(x), P.y(y))); p.closePath(); } return { a, p }; }); }
+  const path = a => { const p = new Path2D(); for (const poly of polys(a.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? p.lineTo(P.x(x), P.y(y)) : p.moveTo(P.x(x), P.y(y))); p.closePath(); } return { a, p }; };
+  const kids = scope.t === 'c' && overview();   // inside a comunidad: its provinces, over the other comunidades
+  shownAreas = (kids ? children(scope.k) : AREAS[AS().t === 'es' ? group : AS().t]).map(path); backdrop = kids ? AREAS.c.filter(c => c.name !== scope.k).map(path) : []; }
+let backdrop = [];
 function text(t, x, y, size, weight, color) { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
 function gauge(r, rad) { rad *= 0.45 + 0.55 * ANIM; const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
   ctx.beginPath(); ctx.arc(x, y, rad + 1.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();
   ctx.save(); ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.clip(); ctx.fillStyle = isLow(r) ? css('--low') : css('--water'); ctx.fillRect(x - rad, y + rad - 2 * rad * f, rad * 2, 2 * rad * f); ctx.restore();
   ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1; ctx.stroke(); marks.push({ r, x, y, rad }); }
 function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
-  const es = scope.t === 'es', ink = css('--ink'), muted = css('--muted'), taken = [];
+  const es = overview(), top = scope.t === 'es', sk = AS().k, ink = css('--ink'), muted = css('--muted'), taken = [];
+  for (const { p } of backdrop) { ctx.fillStyle = css('--land'); ctx.fill(p, 'evenodd'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(p); }
   const free = b => { if (taken.some(t => b[0] < t[2] && b[2] > t[0] && b[1] < t[3] && b[3] > t[1])) return false; taken.push(b); return true; };
-  for (const { a, p } of shownAreas) { const sel = !es && a.name === scope.k; ctx.fillStyle = layer === 'res' && (es || sel) && a.fill != null ? css('--a' + (stepOf(a.fill, BAND) + 1)) : css('--land'); ctx.globalAlpha = sel && layer === 'res' ? 0.55 : 1; ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; }
+  for (const { a, p } of shownAreas) { const sel = !es && a.name === sk; ctx.fillStyle = layer === 'res' && (es || sel) && a.fill != null ? css('--a' + (stepOf(a.fill, BAND) + 1)) : css('--land'); ctx.globalAlpha = sel && layer === 'res' ? 0.55 : 1; ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; }
   if (layer === 'rain') { const A = [0.35, 0.55, 0.75, 0.9, 1, 1];
     for (const c of D.grid) { const mm = c['rain_' + win]; if (mm == null || mm < 0.2) continue; let b = bounds.get(c.h3_cell); if (!b) bounds.set(c.h3_cell, b = h3.cellToBoundary(c.h3_cell));
       const s = stepOf(mm, STEPS); ctx.beginPath(); b.forEach(([la, lo], i) => i ? ctx.lineTo(P.x(lo), P.y(la)) : ctx.moveTo(P.x(lo), P.y(la))); ctx.closePath(); ctx.globalAlpha = A[s]; ctx.fillStyle = css('--f' + (s + 1)); ctx.fill(); } ctx.globalAlpha = 1; }
-  if (!es || layer !== 'res') { ctx.strokeStyle = css('--river'); ctx.lineCap = 'round'; const zf = es ? 1 : 1.6;
+  if (!es || layer !== 'res') { ctx.strokeStyle = css('--river'); ctx.lineCap = 'round'; const zf = top ? 1 : 1.6;
     for (const r of D.rivers) { const qf = r.mean_flow_m3s || 0; ctx.lineWidth = (qf > 300 ? 2 : qf > 80 ? 1.4 : qf > 20 ? 1 : 0.6) * zf; ctx.beginPath();
       for (const l of (r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates)) l.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.stroke(); } }
-  for (const { a, p } of shownAreas) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === scope.k ? 1.8 : 0.7; ctx.stroke(p); }
+  for (const { a, p } of shownAreas) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === sk ? 1.8 : 0.7; ctx.stroke(p); }
   if (HOVER) { const h = shownAreas.find(x => x.a === HOVER); if (h) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill(h.p, 'evenodd'); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 2; ctx.stroke(h.p); } }
   ctx.globalAlpha = ANIM;
   const rs = D.res.filter(r => r.lon != null && inScope(r)).sort((a, b) => b.capacity_hm3 - a.capacity_hm3);
   if (layer === 'res' && es) { for (const { a } of shownAreas) { if (a.fill == null) continue; const x = P.x(a.cx), y = P.y(a.cy), small = (a.bb.e - a.bb.w) * KX * P.k < 95;
       text(SHORT[a.name] || a.name, x, y - 4, small ? 12 : 14, 600, ink); text(`${fmt(a.fill, 0)} %`, x, y + (small ? 11 : 16), small ? 14 : 19, 700, ink); } }
   else if (layer === 'res') { for (const r of rs) gauge(r, Math.min(34, Math.max(4, Math.sqrt(r.capacity_hm3) * 0.26 * P.k / 60)));
-    for (const m of marks.slice(0, 14)) { ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(m.r.reservoir_name).width, 110) + 8;
+    const one = scope.t === 'r' && marks.find(m => m.r.reservoir_id === scope.k);
+    if (one) { ctx.beginPath(); ctx.arc(one.x, one.y, one.rad + 6, 0, 7); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 3; ctx.stroke(); }
+    for (const m of (one ? [one, ...marks.filter(m => m !== one)] : marks).slice(0, 14)) { ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(m.r.reservoir_name).width, 110) + 8;
       if (free([m.x - w / 2, m.y + m.rad + 2, m.x + w / 2, m.y + m.rad + 34])) { text(m.r.reservoir_name, m.x, m.y + m.rad + 15, 13, 600, ink); text(`${fmt(m.r.fill_pct, 0)} % · normal ${fmt(m.r.fill_10y, 0)} %`, m.x, m.y + m.rad + 30, 12, 400, muted); } } }
-  else if (layer === 'var') { for (const r of rs) { ctx.beginPath(); ctx.arc(P.x(r.lon), P.y(r.lat), es ? 1.6 : 2.6, 0, 7); ctx.fillStyle = css('--faint'); ctx.fill(); }
-    for (const r of rs.filter(r => Math.abs(trend(r) || 0) >= 0.5).sort((a, b) => Math.abs(trend(b)) - Math.abs(trend(a))).slice(0, es ? 16 : 12)) { const v = trend(r), x = P.x(r.lon), y = P.y(r.lat), sz = Math.min(26, 7 + Math.sqrt(Math.abs(v)) * 1.6), up = v > 0;
+  else if (layer === 'var') { for (const r of rs) { ctx.beginPath(); ctx.arc(P.x(r.lon), P.y(r.lat), top ? 1.6 : 2.6, 0, 7); ctx.fillStyle = css('--faint'); ctx.fill(); }
+    for (const r of rs.filter(r => Math.abs(trend(r) || 0) >= 0.5).sort((a, b) => Math.abs(trend(b)) - Math.abs(trend(a))).slice(0, top ? 16 : 12)) { const v = trend(r), x = P.x(r.lon), y = P.y(r.lat), sz = Math.min(26, 7 + Math.sqrt(Math.abs(v)) * 1.6), up = v > 0;
       ctx.beginPath(); if (up) { ctx.moveTo(x, y - sz); ctx.lineTo(x + sz * 0.8, y + sz * 0.6); ctx.lineTo(x - sz * 0.8, y + sz * 0.6); } else { ctx.moveTo(x, y + sz); ctx.lineTo(x + sz * 0.8, y - sz * 0.6); ctx.lineTo(x - sz * 0.8, y - sz * 0.6); }
       ctx.closePath(); ctx.fillStyle = up ? css('--up') : css('--down'); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); marks.push({ r, x, y, rad: sz }); }
     for (const m of marks) { const v = trend(m.r); ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(m.r.reservoir_name).width, 60) + 8, yy = m.y + m.rad + 4;
@@ -403,25 +431,27 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   ctx.globalAlpha = 1;
   $('mapkey').innerHTML = layer === 'rain' ? `<div>Lluvia en ${win.replace('h', ' h')} (mm)</div><div class="ramp">${STEPS.map((s, i) => `<span style="background:var(--f${i + 1})"></span>`).join('')}</div><div class="ticks num">${STEPS.map(s => `<span>${fmt(s, s < 1 ? 1 : 0)}</span>`).join('')}</div>`
     : layer === 'var' ? `<div><span class="upc">▲</span> gana agua · <span class="downc">▼</span> pierde agua</div>` : `<div>% de la capacidad</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> por debajo de lo normal · <span style="color:var(--water)">●</span> normal o por encima</div>`);
-  $('map-note').textContent = es ? 'Pulsa una zona del mapa para ver sus embalses.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
+  $('map-note').textContent = top ? 'Pulsa una zona del mapa para ver sus embalses.' : es ? 'Pulsa una provincia para ver sus embalses.' : layer === 'res' && scope.t !== 'r' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su ficha.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
 const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of shownAreas) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const mtip = $('map-tip');
 cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) { m = p.r; break; } }
-  const a = areaAt(mx, my), can = a && a.name !== scope.k && a.res.length ? a : null; cv.style.cursor = can ? 'pointer' : ''; if (can !== HOVER) { HOVER = can; if (ANIM === 1) draw(); }
+  const a = areaAt(mx, my), can = !m && a && a.name !== AS().k && a.res.length ? a : null; if (m) cv.style.cursor = 'pointer'; if (!m) cv.style.cursor = can ? 'pointer' : ''; if (can !== HOVER) { HOVER = can; if (ANIM === 1) draw(); }
   if (m) { const v = trend(m); mtip.innerHTML = `<b>${esc(m.reservoir_name)}</b> <span class="muted">· ${esc(m.basin_name || '')}</span><br><span class="num">${fmt(m.fill_pct, 1)} % · ${fmt(m.stored_hm3)} de ${fmt(m.capacity_hm3)} hm³</span><br><span class="muted num">media 10 años ${fmt(m.fill_10y, 1)} % · hace un año ${fmt(m.fill_last_year, 1)} %</span>${v != null && Math.abs(v) >= 0.5 ? `<br><span class="${v > 0 ? 'upc' : 'downc'} num">${signed(v, 1)} hm³</span> <span class="muted">${m.change_since_bulletin_hm3 != null ? 'desde el último boletín' : 'en la última semana'}</span>` : ''}`; }
   else if (layer === 'rain') { const lon = BB.w + (mx - P.ox) / (KX * P.k), lat = BB.n - (my - P.oy) / P.k, c = gridIndex.get(h3.latLngToCell(lat, lon, 6)), mm = c && c['rain_' + win]; if (!(mm >= 0.2)) { mtip.hidden = true; return; } mtip.innerHTML = `<b class="num">${fmt(mm, 1)} mm</b> <span class="muted">en ${win.replace('h', ' h')}</span>`; }
   else if (a && a.fill != null) mtip.innerHTML = `<b>${esc(a.name)}</b><br><span class="num">${fmt(a.fill, 1)} % · ${fmt(a.stored)} de ${fmt(a.cap)} hm³</span><br><span class="muted num">media 10 años ${fmt(a.avg, 1)} % · ${a.res.length} embalses</span>`;
   else { mtip.hidden = true; return; }
   mtip.hidden = false; mtip.style.left = Math.max(4, Math.min(mx + 14, P.W - mtip.offsetWidth - 6)) + 'px'; mtip.style.top = Math.min(my + 14, P.H - mtip.offsetHeight - 6) + 'px'; });
 cv.addEventListener('mouseleave', () => { mtip.hidden = true; if (HOVER) { HOVER = null; draw(); } });
-cv.addEventListener('click', e => { const rc = cv.getBoundingClientRect(), a = areaAt(e.clientX - rc.left, e.clientY - rc.top); if (a && a.res.length && a.name !== scope.k) setScope(a.type, a.name); });
+cv.addEventListener('click', e => { const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top;
+  for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) return setScope('r', p.r.reservoir_id); }
+  const a = areaAt(mx, my); if (a && a.res.length && a.name !== AS().k) setScope(a.type, a.name); });
 const press = (ids, on) => { for (const i of ids) $(i).setAttribute('aria-pressed', i === on); };
-function setLayer(l) { layer = l; press(['l-res', 'l-var', 'l-rain'], 'l-' + l); $('winseg').hidden = l !== 'rain'; animate(BB, BB); }
+function setLayer(l, note = true) { layer = l; if (note) remember(false); press(['l-res', 'l-var', 'l-rain'], 'l-' + l); $('winseg').hidden = l !== 'rain'; animate(BB, BB); }
 for (const l of ['res', 'var', 'rain']) $('l-' + l).onclick = () => setLayer(l);
 for (const g of ['b', 'c']) $('g-' + g).onclick = () => { group = g; press(['g-b', 'g-c'], 'g-' + g); animate(BB, BB); };
 for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).onclick = () => { win = w; press(['w-1h', 'w-6h', 'w-12h', 'w-24h'], 'w-' + w); draw(); };
-$('back').onclick = () => setScope('es', null);
+$('back').onclick = () => { const p = parentOf(scope); setScope(p.t, p.k); };
 function fullscreen(on) { $('mapcard').classList.toggle('fs', on); $('fs').textContent = on ? '✕' : '⛶'; $('fs').title = on ? 'Salir de pantalla completa' : 'Pantalla completa'; document.body.style.overflow = on ? 'hidden' : ''; animRun++; ANIM = 1; fit(); draw(); }
 $('fs').onclick = () => fullscreen(!$('mapcard').classList.contains('fs'));
 addEventListener('keydown', e => { if (e.key === 'Escape' && $('mapcard').classList.contains('fs')) fullscreen(false); });
@@ -444,19 +474,51 @@ $('rain-btn').onclick = () => { setLayer('rain'); $('panorama').scrollIntoView()
 const norm = s => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 function table() { const qv = norm($('q').value), rows = D.res.filter(r => inScope(r) && (!qv || norm(`${r.reservoir_name} ${r.river_name} ${r.province} ${r.basin_name}`).includes(qv)));
   rows.sort(sortBy === 'cap' ? (a, b) => b.capacity_hm3 - a.capacity_hm3 : sortBy === 'fill' ? (a, b) => (b.fill_pct ?? -1) - (a.fill_pct ?? -1) : (a, b) => (trend(b) ?? -1e9) - (trend(a) ?? -1e9));
-  $('count').textContent = `${rows.length} embalses`; $('more').hidden = rows.length <= shown; $('res-title').textContent = scope.t === 'es' ? 'Principales embalses' : `Embalses de ${scope.k}`;
+  $('count').textContent = `${rows.length} embalses`; $('more').hidden = rows.length <= shown; $('res-title').textContent = AS().t === 'es' ? 'Principales embalses' : `Embalses de ${AS().k}`;
   $('t-res').innerHTML = `<thead><tr><th>Embalse</th><th>Cuenca</th><th class="r">Embalsado</th><th class="r">Capacidad</th><th>Nivel</th><th class="r">Cambio</th><th>Dato</th></tr></thead><tbody>` + rows.slice(0, shown).map(r => { const v = trend(r);
-    return `<tr><td><div class="name">${esc(r.reservoir_name)}</div><div class="sub">${esc([title(r.river_name), r.province].filter(Boolean).join(' · '))}</div></td><td>${esc(r.basin_name || '')}</td><td class="r num">${fmt(r.stored_hm3)} hm³</td><td class="r num">${fmt(r.capacity_hm3)} hm³</td>
+    return `<tr data-id="${r.reservoir_id}" class="${scope.t === 'r' && r.reservoir_id === scope.k ? 'on' : ''}"><td><div class="name">${esc(r.reservoir_name)}</div><div class="sub">${esc([title(r.river_name), r.province].filter(Boolean).join(' · '))}</div></td><td>${esc(r.basin_name || '')}</td><td class="r num">${fmt(r.stored_hm3)} hm³</td><td class="r num">${fmt(r.capacity_hm3)} hm³</td>
       <td><div class="fillcell"><div class="bar"><span style="width:${Math.min(100, r.fill_pct || 0)}%"></span>${r.fill_10y != null ? `<b style="left:${Math.min(100, r.fill_10y)}%" title="Media de 10 años"></b>` : ''}</div><span class="num">${fmt(r.fill_pct, 0)} %</span></div></td>
       <td class="r num ${v > 0 ? 'upc' : v < 0 ? 'downc' : ''}">${v == null ? '—' : `${v > 0 ? '↑' : v < 0 ? '↓' : ''} ${signed(v, Math.abs(v) < 10 ? 1 : 0)} hm³`}</td><td><span class="pill ${r.data_source === 'miteco-weekly' ? 'w' : ''}"><i></i>${r.data_source === 'miteco-weekly' ? 'semanal' : 'en directo'}</span></td></tr>`; }).join('') + '</tbody>'; }
 for (const [id, k] of [['t-up', 'up'], ['t-fill', 'fill'], ['t-cap', 'cap']]) $(id).onclick = () => { sortBy = k; shown = 8; press(['t-up', 't-fill', 't-cap'], id); table(); };
+$('t-res').onclick = e => { const tr = e.target.closest('tr[data-id]'); if (tr) { setScope('r', +tr.dataset.id); $('panorama').scrollIntoView(); } };
 $('q').oninput = () => { shown = 8; table(); }; $('more').onclick = () => { shown += 30; table(); };
 $('full-btn').onclick = () => { sortBy = 'fill'; shown = 20; press(['t-up', 't-fill', 't-cap'], 't-fill'); table(); $('embalses').scrollIntoView(); };
 
-async function setScope(t, k) { const from = BB; HOVER = null; mtip.hidden = true; scope = { t, k }; if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); }
-  $('back').hidden = t === 'es'; $('groupseg').hidden = t !== 'es'; const an = AREA_NOTES[k]; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
-  animate(from, target()); shown = 8; table();
-  try { ST = stats(await series()); numbers(); yearChart(); } catch (e) { console.error(e); } }
+const when = iso => { const d = new Date(iso); return isNaN(d) ? '—' : d.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+async function ficha() { const r = selRes(), el = $('ficha'); el.hidden = !r; if (!r) return;
+  const live = r.data_source !== 'miteco-weekly', row = (k, v) => v == null || v === '' || v === '—' ? '' : `<div><dt>${k}</dt><dd class="num">${v}</dd></div>`, n = (v, d, u) => v == null ? null : `${fmt(v, d)} ${u}`;
+  const head = `<h3>Ficha del embalse</h3><dl>` + row('Agua embalsada', n(r.stored_hm3, 0, 'hm³')) + row('Capacidad', n(r.capacity_hm3, 0, 'hm³')) + row('Último dato', live ? `en directo · ${when(r.reading_at)}` : 'boletín semanal')
+    + row('Cambio en 24 h', r.change_24h_hm3 == null ? null : signed(r.change_24h_hm3, 1) + ' hm³') + row('Entrada', n(r.inflow_m3s, 1, 'm³/s')) + row('Salida', n(r.outflow_m3s, 1, 'm³/s'))
+    + row('Lluvia en su cuenca, 24 h', r.rain_24h_mm == null ? null : `${fmt(r.rain_24h_mm, 1)} mm${r.rain_24h_hm3 != null ? ` · ${fmt(r.rain_24h_hm3, 1)} hm³` : ''}`);
+  el.innerHTML = head + '</dl>'; const id = r.reservoir_id;
+  try { const f = (await q(SQL.ficha(id))).rows[0]; if (!f || scope.k !== id) return;
+    el.innerHTML = head + row('Presa', esc(title(f.dam_name))) + row('Tipo de presa', esc(f.dam_type)) + row('Usos', esc((f.uses || []).join(', '))) + row('Cuenca vertiente', n(f.catchment_area_km2, 0, 'km²'))
+      + row('Superficie del embalse', n(f.surface_area_ha, 0, 'ha')) + row('Aportación media anual', n(f.mean_annual_inflow_hm3, 0, 'hm³')) + row('Hidroeléctrico', f.is_hydroelectric == null ? null : f.is_hydroelectric ? `sí${f.energy_capacity_gwh ? ` · ${fmt(f.energy_capacity_gwh, 0)} GWh` : ''}` : 'no')
+      + '</dl><p class="muted small" style="margin:8px 0 0">Fuentes: MITECO (Boletín Hidrológico e Inventario de Presas y Embalses)' + (live ? ' y SAIH de la confederación; el dato en directo es provisional' : '') + '.</p>'; } catch (e) { console.error(e); } }
+// ───────── links: every view has its own address (#/cuenca/tajo, #/provincia/guadalajara, #/embalse/15-alcantara) ─────────
+const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+const WORD = { b: 'cuenca', c: 'comunidad', p: 'provincia', r: 'embalse' }, CAPA = { res: '', var: 'variaciones', rain: 'lluvia' };
+const address = () => '#/' + (scope.t === 'es' ? '' : WORD[scope.t] + '/' + (scope.t === 'r' ? scope.k + '-' + slug(scopeName(scope)) : slug(scope.k))) + (CAPA[layer] ? '?capa=' + CAPA[layer] : '');
+function remember(push) { const a = address(); if (location.hash !== a && !(a === '#/' && !location.hash.startsWith('#/'))) history[push ? 'pushState' : 'replaceState'](null, '', a);
+  document.title = (scope.t === 'es' ? '' : scopeName(scope) + ' · ') + 'Embalses de España'; }
+function route() { if (location.hash && !location.hash.startsWith('#/')) return;   // #panorama and the like are not views
+  const m = (location.hash || '#/').match(/^#\/(?:(cuenca|comunidad|provincia|embalse)\/([^?]+))?(?:\?capa=(\w+))?$/); if (!m) return;
+  const l = Object.keys(CAPA).find(k => CAPA[k] === (m[3] || '')) || 'res', t = Object.keys(WORD).find(k => WORD[k] === m[1]);
+  const k = !t ? null : t === 'r' ? D.res.find(r => r.reservoir_id === parseInt(m[2]))?.reservoir_id : AREAS[t].find(a => slug(a.name) === m[2] && a.res.length)?.name;
+  if (l !== layer) setLayer(l, false); if ((k ?? null) !== scope.k || (k == null ? 'es' : t) !== scope.t) setScope(k == null ? 'es' : t, k ?? null, false); }
+addEventListener('popstate', route); addEventListener('hashchange', route);
+document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').startsWith('#/')) return; e.preventDefault(); const el = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href')); (el || document.body).scrollIntoView(); });
+$('share').onclick = async () => { try { await navigator.clipboard.writeText(location.href); $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
+async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; mtip.hidden = true;
+  if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
+    const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
+    scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? { t: 'p', k: r.in.p } : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
+  else scope = { t, k };
+  if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); } else if (t === 'p') { group = 'c'; press(['g-b', 'g-c'], 'g-c'); }
+  $('back').hidden = t === 'es'; $('back').textContent = '← ' + scopeName(parentOf(scope)); $('groupseg').hidden = t !== 'es';
+  const an = AREA_NOTES[AS().k]; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
+  remember(push); animate(from, target()); shown = 8; table(); ficha();
+  try { const S = await series(); if (scope.t === t && scope.k === k) { ST = stats(S); numbers(); yearChart(); } } catch (e) { console.error(e); } }
 
 // ───────── open data console ─────────
 const EXAMPLES = [
@@ -491,15 +553,17 @@ const saveShapes = rows => { try { localStorage.setItem(SHAPES, JSON.stringify({
 function showOutlines(rows) { const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson)));
   AREAS = { b: of('basin', 'b'), c: of('region', 'c'), p: of('province', 'p') };
   D.rivers = rows.filter(r => r.layer === 'river').map(r => ({ mean_flow_m3s: r.mean_flow_m3s, geometry: JSON.parse(r.geojson) }));
-  if (D.res.length) assign(); animate(BB, BB); }
-function showReservoirs(rows) { D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); }
-function showNational(rows) { SER.es = toSeries(rows); if (scope.t !== 'es') return; ST = stats(SER.es); numbers(); yearChart();
-  const { last, avg10, lw, prev } = ST, av = avg10[lw], d = last.f - av;
+  if (D.res.length) { assign(); if (!routed) { routed = true; route(); } } animate(BB, BB); }
+let routed = false;
+function showReservoirs(rows) { D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
+  if (!routed && AREAS.b.length) { routed = true; route(); } }
+function showNational(rows) { SER.es = toSeries(rows); const N = stats(SER.es); if (scope.t === 'es') { ST = N; numbers(); yearChart(); }
+  const { last, avg10, lw, prev } = N, av = avg10[lw], d = last.f - av;
   $('headline').textContent = d > 3 ? 'España tiene más agua embalsada de lo normal' : d < -3 ? 'España tiene menos agua embalsada de lo normal' : 'El agua embalsada en España está en niveles normales';
   $('subhead').textContent = `Los embalses están al ${fmt(last.f, 1)} %, ${fmt(Math.abs(d), 1)} puntos ${d >= 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años en estas fechas, y han ${last.s >= prev.s ? 'ganado' : 'perdido'} ${fmt(Math.abs(last.s - prev.s))} hm³ en la última semana.`; }
 (async () => {
   try {
-    const ready = connect();
+    const ready = READY = connect();
     ready.catch(() => {});
     fit(); $('map-note').textContent = 'Cargando el mapa…';
     let shapes = savedShapes(); if (shapes) { showOutlines(shapes); $('map-note').textContent = 'Cargando los datos en directo…'; }
