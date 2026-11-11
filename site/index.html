@@ -407,7 +407,7 @@ function animate(from, to, ms = 750) {   // glide the view from one box to anoth
     if (t < 1) requestAnimationFrame(step); else { ANIM = 1; fit(to); draw(); } };
   requestAnimationFrame(step); }
 function fit(bb = target()) { BB = bb;
-  const box = $('mapbox'), fs = $('mapcard').classList.contains('fs'), Wd = box.clientWidth, Hh = fs ? Math.max(300, box.clientHeight) : Math.round(Math.min(Wd * 0.8, 640)), dpr = devicePixelRatio || 1;
+  const box = $('mapbox'), fs = $('mapcard').classList.contains('fs'), Wd = box.clientWidth, Hh = fs ? Math.max(300, Math.floor(innerHeight - box.getBoundingClientRect().top - 44)) : Math.round(Math.min(Wd * 0.8, 640)), dpr = devicePixelRatio || 1;
   cv.width = Wd * dpr; cv.height = Hh * dpr; cv.style.height = Hh + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const gw = (BB.e - BB.w) * KX, gh = BB.n - BB.s, k = Math.min((Wd - 16) / gw, (Hh - 16) / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2;
   P = { k, ox, oy, W: Wd, H: Hh, x: lon => ox + (lon - BB.w) * KX * k, y: lat => oy + (BB.n - lat) * k };
