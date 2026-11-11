@@ -307,5 +307,17 @@
       "is_complete": "false when prec is missing, 'Acum' or non-numeric",
       "source": "'aemet-climatological'"
     }
+  },
+  "ref.map_outlines": {
+    "doc": "Simplified outlines for drawing a map of Spain (peninsula and Balearic Islands): river basin districts, comunidades autónomas, provinces and the main rivers. The shape is GeoJSON text, so it can be read without a spatial extension (for example from a browser). For analysis use ref.basins and ref.rivers, which hold the full geometry. Static: loaded once by sql/reference/map_outlines.sql.",
+    "columns": {
+      "layer": "What the outline is: basin, region (comunidad autónoma), province or river.",
+      "outline_id": "Identifier within the layer: basin_id for basins (ref.basins), the name for regions and provinces, a running number for rivers.",
+      "name": "Name to show. For basins it equals ref.basins.basin_name; regions and provinces use the official Spanish names. Empty for rivers.",
+      "stream_order": "Rivers only: stream order (HydroRIVERS), larger for main stems.",
+      "mean_flow_m3s": "Rivers only: long-term mean discharge in m³/s (HydroRIVERS), useful for line width.",
+      "geojson": "GeoJSON geometry as text (Polygon, MultiPolygon, LineString or MultiLineString), WGS84 longitude and latitude, simplified for display.",
+      "source": "Where the outline comes from."
+    }
   }
 }

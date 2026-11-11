@@ -63,9 +63,16 @@ h3 { font-size: 16px; font-weight: 700; margin: 0; }
 select, input[type="search"] { font: inherit; font-size: 14px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); max-width: 100%; }
 .maptools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
 .mapcard { position: relative; }
-.mapcard.fs { position: fixed; inset: 0; z-index: 50; border-radius: 0; display: flex; flex-direction: column; }
+.mapcard.fs { animation: none; position: fixed; inset: 0; z-index: 50; border-radius: 0; display: flex; flex-direction: column; }
 .mapcard.fs .mapbox { flex: 1; }
 .mapbox { position: relative; }
+.mapbox .fsbtn { position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; padding: 0; justify-content: center; font-size: 17px; box-shadow: var(--shadow); }
+.mapbox .overlay { position: absolute; left: 8px; top: 8px; background: rgb(255 255 255 / 0.92); box-shadow: var(--shadow); }
+.chart path.ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: lndraw .9s ease-out forwards; }
+@keyframes lndraw { to { stroke-dashoffset: 0; } }
+.card { animation: rise .5s ease-out both; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .chart path.ln, .card { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } }
 .mapbox canvas { display: block; width: 100%; border-radius: 10px; }
 .mapkey { position: absolute; right: 6px; bottom: 6px; background: rgb(255 255 255 / 0.92); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
 .ramp { display: flex; } .ramp span { width: 28px; height: 9px; } .ticks { display: flex; font-size: 11px; color: var(--faint); } .ticks span { width: 28px; }
@@ -77,7 +84,7 @@ select, input[type="search"] { font: inherit; font-size: 14px; padding: 7px 10px
 .chip { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--up-bg); color: var(--up); }
 .chip.down { background: var(--down-bg); color: var(--down); }
 .meter { height: 12px; background: #dbe7f5; border-radius: 999px; overflow: hidden; margin-top: 12px; }
-.meter i { display: block; height: 100%; background: linear-gradient(90deg, #0c3f7d, #1b6fd1); border-radius: 999px; }
+.meter i { display: block; transition: width .7s cubic-bezier(.2,.7,.2,1); height: 100%; background: linear-gradient(90deg, #0c3f7d, #1b6fd1); border-radius: 999px; }
 .kv2 { display: grid; gap: 10px; border-left: 1px solid var(--line); padding-left: 18px; font-size: 13px; color: var(--muted); }
 .kv2 b { display: block; font-size: 18px; color: var(--ink); }
 .vs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 12px; margin-top: 16px; }
@@ -150,12 +157,9 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <div class="maptools">
         <button class="crumb" id="back" hidden>← España</button>
         <span class="seg" role="group" aria-label="Dividir el mapa por" id="groupseg"><button id="g-b" aria-pressed="true">Cuencas</button><button id="g-c" aria-pressed="false">Comunidades</button></span>
-        <select id="layer" aria-label="Qué muestra el mapa"><option value="res">Nivel de los embalses (%)</option><option value="var">Mayores variaciones</option><option value="rain">Lluvia</option></select>
-        <span class="seg" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span>
-        <span class="sp"></span>
-        <button class="btn" id="fs" aria-label="Ver el mapa a pantalla completa">⛶ Pantalla completa</button>
+        <span class="seg" role="group" aria-label="Qué muestra el mapa" id="layerseg"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
       </div>
-      <div class="mapbox" id="mapbox"><canvas id="map"></canvas><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
+      <div class="mapbox" id="mapbox"><canvas id="map"></canvas><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
       <p class="muted small" id="map-note" style="margin:8px 0 0">Cargando el mapa…</p>
       <p class="muted small" id="area-note" style="margin:6px 0 0" hidden></p>
     </div>
@@ -201,7 +205,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <h2>Estos datos son tuyos</h2>
       <p>Todo lo que ves aquí sale de un catálogo abierto. Puedes consultarlo ahora mismo con SQL, descargar el resultado o conectarlo a tus propias herramientas, sin cuenta y sin pedir permiso.</p>
       <ul>
-        <li>19 tablas documentadas: embalses, cuencas, ríos, estaciones, lluvia horaria, lecturas en directo y el boletín semanal desde 1988.</li>
+        <li>20 tablas documentadas: embalses, cuencas, ríos, estaciones, lluvia horaria, lecturas en directo y el boletín semanal desde 1988.</li>
         <li>Se actualizan solas: los datos en directo cada 15 minutos o cada hora, el boletín cada semana.</li>
         <li>Formato abierto (Apache Iceberg) en <a href="https://lakehousebox.com">LakehouseBox</a>.</li>
       </ul>
@@ -229,6 +233,7 @@ ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg,
 </div></footer>
 
 <script type="module">
+const CALM = matchMedia('(prefers-reduced-motion: reduce)').matches, ease = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 const $ = id => document.getElementById(id), css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const fmt = (v, d = 0) => v == null || isNaN(v) ? '—' : Number(v).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: 'always' });
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -266,6 +271,7 @@ FROM embalses."now".reservoir_status`,
 FROM embalses."now".rain_grid GROUP BY 1`,
   gauges: `SELECT station_name, basin_name, longitude AS lon, latitude AS lat, rain_1h_mm, rain_6h_mm, rain_12h_mm, rain_24h_mm
 FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_24h_mm DESC LIMIT 80`,
+  outlines: `SELECT layer, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
 FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
 };
@@ -308,9 +314,13 @@ async function series() { const a = selArea(), key = a ? a.type + ':' + a.name :
     const { rows } = await q(SQL.weekly(ids ? `AND reservoir_id IN (${ids.join(',')})` : ''));
     SER[key] = rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.s, c: r.c, f: r.c ? 100 * r.s / r.c : null })); }
   return SER[key]; }
+let shownPct = null, pctRun = 0;
+function countTo(el, v) { const from = shownPct ?? v * 0.6, run = ++pctRun, t0 = performance.now(), put = x => el.innerHTML = `${fmt(x, 1)}<small> %</small>`; shownPct = v;
+  if (CALM) return put(v);
+  const step = now => { if (run !== pctRun) return; const t = Math.min(1, (now - t0) / 700); put(from + (v - from) * ease(t)); if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
 function numbers() { const { last, prev, Y, byYear, avg10, lw } = ST, ly = byYear[Y - 1]?.[lw], av = avg10[lw], dw = last.f - prev.f;
   $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.k;
-  $('n-pct').className = 'big num'; $('n-pct').innerHTML = `${fmt(last.f, 1)}<small> %</small>`; $('n-meter').style.width = Math.min(100, last.f) + '%';
+  $('n-pct').className = 'big num'; countTo($('n-pct'), last.f); $('n-meter').style.width = Math.min(100, last.f) + '%';
   $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').textContent = `${dw < 0 ? '↓' : '↑'} ${signed(dw, 1)} p.p.`;
   $('n-stored').textContent = fmt(last.s) + ' hm³'; $('n-cap').textContent = fmt(last.c) + ' hm³';
   const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${d >= 0 ? '↑' : '↓'} ${signed(d, 1)} p.p. <span class="muted small" style="font-weight:400">(${fmt(v, 1)} %)</span>`; };
@@ -324,8 +334,8 @@ function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW 
   let g = ''; for (let v = y0; v <= y1; v += st) g += `<line x1="${m.l}" x2="${VW - m.r}" y1="${Yy(v)}" y2="${Yy(v)}" stroke="${css('--line')}"/><text x="${m.l - 6}" y="${Yy(v) + 4}" text-anchor="end" font-size="12" fill="${css('--faint')}">${v} %</text>`;
   MES.forEach((n, k) => g += `<text x="${X((Date.UTC(2025, k, 15) - Date.UTC(2025, 0, 1)) / 864e5 / 7)}" y="${VH - 6}" text-anchor="middle" font-size="12" fill="${css('--faint')}">${n}</text>`);
   const lx = X(lw), end = lw > 42;
-  svg.innerHTML = `${g}<path d="${path(avg10)}" fill="none" stroke="${css('--avg')}" stroke-width="2" stroke-dasharray="5 4"/><path d="${path(ly)}" fill="none" stroke="${css('--s2')}" stroke-width="2"/>
-    <path d="${path(cur)}" fill="none" stroke="${css('--s1')}" stroke-width="3" stroke-linejoin="round"/><circle cx="${lx}" cy="${Yy(cur[lw])}" r="5" fill="${css('--s1')}" stroke="#fff" stroke-width="2"/>
+  svg.innerHTML = `${g}<path d="${path(avg10)}" fill="none" stroke="${css('--avg')}" stroke-width="2" stroke-dasharray="5 4"/><path class="ln" pathLength="1" d="${path(ly)}" fill="none" stroke="${css('--s2')}" stroke-width="2"/>
+    <path class="ln" pathLength="1" d="${path(cur)}" fill="none" stroke="${css('--s1')}" stroke-width="3" stroke-linejoin="round"/><circle cx="${lx}" cy="${Yy(cur[lw])}" r="5" fill="${css('--s1')}" stroke="#fff" stroke-width="2"/>
     <text x="${lx + (end ? -9 : 9)}" y="${Yy(cur[lw]) - 10}" text-anchor="${end ? 'end' : 'start'}" font-size="14" font-weight="700" fill="${css('--ink')}" paint-order="stroke" stroke="#fff" stroke-width="4">${fmt(cur[lw], 1)} %</text>
     <line class="xh" y1="${m.t}" y2="${VH - m.b}" stroke="${css('--faint')}" visibility="hidden"/><rect class="hit" x="${m.l}" y="${m.t}" width="${VW - m.l - m.r}" height="${VH - m.t - m.b}" fill="transparent"/>`;
   $('year-legend').innerHTML = `<span><i style="border-color:${css('--s1')}"></i>${Y}</span><span><i style="border-color:${css('--s2')}"></i>${Y - 1}</span><span><i style="border-color:${css('--avg')};border-top-style:dashed"></i>Media 10 años</span>`;
@@ -341,14 +351,23 @@ const cv = $('map'), ctx = cv.getContext('2d'), ES = { w: -9.45, e: 4.45, s: 35.
 let P, BB = ES, shownAreas = [], marks = [];
 const BAND = [0, 20, 30, 40, 50, 60, 70, 80], STEPS = [0.2, 1, 5, 10, 20, 40], bounds = new Map(); let gridIndex = new Map();
 const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v >= st[s]) i = s; return i; };
-function fit() { const a = selArea(); BB = ES; if (a) { const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); BB = { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
+let ANIM = 1, HOVER = null, animRun = 0;   // ANIM: 0→1 as the marks and labels of a view come in
+function target() { const a = selArea(); if (!a) return ES; const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); return { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
+function animate(from, to, ms = 750) {   // glide the view from one box to another, then let the marks grow in
+  const run = ++animRun; if (CALM || !P) { ANIM = 1; fit(to); draw(); return; }
+  const t0 = performance.now(), same = from === to, L = (a, b, e) => a + (b - a) * e;
+  const step = now => { if (run !== animRun) return; const t = Math.min(1, (now - t0) / (same ? ms * 0.5 : ms)), e = ease(t);
+    ANIM = same ? e : Math.max(0, Math.min(1, (t - 0.45) / 0.55)); fit(same ? to : { w: L(from.w, to.w, e), e: L(from.e, to.e, e), s: L(from.s, to.s, e), n: L(from.n, to.n, e) }); draw();
+    if (t < 1) requestAnimationFrame(step); else { ANIM = 1; fit(to); draw(); } };
+  requestAnimationFrame(step); }
+function fit(bb = target()) { BB = bb;
   const box = $('mapbox'), fs = $('mapcard').classList.contains('fs'), Wd = box.clientWidth, Hh = fs ? Math.max(300, box.clientHeight) : Math.round(Math.min(Wd * 0.8, 640)), dpr = devicePixelRatio || 1;
   cv.width = Wd * dpr; cv.height = Hh * dpr; cv.style.height = Hh + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const gw = (BB.e - BB.w) * KX, gh = BB.n - BB.s, k = Math.min((Wd - 16) / gw, (Hh - 16) / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2;
   P = { k, ox, oy, W: Wd, H: Hh, x: lon => ox + (lon - BB.w) * KX * k, y: lat => oy + (BB.n - lat) * k };
   shownAreas = AREAS[scope.t === 'es' ? group : scope.t].map(a => { const p = new Path2D(); for (const poly of polys(a.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? p.lineTo(P.x(x), P.y(y)) : p.moveTo(P.x(x), P.y(y))); p.closePath(); } return { a, p }; }); }
 function text(t, x, y, size, weight, color) { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
-function gauge(r, rad) { const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
+function gauge(r, rad) { rad *= 0.45 + 0.55 * ANIM; const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
   ctx.beginPath(); ctx.arc(x, y, rad + 1.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();
   ctx.save(); ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.clip(); ctx.fillStyle = isLow(r) ? css('--low') : css('--water'); ctx.fillRect(x - rad, y + rad - 2 * rad * f, rad * 2, 2 * rad * f); ctx.restore();
   ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1; ctx.stroke(); marks.push({ r, x, y, rad }); }
@@ -363,6 +382,8 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
     for (const r of D.rivers) { const qf = r.mean_flow_m3s || 0; ctx.lineWidth = (qf > 300 ? 2 : qf > 80 ? 1.4 : qf > 20 ? 1 : 0.6) * zf; ctx.beginPath();
       for (const l of (r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates)) l.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.stroke(); } }
   for (const { a, p } of shownAreas) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === scope.k ? 1.8 : 0.7; ctx.stroke(p); }
+  if (HOVER) { const h = shownAreas.find(x => x.a === HOVER); if (h) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill(h.p, 'evenodd'); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 2; ctx.stroke(h.p); } }
+  ctx.globalAlpha = ANIM;
   const rs = D.res.filter(r => r.lon != null && inScope(r)).sort((a, b) => b.capacity_hm3 - a.capacity_hm3);
   if (layer === 'res' && es) { for (const { a } of shownAreas) { if (a.fill == null) continue; const x = P.x(a.cx), y = P.y(a.cy), small = (a.bb.e - a.bb.w) * KX * P.k < 95;
       text(SHORT[a.name] || a.name, x, y - 4, small ? 12 : 14, 600, ink); text(`${fmt(a.fill, 0)} %`, x, y + (small ? 11 : 16), small ? 14 : 19, 700, ink); } }
@@ -379,6 +400,7 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
     const k = 'rain_' + win + '_mm'; for (const g of D.gauges.filter(g => g[k] > 0 && g.lon > BB.w && g.lon < BB.e && g.lat > BB.s && g.lat < BB.n).sort((a, b) => b[k] - a[k]).slice(0, 12)) { const x = P.x(g.lon), y = P.y(g.lat);
       ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fillStyle = ink; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); const n = title(g.station_name); ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(n).width, 60) + 8;
       if (free([x - w / 2, y + 7, x + w / 2, y + 39])) { text(n, x, y + 20, 13, 600, ink); text(`${fmt(g[k], 1)} mm`, x, y + 35, 13, 700, css('--brand')); } } }
+  ctx.globalAlpha = 1;
   $('mapkey').innerHTML = layer === 'rain' ? `<div>Lluvia en ${win.replace('h', ' h')} (mm)</div><div class="ramp">${STEPS.map((s, i) => `<span style="background:var(--f${i + 1})"></span>`).join('')}</div><div class="ticks num">${STEPS.map(s => `<span>${fmt(s, s < 1 ? 1 : 0)}</span>`).join('')}</div>`
     : layer === 'var' ? `<div><span class="upc">▲</span> gana agua · <span class="downc">▼</span> pierde agua</div>` : `<div>% de la capacidad</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> por debajo de lo normal · <span style="color:var(--water)">●</span> normal o por encima</div>`);
   $('map-note').textContent = es ? 'Pulsa una zona del mapa para ver sus embalses.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
@@ -386,21 +408,21 @@ const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, 
 const mtip = $('map-tip');
 cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) { m = p.r; break; } }
-  const a = areaAt(mx, my); cv.style.cursor = a && a.name !== scope.k && a.res.length ? 'pointer' : '';
+  const a = areaAt(mx, my), can = a && a.name !== scope.k && a.res.length ? a : null; cv.style.cursor = can ? 'pointer' : ''; if (can !== HOVER) { HOVER = can; if (ANIM === 1) draw(); }
   if (m) { const v = trend(m); mtip.innerHTML = `<b>${esc(m.reservoir_name)}</b> <span class="muted">· ${esc(m.basin_name || '')}</span><br><span class="num">${fmt(m.fill_pct, 1)} % · ${fmt(m.stored_hm3)} de ${fmt(m.capacity_hm3)} hm³</span><br><span class="muted num">media 10 años ${fmt(m.fill_10y, 1)} % · hace un año ${fmt(m.fill_last_year, 1)} %</span>${v != null && Math.abs(v) >= 0.5 ? `<br><span class="${v > 0 ? 'upc' : 'downc'} num">${signed(v, 1)} hm³</span> <span class="muted">${m.change_since_bulletin_hm3 != null ? 'desde el último boletín' : 'en la última semana'}</span>` : ''}`; }
   else if (layer === 'rain') { const lon = BB.w + (mx - P.ox) / (KX * P.k), lat = BB.n - (my - P.oy) / P.k, c = gridIndex.get(h3.latLngToCell(lat, lon, 6)), mm = c && c['rain_' + win]; if (!(mm >= 0.2)) { mtip.hidden = true; return; } mtip.innerHTML = `<b class="num">${fmt(mm, 1)} mm</b> <span class="muted">en ${win.replace('h', ' h')}</span>`; }
   else if (a && a.fill != null) mtip.innerHTML = `<b>${esc(a.name)}</b><br><span class="num">${fmt(a.fill, 1)} % · ${fmt(a.stored)} de ${fmt(a.cap)} hm³</span><br><span class="muted num">media 10 años ${fmt(a.avg, 1)} % · ${a.res.length} embalses</span>`;
   else { mtip.hidden = true; return; }
   mtip.hidden = false; mtip.style.left = Math.max(4, Math.min(mx + 14, P.W - mtip.offsetWidth - 6)) + 'px'; mtip.style.top = Math.min(my + 14, P.H - mtip.offsetHeight - 6) + 'px'; });
-cv.addEventListener('mouseleave', () => mtip.hidden = true);
+cv.addEventListener('mouseleave', () => { mtip.hidden = true; if (HOVER) { HOVER = null; draw(); } });
 cv.addEventListener('click', e => { const rc = cv.getBoundingClientRect(), a = areaAt(e.clientX - rc.left, e.clientY - rc.top); if (a && a.res.length && a.name !== scope.k) setScope(a.type, a.name); });
 const press = (ids, on) => { for (const i of ids) $(i).setAttribute('aria-pressed', i === on); };
-function setLayer(l) { layer = l; $('layer').value = l; $('winseg').hidden = l !== 'rain'; draw(); }
-$('layer').onchange = () => setLayer($('layer').value);
-for (const g of ['b', 'c']) $('g-' + g).onclick = () => { group = g; press(['g-b', 'g-c'], 'g-' + g); fit(); draw(); };
+function setLayer(l) { layer = l; press(['l-res', 'l-var', 'l-rain'], 'l-' + l); $('winseg').hidden = l !== 'rain'; animate(BB, BB); }
+for (const l of ['res', 'var', 'rain']) $('l-' + l).onclick = () => setLayer(l);
+for (const g of ['b', 'c']) $('g-' + g).onclick = () => { group = g; press(['g-b', 'g-c'], 'g-' + g); animate(BB, BB); };
 for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).onclick = () => { win = w; press(['w-1h', 'w-6h', 'w-12h', 'w-24h'], 'w-' + w); draw(); };
 $('back').onclick = () => setScope('es', null);
-function fullscreen(on) { $('mapcard').classList.toggle('fs', on); $('fs').textContent = on ? '✕ Salir' : '⛶ Pantalla completa'; document.body.style.overflow = on ? 'hidden' : ''; fit(); draw(); }
+function fullscreen(on) { $('mapcard').classList.toggle('fs', on); $('fs').textContent = on ? '✕' : '⛶'; $('fs').title = on ? 'Salir de pantalla completa' : 'Pantalla completa'; document.body.style.overflow = on ? 'hidden' : ''; animRun++; ANIM = 1; fit(); draw(); }
 $('fs').onclick = () => fullscreen(!$('mapcard').classList.contains('fs'));
 addEventListener('keydown', e => { if (e.key === 'Escape' && $('mapcard').classList.contains('fs')) fullscreen(false); });
 
@@ -431,9 +453,9 @@ for (const [id, k] of [['t-up', 'up'], ['t-fill', 'fill'], ['t-cap', 'cap']]) $(
 $('q').oninput = () => { shown = 8; table(); }; $('more').onclick = () => { shown += 30; table(); };
 $('full-btn').onclick = () => { sortBy = 'fill'; shown = 20; press(['t-up', 't-fill', 't-cap'], 't-fill'); table(); $('embalses').scrollIntoView(); };
 
-async function setScope(t, k) { scope = { t, k }; if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); }
+async function setScope(t, k) { const from = BB; HOVER = null; mtip.hidden = true; scope = { t, k }; if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); }
   $('back').hidden = t === 'es'; $('groupseg').hidden = t !== 'es'; const an = AREA_NOTES[k]; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
-  fit(); draw(); shown = 8; table();
+  animate(from, target()); shown = 8; table();
   try { ST = stats(await series()); numbers(); yearChart(); } catch (e) { console.error(e); } }
 
 // ───────── open data console ─────────
@@ -457,32 +479,40 @@ $('csv').onclick = () => { if (!lastResult) return; const cell = v => v == null 
   a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'embalses.csv'; a.click(); };
 
 // ───────── start ─────────
-addEventListener('resize', () => { if (P) { fit(); draw(); rainCard(); } });
+addEventListener('resize', () => { if (P) { animRun++; ANIM = 1; fit(); draw(); rainCard(); } });
 const toSeries = rows => rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.s, c: r.c, f: r.c ? 100 * r.s / r.c : null }));
 const CACHE = 'embalses:v2';   // last answer, shown at once on the next visit while the live data loads
 const saved = () => { try { return JSON.parse(localStorage.getItem(CACHE)); } catch (e) { return null; } };
 const save = o => { try { localStorage.setItem(CACHE, JSON.stringify(o)); } catch (e) {} };
-function showReservoirs(rows) { D.res = rows; assign(); fit(); draw(); table(); }
+const SHAPES = 'embalses:outlines:v1';   // outlines never change between visits: keep them so the map is there at once
+const savedShapes = () => { try { return JSON.parse(localStorage.getItem(SHAPES))?.rows || null; } catch (e) { return null; } };
+const stillFresh = () => { try { return Date.now() - JSON.parse(localStorage.getItem(SHAPES)).at < 864e5; } catch (e) { return false; } };
+const saveShapes = rows => { try { localStorage.setItem(SHAPES, JSON.stringify({ at: Date.now(), rows })); } catch (e) {} };
+function showOutlines(rows) { const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson)));
+  AREAS = { b: of('basin', 'b'), c: of('region', 'c'), p: of('province', 'p') };
+  D.rivers = rows.filter(r => r.layer === 'river').map(r => ({ mean_flow_m3s: r.mean_flow_m3s, geometry: JSON.parse(r.geojson) }));
+  if (D.res.length) assign(); animate(BB, BB); }
+function showReservoirs(rows) { D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); }
 function showNational(rows) { SER.es = toSeries(rows); if (scope.t !== 'es') return; ST = stats(SER.es); numbers(); yearChart();
   const { last, avg10, lw, prev } = ST, av = avg10[lw], d = last.f - av;
   $('headline').textContent = d > 3 ? 'España tiene más agua embalsada de lo normal' : d < -3 ? 'España tiene menos agua embalsada de lo normal' : 'El agua embalsada en España está en niveles normales';
   $('subhead').textContent = `Los embalses están al ${fmt(last.f, 1)} %, ${fmt(Math.abs(d), 1)} puntos ${d >= 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años en estas fechas, y han ${last.s >= prev.s ? 'ganado' : 'perdido'} ${fmt(Math.abs(last.s - prev.s))} hm³ en la última semana.`; }
 (async () => {
   try {
-    const ready = connect();   // DuckDB starts downloading while the outlines load
+    const ready = connect();
     ready.catch(() => {});
-    const [basins, ccaa, prov, rivers] = await Promise.all(['basins', 'ccaa', 'prov', 'rivers'].map(n => fetch(`geo/${n}.json`).then(r => r.json())));
-    D.rivers = rivers;
-    AREAS = { b: basins.map(b => area('b', b.basin_name, b.geometry)), c: ccaa.map(c => area('c', c.name, c.geometry)), p: prov.map(p => area('p', p.name, p.geometry)) };
-    fit(); draw(); $('map-note').textContent = 'Cargando los datos en directo…';
+    fit(); $('map-note').textContent = 'Cargando el mapa…';
+    let shapes = savedShapes(); if (shapes) { showOutlines(shapes); $('map-note').textContent = 'Cargando los datos en directo…'; }
     const old = saved();
     if (old?.res && old?.weekly) { showReservoirs(old.res); showNational(old.weekly); setStatus('Actualizando los datos…'); }
     await ready; if (!old) setStatus('Leyendo los datos…');
+    if (!shapes) { shapes = (await q(SQL.outlines)).rows; showOutlines(shapes); saveShapes(shapes); }
     const res = (await q(SQL.res)).rows; showReservoirs(res);
     const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly); save({ res, weekly });
     D.grid = (await q(SQL.grid)).rows; gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows;
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
     cards(); rainCard(); draw();
+    if (!stillFresh()) q(SQL.outlines).then(r => saveShapes(r.rows)).catch(() => {});   // refresh the stored outlines once a day
     const asOf = D.grid.find(c => c.as_of)?.as_of; setStatus(asOf ? `Datos en directo · lluvia hasta las ${new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Datos en directo', 'ok');
   } catch (e) { console.error(e); setStatus('No se han podido cargar los datos', 'err'); if (!D.res.length) $('map-note').textContent = 'No se han podido cargar los datos en directo. Vuelve a intentarlo en unos minutos.'; }
 })();

@@ -13,11 +13,12 @@ Every value comes from its publisher: MITECO (weekly reservoir bulletin, dam inv
   - `reservoirs`: the 375 reservoirs in MITECO's weekly bulletin.
   - `reservoir_catchments`: every catchment unit upstream of each reservoir.
   - `stations`: every AEMET and SAIH station.
+  - `map_outlines`: simplified outlines of basins, comunidades, provinces and main rivers as GeoJSON text, for drawing a map without a spatial extension (for example in a browser).
 - **obs**: measurements. Append-only, partitioned by day, timestamps UTC.
   - `precipitation`: rain per explicit interval.
   - `weather`: temperature, humidity, wind, pressure.
   - Coming next: `reservoir_readings`, `river_flow`, `reservoir_weekly` (since 1988), `daily_weather` (since Oct 2023).
-- **now**: hourly summaries for the map. Coming: upstream rain per reservoir, reservoir status, basin totals.
+- **now**: hourly summaries, rebuilt inside LakehouseBox: `rain_grid`, `upstream_rain`, `reservoir_status`, `basin_summary`, `station_status`. `reservoir_status` and `station_status` carry names, basin, longitude and latitude, so they can be listed or mapped without joining `ref.*`.
 
 ## How the tables join
 

@@ -4,7 +4,7 @@
 
 A live, open dataset joining Spain's official rain gauges, river gauges and reservoirs, kept up to date inside [LakehouseBox](https://lakehousebox.com). It is published as a public Apache Iceberg catalog and read straight from the browser.
 
-- **Site:** <https://lakehousebox.github.io/embalses/>. One static page ([`site/index.html`](site/index.html)) on GitHub Pages: the browser attaches the public catalog with DuckDB-WASM and queries it directly, with no backend. It includes a live SQL box and CSV download. [`site/prototype/`](site/prototype) keeps the earlier design prototypes.
+- **Site:** <https://lakehousebox.github.io/embalses/>. One static page ([`site/index.html`](site/index.html)) on GitHub Pages: the browser attaches the public catalog with DuckDB-WASM (DuckDB 2.0) and reads everything from it, map outlines included, with no backend, no data files and no spatial extension. It has a live SQL box and CSV download.
 - **Data:** the public catalog `embalses`. Attach it from any DuckDB, no account needed:
 
   ```sql
@@ -19,7 +19,7 @@ A live, open dataset joining Spain's official rain gauges, river gauges and rese
 
 | Namespace | What | Tables |
 |---|---|---|
-| `ref` | places | `basins`, `catchments`, `rivers`, `reservoirs`, `reservoir_catchments`, `stations`, `grid_cells`, `catchment_cells` |
+| `ref` | places | `basins`, `catchments`, `rivers`, `reservoirs`, `reservoir_catchments`, `stations`, `grid_cells`, `catchment_cells`, `map_outlines` (GeoJSON text for drawing) |
 | `obs` | measurements, append-only | `precipitation`, `weather`, `reservoir_readings`, `river_flow`, `reservoir_weekly` (since 1988), `daily_weather` (since Oct 2023) |
 | `now` | rebuilt hourly | `rain_grid` (H3), `upstream_rain`, `reservoir_status`, `basin_summary`, `station_status` |
 
@@ -60,7 +60,7 @@ Real-time values are provisional: the publishers haven't validated them.
 
 ```sh
 lhbox catalog create embalses
-lhbox migrate --catalog embalses      # creates the 19 tables from sql/migrations/, with partitioning and descriptions
+lhbox migrate --catalog embalses      # creates the 20 tables from sql/migrations/, with partitioning and descriptions
 lhbox plan -f lakehouse.yaml          # shows what apply would create or change
 lhbox apply -f lakehouse.yaml         # connections, POST prefixes, the 13 scheduled sinks, table descriptions
 ```
