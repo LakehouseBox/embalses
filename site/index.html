@@ -11,157 +11,171 @@
 <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev114.0/+esm">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700;800&display=swap">
 <script defer src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
 <style>
 :root {
-  --bg: #f3f6f9; --surface: #ffffff; --ink: #0f2233; --muted: #55697a; --faint: #8b9aa8; --line: #e1e8ee; --border: #9fb0be; --land: #eef2f5;
-  --brand: #1565c0; --brand-dark: #0c3f7d; --water: #1b6fd1; --low: #d9822b; --river: #6ea5cc;
-  --up: #1a7f3c; --up-bg: #e6f4ea; --down: #b4541a; --down-bg: #fbeee4; --s1: #1b6fd1; --s2: #f08a3c; --avg: #6b7a86;
+  --bg: #ffffff; --surface: #ffffff; --ink: #0f2233; --muted: #55697a; --faint: #8b9aa8; --line: #e1e8ee; --border: #9fb0be; --land: #eef2f5; --tint: #f3f7fc;
+  --brand: #1463e0; --brand-dark: #0c3f7d; --water: #1b6fd1; --low: #d9822b; --river: #6ea5cc;
+  --up: #0f7b55; --up-bg: #e3f4ec; --down: #b4541a; --down-bg: #fbeee4; --s1: #1b6fd1; --s2: #f08a3c; --avg: #6b7a86;
   --a1: #f2b48c; --a2: #f6d2b0; --a3: #f3ecd9; --a4: #e3eefb; --a5: #c3dbf7; --a6: #93bff0; --a7: #559ae6; --a8: #1b6fd1;
   --f1: #d6e6fb; --f2: #a9cbf5; --f3: #79adee; --f4: #4a8fe3; --f5: #2a6fc6; --f6: #123f85;
-  --serif: "Source Serif 4", Georgia, serif; --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --shadow: 0 1px 2px rgb(15 34 51 / 0.06), 0 8px 24px rgb(15 34 51 / 0.06);
+  --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r: 8px; --rs: 6px; --float: 0 4px 16px rgb(15 34 51 / 0.14);
 }
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; }
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.5; font-variant-numeric: tabular-nums; }
 [hidden] { display: none !important; }
 a { color: var(--brand); }
-.num { font-variant-numeric: tabular-nums; }
-.wrap { max-width: 1320px; margin: 0 auto; padding: 0 20px; }
-header.top { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
-header.top .wrap { display: flex; align-items: center; gap: 28px; height: 56px; }
-.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 20px; color: var(--ink); text-decoration: none; white-space: nowrap; }
-.brand svg { width: 22px; height: 22px; }
-nav.main { display: flex; gap: 26px; overflow-x: auto; }
-nav.main a { color: var(--muted); text-decoration: none; font-size: 15px; padding: 16px 0; border-bottom: 2px solid transparent; white-space: nowrap; }
-nav.main a:hover, nav.main a:focus-visible { color: var(--ink); border-bottom-color: var(--brand); outline: none; }
-.sp { flex: 1; }
-.btn { font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
-.btn:hover { border-color: var(--border); } .btn.primary { background: var(--brand-dark); color: #fff; border-color: var(--brand-dark); }
-button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
-.hero { position: relative; color: #fff; background: linear-gradient(180deg, #0c3f7d 0%, #1565c0 55%, #3f8fd9 100%); overflow: hidden; }
-.hero svg.land { position: absolute; inset: auto 0 0 0; width: 100%; height: 100%; }
-.hero .wrap { position: relative; padding-top: 30px; padding-bottom: 150px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
-.eyebrow { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; opacity: 0.85; }
-h1 { font-family: var(--serif); font-weight: 700; font-size: clamp(30px, 3.6vw, 46px); line-height: 1.08; margin: 6px 0 0; text-wrap: balance; }
-.hero p { margin: 0; font-size: 17px; max-width: 46ch; border-left: 1px solid rgb(255 255 255 / 0.45); padding-left: 20px; }
-main { margin-top: -120px; position: relative; padding-bottom: 40px; display: grid; gap: 22px; }
-.card { background: var(--surface); border-radius: 16px; box-shadow: var(--shadow); padding: 20px; min-width: 0; }
-.grid2 { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 22px; align-items: start; }
-.grid3 { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 22px; }
-.gridb { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.5fr); gap: 22px; align-items: start; }
-h2 { font-family: var(--serif); font-weight: 700; font-size: 24px; margin: 0; line-height: 1.15; }
-h3 { font-size: 16px; font-weight: 700; margin: 0; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 0 20px; }
+h1 { font-weight: 800; font-size: clamp(32px, 4vw, 46px); line-height: 1.05; letter-spacing: -0.02em; margin: 0; }
+h2 { font-weight: 800; font-size: 28px; letter-spacing: -0.01em; margin: 0; line-height: 1.15; }
+h3 { font-size: 17px; font-weight: 700; margin: 0; }
 .label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; color: var(--muted); }
-.muted { color: var(--muted); } .small { font-size: 13px; }
-.seg { display: inline-flex; background: var(--land); border-radius: 999px; padding: 3px; }
-.seg button { font: inherit; font-size: 14px; padding: 5px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; }
-.seg button[aria-pressed="true"] { background: var(--brand-dark); color: #fff; font-weight: 600; }
-.seg button:disabled { opacity: 0.4; cursor: not-allowed; }
-select, input[type="search"] { font: inherit; font-size: 14px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); max-width: 100%; }
-.maptools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
-.mapcard { position: relative; }
-.mapcard.fs { animation: none; position: fixed; inset: 0; z-index: 50; border-radius: 0; display: flex; flex-direction: column; }
-.mapcard.fs .mapbox { flex: 1; }
-.mapbox { position: relative; }
-.mapbox .fsbtn { position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; padding: 0; justify-content: center; font-size: 17px; box-shadow: var(--shadow); }
-.mapbox .overlay { position: absolute; left: 8px; top: 8px; background: rgb(255 255 255 / 0.92); box-shadow: var(--shadow); }
-.chart path.ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: lndraw .9s ease-out forwards; }
-@keyframes lndraw { to { stroke-dashoffset: 0; } }
-.card { animation: rise .5s ease-out both; }
-@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
-@media (prefers-reduced-motion: reduce) { .chart path.ln, .card { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } }
-.mapbox canvas { display: block; width: 100%; border-radius: 10px; }
-.mapkey { position: absolute; right: 6px; bottom: 6px; background: rgb(255 255 255 / 0.92); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
-.ramp { display: flex; } .ramp span { width: 28px; height: 9px; } .ticks { display: flex; font-size: 11px; color: var(--faint); } .ticks span { width: 28px; }
-.crumb { font: inherit; font-size: 14px; font-weight: 600; padding: 5px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--brand); cursor: pointer; }
-.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 13px; line-height: 1.35; box-shadow: var(--shadow); z-index: 5; white-space: nowrap; }
-.natl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: start; }
-.big { font-family: var(--sans); font-weight: 700; font-size: 64px; line-height: 1; letter-spacing: -0.02em; }
-.big small { font-size: 30px; }
-.chip { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--up-bg); color: var(--up); }
-.chip.down { background: var(--down-bg); color: var(--down); }
-.meter { height: 12px; background: #dbe7f5; border-radius: 999px; overflow: hidden; margin-top: 12px; }
-.meter i { display: block; transition: width .7s cubic-bezier(.2,.7,.2,1); height: 100%; background: linear-gradient(90deg, #0c3f7d, #1b6fd1); border-radius: 999px; }
-.kv2 { display: grid; gap: 10px; border-left: 1px solid var(--line); padding-left: 18px; font-size: 13px; color: var(--muted); }
-.kv2 b { display: block; font-size: 18px; color: var(--ink); }
-.vs { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 12px; margin-top: 16px; }
-.vs div { padding: 10px 14px; text-align: center; font-size: 13px; color: var(--muted); } .vs div + div { border-left: 1px solid var(--line); }
-.vs b { font-size: 17px; display: block; } .upc { color: var(--up); } .downc { color: var(--down); }
-.chart { position: relative; margin-top: 18px; } .chart svg { display: block; width: 100%; height: auto; }
-.legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
-.legend i { display: inline-block; width: 18px; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
-.feature { background: linear-gradient(120deg, #e8f5ec, #d6ecdf); display: grid; gap: 6px; align-content: center; }
-.feature h2 { font-size: 26px; } .feature p { margin: 0; max-width: 52ch; }
-.soft { background: #eef4fb; }
-.list { display: grid; margin-top: 8px; } .list div > b { white-space: nowrap; } .list div { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 15px; } .list div:last-child { border-bottom: 0; }
-.rain { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: center; }
-.rain canvas { width: 100%; display: block; }
-.bigm { font-weight: 700; font-size: 34px; line-height: 1.1; }
-.scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 15px; }
-th { text-align: left; font-size: 12px; font-weight: 700; color: var(--muted); padding: 8px 12px 8px 0; white-space: nowrap; }
-td { border-top: 1px solid var(--line); padding: 9px 12px 9px 0; vertical-align: middle; } td.r, th.r { text-align: right; white-space: nowrap; }
-.name { font-weight: 700; } .sub { color: var(--muted); font-size: 13px; }
-.fillcell { display: grid; grid-template-columns: minmax(80px, 150px) 3.2em; gap: 8px; align-items: center; }
-.bar { height: 9px; background: #dbe7f5; border-radius: 999px; position: relative; }
-.bar > span { position: absolute; inset: 0 auto 0 0; background: var(--water); border-radius: 999px; }
-.bar > b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
-.pill { font-size: 12px; color: var(--muted); white-space: nowrap; } .pill i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #1baf7a; margin-right: 5px; } .pill.w i { background: transparent; border: 1.5px solid var(--faint); }
-.tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.open { background: #0f2233; color: #e8eff6; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 28px; padding: 28px; }
-.open h2 { color: #fff; font-size: 28px; } .open p { margin: 8px 0 0; color: #b9c8d6; max-width: 56ch; }
-.open ul { margin: 12px 0 0; padding-left: 18px; color: #b9c8d6; } .open a { color: #9cc8ff; }
-pre.code, textarea.sql { margin: 0; background: #0a1826; color: #e8eff6; border: 1px solid #24384a; border-radius: 10px; padding: 12px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; overflow-x: auto; width: 100%; }
-textarea.sql { min-height: 120px; resize: vertical; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
-.chips button { font: inherit; font-size: 13px; padding: 4px 10px; border-radius: 999px; border: 1px solid #2f4658; background: transparent; color: #cfe0ef; cursor: pointer; }
-.chips button:hover { border-color: #9cc8ff; }
-.result { margin-top: 10px; max-height: 320px; overflow: auto; background: #0a1826; border: 1px solid #24384a; border-radius: 10px; font-size: 13px; }
-.result table { font-size: 13px; } .result th { color: #9fb4c6; padding: 8px 12px; position: sticky; top: 0; background: #0a1826; } .result td { border-top: 1px solid #1b2e3f; padding: 6px 12px; white-space: nowrap; color: #e8eff6; }
+.muted { color: var(--muted); } .small { font-size: 13px; } .sp { flex: 1; }
+.upc { color: var(--up); } .downc { color: var(--down); }
+button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+/* header */
+header.top { background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 20; }
+header.top .wrap { display: flex; align-items: center; gap: 28px; height: 52px; }
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 19px; color: var(--ink); text-decoration: none; white-space: nowrap; }
+.brand svg { width: 22px; height: 22px; }
+nav.main { display: flex; gap: 26px; overflow-x: auto; align-self: stretch; }
+nav.main a { color: var(--muted); text-decoration: none; font-size: 15px; display: flex; align-items: center; border-bottom: 2px solid transparent; white-space: nowrap; }
+nav.main a:hover, nav.main a:focus-visible { color: var(--brand); border-bottom-color: var(--brand); outline: none; }
 .status { font-size: 13px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .status i { width: 8px; height: 8px; border-radius: 50%; background: #f0a030; display: inline-block; } .status.ok i { background: #1baf7a; } .status.err i { background: #d64545; }
-footer { border-top: 1px solid var(--line); background: var(--surface); padding: 28px 0 40px; font-size: 14px; color: var(--muted); }
-footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; } footer h3 { color: var(--ink); margin-bottom: 6px; } footer p { margin: 0 0 6px; }
-.skeleton { color: var(--faint); }
-.ficha dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 18px; margin: 8px 0 0; }
-.ficha dt { font-size: 12px; color: var(--muted); } .ficha dd { margin: 0; font-weight: 600; font-size: 15px; }
+/* controls */
+.btn { font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; border-radius: var(--rs); border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--border); } .btn.primary { background: var(--brand); color: #fff; border-color: var(--brand); } .btn:disabled { opacity: 0.5; cursor: default; }
+.linkbtn { font: inherit; font-size: 15px; font-weight: 600; color: var(--brand); background: none; border: 0; padding: 2px 0; cursor: pointer; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
+.linkbtn.quiet { font-size: 13px; font-weight: 400; text-decoration: none; } .linkbtn.quiet:hover { text-decoration: underline; }
+.seg { display: inline-flex; background: var(--land); border-radius: var(--rs); padding: 3px; }
+.seg button { font: inherit; font-size: 14px; padding: 5px 13px; border: 0; border-radius: 4px; background: transparent; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: var(--brand); color: #fff; font-weight: 600; }
+.seg button:disabled { opacity: 0.4; cursor: not-allowed; }
+input[type="search"] { font: inherit; font-size: 15px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--rs); background: var(--surface); color: var(--ink); max-width: 100%; }
+/* intro */
+main { padding: 30px 0 10px; }
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.lede { margin: 4px 0 0; font-size: 21px; color: var(--muted); }
+.state { margin: 0; font-size: 19px; color: var(--muted); border-left: 1px solid var(--line); padding-left: 28px; max-width: 34ch; }
+.crumbs { margin-top: 18px; font-size: 15px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.crumbs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; } .crumbs button:hover { color: var(--brand); text-decoration: underline; }
+.crumbs b { color: var(--ink); }
+/* the map and the level: one frame */
+.frame { margin-top: 18px; border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); }
+.pane { padding: 16px 18px 18px; min-width: 0; } .pane + .pane { border-left: 1px solid var(--line); }
+.under { grid-column: 1 / -1; border-top: 1px solid var(--line); padding: 18px; }
+.maptools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+.mapcard.fs { position: fixed; inset: 0; z-index: 50; background: var(--surface); display: flex; flex-direction: column; }
+.mapcard.fs .mapbox { flex: 1; }
+.mapbox { position: relative; }
+.mapbox canvas { display: block; width: 100%; border-radius: var(--rs); }
+.mapbox .fsbtn { position: absolute; right: 8px; top: 8px; width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 16px; }
+.mapbox .overlay { position: absolute; left: 8px; top: 8px; background: rgb(255 255 255 / 0.94); border: 1px solid var(--line); }
+.mapkey { position: absolute; right: 6px; bottom: 6px; background: rgb(255 255 255 / 0.94); border: 1px solid var(--line); border-radius: var(--rs); padding: 8px 10px; font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
+.ramp { display: flex; } .ramp span { width: 28px; height: 9px; } .ticks { display: flex; font-size: 11px; color: var(--faint); } .ticks span { width: 28px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--rs); padding: 8px 10px; font-size: 13px; line-height: 1.35; box-shadow: var(--float); z-index: 5; white-space: nowrap; }
 .labelrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-.linkbtn { font: inherit; font-size: 13px; color: var(--brand); background: none; border: 0; padding: 2px 0; cursor: pointer; white-space: nowrap; }
-.linkbtn:hover { text-decoration: underline; }
-#t-res tbody tr { cursor: pointer; } #t-res tbody tr:hover { background: #f5f8fb; } #t-res tbody tr.on { background: #e8f1fc; }
-@media (max-width: 980px) { .grid2, .grid3, .gridb, .open, .hero .wrap, footer .cols { grid-template-columns: minmax(0, 1fr); } .hero p { border-left: 0; padding-left: 0; } nav.main { display: none; } .natl { grid-template-columns: minmax(0, 1fr); } .kv2 { border-left: 0; padding-left: 0; grid-auto-flow: column; } }
-@media (max-width: 560px) { .rain { grid-template-columns: minmax(0, 1fr); } .big { font-size: 52px; } }
+.headline { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+.big { font-weight: 800; font-size: 68px; line-height: 1; letter-spacing: -0.03em; } .big small { font-size: 30px; font-weight: 700; letter-spacing: 0; }
+.chips2 { display: grid; gap: 6px; justify-items: start; }
+.chip { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--up-bg); color: var(--up); }
+.chip.down { background: var(--down-bg); color: var(--down); } .chip span { font-weight: 400; }
+.meter { height: 12px; background: #dbe7f5; border-radius: 999px; overflow: hidden; margin-top: 12px; }
+.meter i { display: block; transition: width .7s cubic-bezier(.2,.7,.2,1); height: 100%; background: var(--brand); border-radius: 999px; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; margin-top: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.pair > div { font-size: 14px; color: var(--muted); } .pair > div + div { border-left: 1px solid var(--line); padding-left: 22px; }
+.pair b { display: block; font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.2; } .pair.cmp b { font-size: 21px; } .pair b.upc { color: var(--up); } .pair b.downc { color: var(--down); } .pair.cmp b span { font-size: 14px; font-weight: 400; color: var(--muted); }
+.chart { position: relative; margin-top: 16px; } .chart svg { display: block; width: 100%; height: auto; }
+.chart path.ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: lndraw .9s ease-out forwards; }
+@keyframes lndraw { to { stroke-dashoffset: 0; } }
+.legend { display: flex; gap: 16px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.legend i { display: inline-block; width: 18px; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
+/* a reservoir and its catchment */
+.ficha .top3 { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 24px; align-items: center; }
+.ficha canvas { width: 190px; height: 130px; display: block; }
+.figs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin-top: 10px; }
+.figs > div { padding: 2px 0 2px 26px; border-left: 1px solid var(--line); color: var(--muted); font-size: 15px; display: grid; align-content: start; justify-items: start; }
+.figs b { font-size: 32px; font-weight: 700; color: var(--ink); line-height: 1.15; } .figs b.rain { font-size: 40px; font-weight: 800; color: var(--brand); }
+details { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-size: 15px; color: var(--muted); list-style: none; display: flex; justify-content: space-between; } summary::after { content: "⌄"; font-size: 18px; line-height: 1; } details[open] summary::after { content: "⌃"; }
+summary::-webkit-details-marker { display: none; }
+.ficha dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px 22px; margin: 12px 0 0; }
+.ficha dt { font-size: 12px; color: var(--muted); } .ficha dd { margin: 0; font-weight: 600; font-size: 15px; }
+/* sections */
+.sec { margin-top: 34px; padding-top: 30px; border-top: 1px solid var(--line); }
+.sechead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.raingrid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.85fr) minmax(0, 1.2fr); gap: 0; align-items: start; }
+.raingrid > div + div { border-left: 1px solid var(--line); padding-left: 26px; margin-left: 26px; }
+.raingrid canvas { width: 100%; display: block; }
+.stat { padding: 0 0 12px; } .stat + .stat { border-top: 1px solid var(--line); padding-top: 12px; }
+.stat b { display: block; font-size: 26px; font-weight: 700; line-height: 1.2; } .stat b.xl { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; } .stat b.xl small { font-size: 24px; font-weight: 700; }
+.stat span { color: var(--muted); font-size: 15px; } .stat b.md { font-size: 18px; }
+.rank > div { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); } .rank > div:last-child { border-bottom: 0; }
+.rank .n { font-weight: 700; font-size: 17px; line-height: 1.2; } .rank .s { color: var(--muted); font-size: 14px; } .rank .v { font-weight: 700; font-size: 17px; white-space: nowrap; }
+.high { display: grid; grid-template-columns: minmax(0, 2.6fr) minmax(0, 1fr); gap: 0; }
+.ups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: 14px; }
+.ups > div { padding: 0 16px; border-left: 1px solid var(--line); } .ups > div:first-child { border-left: 0; padding-left: 0; }
+.ups .n { font-weight: 700; font-size: 17px; line-height: 1.2; } .ups .s { color: var(--muted); font-size: 14px; } .ups .v { font-weight: 700; font-size: 24px; margin-top: 8px; }
+.full { border-left: 1px solid var(--line); padding-left: 28px; } .full .row { display: flex; align-items: center; gap: 14px; margin-top: 6px; } .full b { font-size: 52px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; } .full span { color: var(--muted); font-size: 15px; line-height: 1.3; max-width: 14ch; }
+.tools { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 16px; }
+th { text-align: left; font-size: 14px; font-weight: 600; color: var(--muted); padding: 10px 14px 10px 0; white-space: nowrap; }
+td { border-top: 1px solid var(--line); padding: 11px 14px 11px 0; vertical-align: middle; } td.r, th.r { text-align: right; white-space: nowrap; }
+.name { font-weight: 700; font-size: 17px; } .sub { color: var(--muted); font-size: 14px; }
+.fillcell { display: grid; grid-template-columns: minmax(90px, 220px) 3.4em; gap: 12px; align-items: center; }
+.bar { height: 8px; background: #dbe7f5; border-radius: 999px; position: relative; }
+.bar > span { position: absolute; inset: 0 auto 0 0; background: var(--brand); border-radius: 999px; }
+.bar > b { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.pill { font-size: 13px; color: var(--muted); white-space: nowrap; } .pill i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #1baf7a; margin-right: 5px; } .pill.w i { background: transparent; border: 1.5px solid var(--faint); }
+#t-res tbody tr { cursor: pointer; } #t-res tbody tr:hover { background: var(--tint); } #t-res tbody tr.on { background: #e8f1fc; box-shadow: inset 3px 0 0 var(--brand); } #t-res td:first-child, #t-res th:first-child { padding-left: 8px; }
+/* open data */
+.open { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 0; }
+.open > div + div { border-left: 1px solid var(--line); padding-left: 30px; margin-left: 30px; }
+.open p { margin: 10px 0 0; color: var(--muted); max-width: 58ch; } .open ul { margin: 12px 0 0; padding-left: 20px; color: var(--muted); } .open li { margin: 6px 0; } .open li::marker { color: var(--brand); }
+pre.code { margin: 8px 0 0; background: var(--tint); color: var(--ink); border: 1px solid var(--line); border-radius: var(--rs); padding: 12px; font-family: var(--mono); font-size: 12.5px; line-height: 1.5; overflow-x: auto; }
+textarea.sql { margin: 0; background: #0f2233; color: #e8eff6; border: 0; border-radius: var(--rs); padding: 14px; font-family: var(--mono); font-size: 13px; line-height: 1.55; width: 100%; min-height: 150px; resize: vertical; display: block; }
+.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+.chips button { font: inherit; font-size: 14px; padding: 8px 12px; border-radius: var(--rs); border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer; text-align: left; }
+.chips button:hover, .chips button.on { border-color: var(--brand); background: var(--tint); }
+.result { margin-top: 12px; max-height: 320px; overflow: auto; border: 1px solid var(--line); border-radius: var(--rs); font-size: 13px; }
+.result table { font-size: 13px; } .result th { padding: 8px 12px; position: sticky; top: 0; background: var(--tint); } .result td { padding: 6px 12px; white-space: nowrap; }
+footer { margin-top: 40px; border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 15px; color: var(--muted); }
+footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; } footer h3 { color: var(--ink); margin-bottom: 6px; } footer p { margin: 0 0 8px; }
+.skeleton { color: var(--faint); }
+@media (prefers-reduced-motion: reduce) { .chart path.ln { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } html { scroll-behavior: auto; } }
+@media (max-width: 980px) {
+  .intro, .frame, .raingrid, .high, .open, footer .cols, .ficha .top3 { grid-template-columns: minmax(0, 1fr); }
+  .state { border-left: 0; padding-left: 0; } nav.main { display: none; }
+  .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
+  .raingrid > div + div, .open > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 20px; }
+  .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
+}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
-  <a class="brand" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.2 4.3 6.5 8 6.5 12a6.5 6.5 0 0 1-13 0c0-4 3.300-7.700 6.500-12z" fill="#1565c0"/></svg>Embalses de España</a>
-  <nav class="main"><a href="#panorama">Panorama</a><a href="#embalses">Embalses</a><a href="#lluvia">Lluvia</a><a href="#datos">Datos abiertos</a></nav>
+  <a class="brand" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.2 4.3 6.5 8 6.5 12a6.5 6.5 0 0 1-13 0c0-4 3.300-7.700 6.500-12z" fill="#1463e0"/></svg>Embalses de España</a>
+  <nav class="main"><a href="#panorama">Panorama</a><a href="#lluvia">Lluvia</a><a href="#embalses">Embalses</a><a href="#datos">Datos abiertos</a></nav>
   <span class="sp"></span>
   <span class="status" id="status"><i></i><span>Conectando con los datos…</span></span>
-  <a class="btn" href="#datos">Datos abiertos</a>
 </div></header>
 
-<section class="hero">
-  <svg class="land" viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
-    <path d="M0 210 C 180 150 320 190 480 160 S 800 110 980 150 S 1300 120 1440 160 V320 H0Z" fill="#2f7bd0" opacity=".55"/>
-    <path d="M0 250 C 220 200 380 240 600 210 S 980 180 1180 215 S 1380 200 1440 210 V320 H0Z" fill="#5aa0e3" opacity=".6"/>
-    <path d="M0 290 C 260 262 520 286 760 268 S 1200 262 1440 276 V320 H0Z" fill="#9cc8f2" opacity=".75"/>
-  </svg>
-  <div class="wrap">
-    <div><div class="eyebrow">Estado de los embalses en España</div><h1 id="headline">El agua embalsada en España, hoy</h1></div>
-    <p id="subhead">Niveles, lluvia y cuencas con los datos oficiales, actualizados cada hora.</p>
-  </div>
-</section>
-
 <div class="wrap"><main>
-  <div class="grid2" id="panorama">
-    <div class="card mapcard" id="mapcard">
+  <div class="intro">
+    <div><h1>El agua en España</h1><p class="lede">Embalses, lluvia y cómo cambian.</p></div>
+    <p class="state" id="subhead">Datos oficiales, actualizados cada hora.</p>
+  </div>
+  <nav class="crumbs" id="crumbs" aria-label="Dónde estás" hidden></nav>
+
+  <div class="frame" id="panorama">
+    <div class="pane mapcard" id="mapcard">
       <div class="maptools">
-        <button class="crumb" id="back" hidden>← España</button>
         <span class="seg" role="group" aria-label="Dividir el mapa por" id="groupseg"><button id="g-b" aria-pressed="true">Cuencas</button><button id="g-c" aria-pressed="false">Comunidades</button></span>
         <span class="seg" role="group" aria-label="Qué muestra el mapa" id="layerseg"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
       </div>
@@ -169,75 +183,79 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <p class="muted small" id="map-note" style="margin:8px 0 0">Cargando el mapa…</p>
       <p class="muted small" id="area-note" style="margin:6px 0 0" hidden></p>
     </div>
-    <div class="card">
-      <div class="labelrow"><div class="label" id="n-label">Nivel nacional de los embalses</div><button class="linkbtn" id="share" title="Copia un enlace a esta vista">Copiar enlace</button></div><div class="muted small" id="n-sub" hidden></div>
-      <div class="natl" style="margin-top:8px">
-        <div><div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap"><div class="big num skeleton" id="n-pct">—</div><div><span class="chip" id="n-week"></span><div class="muted small">en la última semana</div></div></div><div class="meter"><i id="n-meter" style="width:0"></i></div></div>
-        <div class="kv2 num"><div>Agua embalsada<b id="n-stored">—</b></div><div>Capacidad total<b id="n-cap">—</b></div></div>
-      </div>
-      <div class="vs num"><div>frente a hace un año<b id="n-ly">—</b></div><div>frente a la media de 10 años<b id="n-avg">—</b></div></div>
+    <div class="pane">
+      <div class="labelrow"><div class="label" id="n-label">Nivel nacional de los embalses</div><button class="linkbtn quiet" id="share" title="Copia un enlace a esta vista">Copiar enlace</button></div>
+      <div class="muted" id="n-sub" hidden></div>
+      <div class="headline"><div class="big skeleton" id="n-pct">—</div><div class="chips2"><span class="chip" id="n-week"></span><span class="chip" id="n-week2"></span></div></div>
+      <div class="meter"><i id="n-meter" style="width:0"></i></div>
+      <div class="pair"><div><b id="n-stored">—</b>Agua embalsada</div><div><b id="n-cap">—</b>Capacidad total</div></div>
+      <div class="pair cmp"><div>Frente a hace un año<b id="n-ly">—</b></div><div>Frente a la media de 10 años<b id="n-avg">—</b></div></div>
       <div class="chart" id="yearbox">
-        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 id="year-title">Evolución del nivel de los embalses</h3><div class="legend" id="year-legend"></div></div>
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 id="year-title">Evolución del nivel</h3><div class="legend" id="year-legend"></div></div>
         <svg id="year" viewBox="0 0 560 250" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div>
       </div>
       <div class="muted small" id="n-date"></div>
     </div>
+    <div class="under ficha" id="ficha" hidden></div>
   </div>
 
-  <div class="card ficha" id="ficha" hidden></div>
-
-  <div class="grid3">
-    <div class="card feature"><h2 id="f-title">Lluvia y embalses</h2><p id="f-text" class="skeleton">Cargando…</p></div>
-    <div class="card soft"><h3>Subidas destacadas</h3><div class="list num" id="ups"></div></div>
-    <div class="card"><h3>Cerca del lleno</h3><p class="muted" id="full-text" style="margin:6px 0 10px"></p><button class="btn" id="full-btn">Ver embalses</button></div>
-  </div>
-
-  <div class="gridb">
-    <div class="card" id="lluvia">
-      <h2>Lluvia reciente</h2><div class="muted small" id="rain-sub">Precipitación acumulada en las últimas 24 horas</div>
-      <div class="rain" style="margin-top:10px"><canvas id="rainmap"></canvas>
-        <div><div class="muted small">Media peninsular</div><div class="bigm num" id="rain-mean">—</div><div class="label" style="margin-top:12px">Donde más ha llovido</div><div class="list num" id="rain-top"></div></div></div>
-      <button class="btn" id="rain-btn" style="margin-top:10px">Ver la lluvia en el mapa</button>
+  <section class="sec" id="lluvia">
+    <div class="sechead"><h2>Lluvia reciente</h2><span class="muted" id="rain-sub">Acumulada en las últimas 24 h</span><span class="sp"></span><button class="linkbtn" id="rain-btn">Ver la lluvia en el mapa →</button></div>
+    <div class="raingrid">
+      <div><canvas id="rainmap"></canvas></div>
+      <div>
+        <div class="stat"><span>Media peninsular</span><b class="xl" id="rain-mean">—</b></div>
+        <div class="stat"><b id="rain-total">—</b><span>Precipitación sobre la España peninsular</span></div>
+        <div class="stat"><b class="md" id="rain-catch">—</b><span>Mayor lluvia sobre la cuenca de un embalse</span></div>
+      </div>
+      <div><h3>Dónde más ha llovido</h3><div class="rank" id="rain-top"></div></div>
     </div>
-    <div class="card" id="embalses">
-      <div class="tools"><h2 id="res-title">Principales embalses</h2>
-        <span class="seg" role="group" aria-label="Ordenar por"><button id="t-up" aria-pressed="false">Mayores subidas</button><button id="t-fill" aria-pressed="false">Mayor nivel</button><button id="t-cap" aria-pressed="true">Mayor capacidad</button></span></div>
-      <div class="tools"><input type="search" id="q" style="width:min(100%,300px)" placeholder="Buscar embalse, río o provincia" aria-label="Buscar embalse"><span class="muted small num" id="count"></span></div>
-      <div class="scroll"><table id="t-res"></table></div>
-      <button class="btn" id="more" style="margin-top:10px">Ver más</button>
-    </div>
-  </div>
+  </section>
 
-  <div class="card open" id="datos">
+  <section class="sec high">
+    <div><div class="sechead" style="margin-bottom:0"><h2 style="font-size:24px">Subidas destacadas</h2><span class="muted" id="ups-sub">Última semana</span></div><div class="ups" id="ups"></div></div>
+    <div class="full"><h3>Cerca del lleno</h3><div class="row"><b id="full-n">—</b><span>embalses por encima del 90 %</span></div><button class="linkbtn" id="full-btn" style="margin-top:8px">Ver embalses →</button></div>
+  </section>
+
+  <section class="sec" id="embalses">
+    <div class="sechead" style="margin-bottom:12px"><h2 id="res-title">Principales embalses</h2><span class="sp"></span><span class="muted" id="count"></span></div>
+    <div class="tools"><input type="search" id="q" style="width:min(100%,400px)" placeholder="Buscar embalse, río o provincia" aria-label="Buscar embalse">
+      <span class="seg" role="group" aria-label="Ordenar por"><button id="t-up" aria-pressed="false">Mayores subidas</button><button id="t-fill" aria-pressed="false">Mayor nivel</button><button id="t-cap" aria-pressed="true">Mayor capacidad</button></span></div>
+    <div class="scroll"><table id="t-res"></table></div>
+    <button class="linkbtn" id="more" style="margin-top:12px">Ver más →</button>
+  </section>
+
+  <section class="sec open" id="datos">
     <div>
       <h2>Estos datos son tuyos</h2>
-      <p>Todo lo que ves aquí sale de un catálogo abierto. Puedes consultarlo ahora mismo con SQL, descargar el resultado o conectarlo a tus propias herramientas, sin cuenta y sin pedir permiso.</p>
+      <p>Todo lo que ves aquí sale de un catálogo abierto. Consulta con SQL, descarga el resultado o conecta tus herramientas, sin cuenta y sin pedir permiso.</p>
       <ul>
         <li>20 tablas documentadas: embalses, cuencas, ríos, estaciones, lluvia horaria, lecturas en directo y el boletín semanal desde 1988.</li>
         <li>Se actualizan solas: los datos en directo cada 15 minutos o cada hora, el boletín cada semana.</li>
-        <li>Formato abierto (Apache Iceberg) en <a href="https://lakehousebox.com">LakehouseBox</a>.</li>
+        <li>Formato abierto (Apache Iceberg), publicado en <a href="https://lakehousebox.com">LakehouseBox</a>.</li>
       </ul>
-      <p style="margin-top:14px">Desde tu ordenador, con DuckDB:</p>
+      <h3 style="margin-top:18px">Desde tu ordenador, con DuckDB</h3>
       <pre class="code">INSTALL iceberg; LOAD iceberg; INSTALL httpfs; LOAD httpfs;
 ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg,
   ENDPOINT 'https://public-catalog.lakehousebox.com',
   AUTHORIZATION_TYPE 'none');</pre>
-      <p><a href="https://github.com/LakehouseBox/embalses">Código y documentación en GitHub</a> · <a id="about" href="https://lakehousebox.com/examples/embalses/">Cómo está hecho</a></p>
+      <p><a href="https://github.com/LakehouseBox/embalses">Código y documentación en GitHub ↗</a> &nbsp; <a id="about" href="https://lakehousebox.com/examples/embalses/">Cómo está hecho ↗</a></p>
     </div>
     <div>
-      <div class="label" style="color:#9fb4c6">Pruébalo aquí: la consulta se ejecuta en tu navegador</div>
+      <h2 style="font-size:24px">Consulta en tu navegador</h2>
+      <p style="margin-top:2px">La consulta se ejecuta aquí, contra el catálogo público.</p>
       <div class="chips" id="examples"></div>
       <textarea class="sql" id="sql" spellcheck="false" aria-label="Consulta SQL"></textarea>
-      <div style="display:flex;gap:10px;margin-top:10px;align-items:center;flex-wrap:wrap"><button class="btn primary" id="run" style="background:#1b6fd1;border-color:#1b6fd1">Ejecutar</button><button class="btn" id="csv" disabled>Descargar CSV</button><span class="small" id="q-status" style="color:#9fb4c6"></span></div>
+      <div style="display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap"><button class="btn primary" id="run">▷ Ejecutar</button><button class="btn" id="csv" disabled>Descargar CSV</button><span class="small muted" id="q-status"></span></div>
       <div class="result" id="result" hidden></div>
     </div>
-  </div>
+  </section>
 </main></div>
 
 <footer><div class="wrap cols">
-  <div><h3>Qué es esto</h3><p>Una vista clara del agua embalsada en España, la lluvia y cómo llega a los embalses, hecha solo con datos oficiales y abiertos. Los datos en tiempo real son provisionales: los organismos todavía no los han validado.</p></div>
-  <div><h3>Fuentes</h3><p>MITECO (Boletín Hidrológico, Inventario de Presas y Embalses) · AEMET OpenData · SAIH de las confederaciones del Ebro, Guadalquivir, Guadiana, Segura, Miño-Sil y Cantábrico · HydroSHEDS (CC BY 4.0).</p></div>
-  <div><h3>Cómo está hecho</h3><p>Los datos se recogen y se publican con <a href="https://lakehousebox.com">LakehouseBox</a>. Tu navegador los consulta directamente, sin servidor intermedio. <a href="https://lakehousebox.com/examples/embalses/">Cómo está hecho</a>.</p><p><a href="https://github.com/LakehouseBox/embalses">Proyecto abierto en GitHub</a></p></div>
+  <div><h3>Qué es esto</h3><p>Una vista del agua embalsada en España, la lluvia y cómo llega a los embalses, hecha solo con datos oficiales y abiertos.</p><p>Las lecturas en tiempo real son provisionales: los organismos todavía no las han validado.</p></div>
+  <div><h3>Fuentes</h3><p>MITECO · Boletín Hidrológico e Inventario de Presas y Embalses</p><p>AEMET OpenData · SAIH del Ebro, Guadalquivir, Guadiana, Segura, Miño-Sil y Cantábrico</p><p>HydroSHEDS · CC BY 4.0</p></div>
+  <div><h3>Cómo está hecho</h3><p>Los datos se recogen y se publican con <a href="https://lakehousebox.com">LakehouseBox</a>. Tu navegador los consulta directamente, sin servidor intermedio.</p><p><a href="https://lakehousebox.com/examples/embalses/">Cómo está hecho ↗</a></p><p><a href="https://github.com/LakehouseBox/embalses">Proyecto abierto en GitHub ↗</a></p></div>
 </div></footer>
 
 <script type="module">
@@ -281,7 +299,7 @@ FROM embalses."now".reservoir_status`,
 FROM embalses."now".rain_grid GROUP BY 1`,
   gauges: `SELECT station_name, basin_name, longitude AS lon, latitude AS lat, rain_1h_mm, rain_6h_mm, rain_12h_mm, rain_24h_mm
 FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_24h_mm DESC LIMIT 80`,
-  outlines: `SELECT layer, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
+  outlines: `SELECT layer, outline_id, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
   ficha: id => `SELECT dam_name, dam_type, uses, catchment_area_km2, surface_area_ha, mean_annual_inflow_hm3, is_hydroelectric, energy_capacity_gwh
 FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
@@ -320,7 +338,8 @@ const inScope = r => AS().t === 'es' || (r.in && r.in[AS().t] === AS().k);
 const selArea = () => AS().t === 'es' ? null : AREAS[AS().t].find(a => a.name === AS().k);
 const children = name => AREAS.p.filter(p => p.parent === name && p.res.length);
 const overview = () => scope.t === 'es' || (scope.t === 'c' && children(scope.k).length > 1);   // coloured zones to pick from, not reservoirs
-const parentOf = sc => sc.t === 'r' ? sc.parent : sc.t === 'p' && group === 'c' ? { t: 'c', k: AREAS.p.find(a => a.name === sc.k)?.parent } : { t: 'es', k: null };
+const regionOf = prov => { const c = AREAS.p.find(a => a.name === prov)?.parent; return c && children(c).length > 1 ? c : null; };   // null when the comunidad is that one province
+const parentOf = sc => sc.t === 'r' ? sc.parent : sc.t === 'p' && group === 'c' && regionOf(sc.k) ? { t: 'c', k: regionOf(sc.k) } : { t: 'es', k: null };
 const scopeName = sc => sc.t === 'es' ? 'España' : sc.t === 'r' ? (D.res.find(r => r.reservoir_id === sc.k)?.reservoir_name || '') : sc.k;
 
 // ───────── weekly series: national at start, a selected area on demand ─────────
@@ -340,14 +359,14 @@ function countTo(el, v) { const from = shownPct ?? v * 0.6, run = ++pctRun, t0 =
   if (CALM) return put(v);
   const step = now => { if (run !== pctRun) return; const t = Math.min(1, (now - t0) / 700); put(from + (v - from) * ease(t)); if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
 function numbers() { const { last, prev, Y, byYear, avg10, lw } = ST, ly = byYear[Y - 1]?.[lw], av = avg10[lw], dw = last.f - prev.f;
-  const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? `Embalse: ${scopeName(scope)}` : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
-  $('n-sub').hidden = !r; if (r) $('n-sub').textContent = [title(r.river_name), r.province, r.region, 'Cuenca: ' + (r.basin_name || '')].filter(Boolean).join(' · ');
-  $('n-pct').className = 'big num'; countTo($('n-pct'), last.f); $('n-meter').style.width = Math.min(100, last.f) + '%';
-  $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').textContent = `${dw < 0 ? '↓' : '↑'} ${signed(dw, 1)} p.p.`;
+  const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? scopeName(scope) : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
+  $('n-sub').hidden = !r; if (r) $('n-sub').textContent = [title(r.river_name), r.province].filter(Boolean).join(' · ');
+  $('n-pct').className = 'big'; countTo($('n-pct'), last.f); $('n-meter').style.width = Math.min(100, last.f) + '%';
+  $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').innerHTML = `${signed(dw, 1)} p.p. <span>esta semana</span>`; const dv = last.s - prev.s; $('n-week2').className = 'chip' + (dv < 0 ? ' down' : ''); $('n-week2').innerHTML = `${signed(dv, Math.abs(dv) < 10 ? 1 : 0)} hm³ <span>esta semana</span>`;
   $('n-stored').textContent = fmt(last.s) + ' hm³'; $('n-cap').textContent = fmt(last.c) + ' hm³';
-  const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${d >= 0 ? '↑' : '↓'} ${signed(d, 1)} p.p. <span class="muted small" style="font-weight:400">(${fmt(v, 1)} %)</span>`; };
-  cmp('n-ly', ly); cmp('n-avg', av); $('n-date').textContent = `Boletín oficial del ${dfmt(last.d)}. Fuente: MITECO.`;
-  $('year-title').textContent = scope.t === 'es' ? 'Evolución del nivel de los embalses en España' : scope.t === 'r' ? `Evolución de ${scopeName(scope)}` : `Evolución en ${scope.k}`; }
+  const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${signed(d, 1)} p.p. <span>(${fmt(v, 1)} %)</span>`; };
+  cmp('n-ly', ly); cmp('n-avg', av); $('n-date').textContent = `Boletín oficial · ${dfmt(last.d)} · MITECO`;
+  }
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW = 560, VH = 250, m = { l: 40, r: 16, t: 22, b: 24 }, cur = byYear[Y] || [], ly = byYear[Y - 1] || [];
   const all = [...cur, ...ly, ...avg10].filter(v => v != null), y0 = Math.floor(Math.min(...all) / 10) * 10, y1 = Math.max(y0 + 20, Math.ceil(Math.max(...all) / 10) * 10), st = y1 - y0 > 50 ? 20 : 10;
@@ -373,8 +392,12 @@ const cv = $('map'), ctx = cv.getContext('2d'), ES = { w: -9.45, e: 3.45, s: 35.
 let P, BB = ES, shownAreas = [], marks = [];
 const BAND = [0, 20, 30, 40, 50, 60, 70, 80], STEPS = [0.2, 1, 5, 10, 20, 40], bounds = new Map(); let gridIndex = new Map();
 const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v >= st[s]) i = s; return i; };
+let CATCH = new Map();   // reservoir_id → its catchment outline (text until first used, then an area)
+const catchment = id => { let c = CATCH.get(id); if (typeof c === 'string') CATCH.set(id, c = area('k', '', JSON.parse(c))); return c || null; };
 let ANIM = 1, HOVER = null, animRun = 0;   // ANIM: 0→1 as the marks and labels of a view come in
-function target() { const r = selRes(); if (r && r.lon != null) return { w: r.lon - 1.0, e: r.lon + 1.0, s: r.lat - 0.62, n: r.lat + 0.62 };
+function target() { const r = selRes(); if (r && r.lon != null) { const c = catchment(r.reservoir_id);
+    if (c && c.bb.e - c.bb.w < 3.2) { const hx = Math.max(0.55, (c.bb.e - c.bb.w) * 0.6), hy = Math.max(0.36, (c.bb.n - c.bb.s) * 0.6), mx = (c.bb.e + c.bb.w) / 2, my = (c.bb.n + c.bb.s) / 2; return { w: Math.min(mx - hx, r.lon - 0.2), e: Math.max(mx + hx, r.lon + 0.2), s: Math.min(my - hy, r.lat - 0.15), n: Math.max(my + hy, r.lat + 0.15) }; }
+    return { w: r.lon - 1.0, e: r.lon + 1.0, s: r.lat - 0.62, n: r.lat + 0.62 }; }
   const a = selArea(); if (!a) return ES; const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); return { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
 function animate(from, to, ms = 750) {   // glide the view from one box to another, then let the marks grow in
   const run = ++animRun; if (CALM || !P) { ANIM = 1; fit(to); draw(); return; }
@@ -410,6 +433,9 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
       for (const l of (r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates)) l.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.stroke(); } }
   for (const { a, p } of shownAreas) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === sk ? 1.8 : 0.7; ctx.stroke(p); }
   if (HOVER) { const h = shownAreas.find(x => x.a === HOVER); if (h) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill(h.p, 'evenodd'); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 2; ctx.stroke(h.p); } }
+  const cat = scope.t === 'r' && catchment(scope.k);
+  if (cat) { ctx.beginPath(); for (const poly of polys(cat.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.closePath(); }
+    ctx.globalAlpha = 0.14 * ANIM; ctx.fillStyle = css('--brand'); ctx.fill('evenodd'); ctx.globalAlpha = ANIM; ctx.setLineDash([5, 4]); ctx.strokeStyle = css('--brand'); ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]); }
   ctx.globalAlpha = ANIM;
   const rs = D.res.filter(r => r.lon != null && inScope(r)).sort((a, b) => b.capacity_hm3 - a.capacity_hm3);
   if (layer === 'res' && es) { for (const { a } of shownAreas) { if (a.fill == null) continue; const x = P.x(a.cx), y = P.y(a.cy), small = (a.bb.e - a.bb.w) * KX * P.k < 95;
@@ -432,7 +458,7 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   ctx.globalAlpha = 1;
   $('mapkey').innerHTML = layer === 'rain' ? `<div>Lluvia en ${win.replace('h', ' h')} (mm)</div><div class="ramp">${STEPS.map((s, i) => `<span style="background:var(--f${i + 1})"></span>`).join('')}</div><div class="ticks num">${STEPS.map(s => `<span>${fmt(s, s < 1 ? 1 : 0)}</span>`).join('')}</div>`
     : layer === 'var' ? `<div><span class="upc">▲</span> gana agua · <span class="downc">▼</span> pierde agua</div>` : `<div>% de la capacidad</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> por debajo de lo normal · <span style="color:var(--water)">●</span> normal o por encima</div>`);
-  $('map-note').textContent = top ? 'Pulsa una zona del mapa para ver sus embalses.' : es ? 'Pulsa una provincia para ver sus embalses.' : layer === 'res' && scope.t !== 'r' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su ficha.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
+  $('map-note').textContent = top ? 'Pulsa una zona del mapa para ver sus embalses.' : es ? 'Pulsa una provincia para ver sus embalses.' : scope.t === 'r' && cat ? 'La zona punteada es la cuenca que vierte al embalse: la lluvia que cae ahí acaba llegando a él.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su detalle.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
 const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of shownAreas) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const mtip = $('map-tip');
 cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
@@ -452,25 +478,26 @@ function setLayer(l, note = true) { layer = l; if (note) remember(false); press(
 for (const l of ['res', 'var', 'rain']) $('l-' + l).onclick = () => setLayer(l);
 for (const g of ['b', 'c']) $('g-' + g).onclick = () => { group = g; press(['g-b', 'g-c'], 'g-' + g); animate(BB, BB); };
 for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).onclick = () => { win = w; press(['w-1h', 'w-6h', 'w-12h', 'w-24h'], 'w-' + w); draw(); };
-$('back').onclick = () => { const p = parentOf(scope); setScope(p.t, p.k); };
+function crumbs() { const chain = []; for (let sc = scope; sc.t !== 'es'; sc = parentOf(sc)) chain.unshift(sc); const el = $('crumbs'); el.hidden = !chain.length;
+  el.innerHTML = '<button data-i="-1">España</button>' + chain.map((sc, i) => ' <span>/</span> ' + (i === chain.length - 1 ? `<b>${esc(scopeName(sc))}</b>` : `<button data-i="${i}">${esc(scopeName(sc))}</button>`)).join('');
+  el.onclick = e => { const i = e.target.dataset?.i; if (i == null) return; const sc = +i < 0 ? { t: 'es', k: null } : chain[+i]; setScope(sc.t, sc.k); }; }
 function fullscreen(on) { $('mapcard').classList.toggle('fs', on); $('fs').textContent = on ? '✕' : '⛶'; $('fs').title = on ? 'Salir de pantalla completa' : 'Pantalla completa'; document.body.style.overflow = on ? 'hidden' : ''; animRun++; ANIM = 1; fit(); draw(); }
 $('fs').onclick = () => fullscreen(!$('mapcard').classList.contains('fs'));
 addEventListener('keydown', e => { if (e.key === 'Escape' && $('mapcard').classList.contains('fs')) fullscreen(false); });
 
 // ───────── cards, rain, table ─────────
-function cards() { const k24 = D.grid.reduce((s, c) => s + (c.rain_24h || 0) * 37.2 / 1000, 0), ups = D.res.filter(r => trend(r) > 0.5).sort((a, b) => trend(b) - trend(a)), { last, prev } = SER.es ? stats(SER.es) : ST;
-  const rainy = [...D.res].filter(r => r.rain_24h_hm3 > 0).sort((a, b) => b.rain_24h_hm3 - a.rain_24h_hm3)[0];
-  $('f-title').textContent = k24 > 300 ? 'Está lloviendo sobre las cuencas' : 'Pocas lluvias en las últimas horas';
-  $('f-text').className = ''; $('f-text').innerHTML = `En las últimas 24 horas han caído unos <b>${fmt(k24)} hm³</b> de lluvia sobre la España peninsular.` + (rainy ? ` Donde más, sobre la cuenca que alimenta <b>${esc(rainy.reservoir_name)}</b>: ${fmt(rainy.rain_24h_mm, 1)} mm.` : '') + ` Los embalses han ${last.s >= prev.s ? 'ganado' : 'perdido'} <b>${fmt(Math.abs(last.s - prev.s))} hm³</b> en la última semana.`;
-  $('ups').innerHTML = ups.slice(0, 4).map(r => `<div><span>${esc(r.reservoir_name)} <span class="muted small">(${esc(r.basin_name || '')})</span></span><b class="upc">${signed(trend(r), trend(r) < 10 ? 1 : 0)} hm³</b></div>`).join('') || '<div class="muted">Sin subidas destacadas ahora.</div>';
-  const full = D.res.filter(r => r.fill_pct >= 90 && r.capacity_hm3 >= 10).length; $('full-text').textContent = `${full} embalses superan el 90 % de su capacidad.`; }
-function rainCard() { const c = $('rainmap'), x = c.getContext('2d'), Wd = c.clientWidth || 260, Hh = Math.round(Wd * 0.8), dpr = devicePixelRatio || 1; c.width = Wd * dpr; c.height = Hh * dpr; c.style.height = Hh + 'px'; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+function cards() { const ups = D.res.filter(r => trend(r) > 0.5).sort((a, b) => trend(b) - trend(a));
+  $('ups').innerHTML = ups.slice(0, 4).map(r => `<div><div class="n">${esc(r.reservoir_name)}</div><div class="s">${esc(r.basin_name || '')}</div><div class="v upc">${signed(trend(r), trend(r) < 10 ? 1 : 0)} hm³</div></div>`).join('') || '<div class="muted">Sin subidas destacadas ahora.</div>';
+  $('full-n').textContent = D.res.filter(r => r.fill_pct >= 90 && r.capacity_hm3 >= 10).length; }
+function rainCard() { const c = $('rainmap'), x = c.getContext('2d'), Wd = c.clientWidth || 260, Hh = Math.round(Wd * 0.82), dpr = devicePixelRatio || 1; c.width = Wd * dpr; c.height = Hh * dpr; c.style.height = Hh + 'px'; x.setTransform(dpr, 0, 0, dpr, 0, 0);
   const gw = (ES.e - ES.w) * KX, gh = ES.n - ES.s, k = Math.min(Wd / gw, Hh / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2, X = lon => ox + (lon - ES.w) * KX * k, Yy = lat => oy + (ES.n - lat) * k;
   x.beginPath(); for (const a of AREAS.b) for (const poly of polys(a.geometry)) for (const ring of poly) { ring.forEach(([lo, la], i) => i ? x.lineTo(X(lo), Yy(la)) : x.moveTo(X(lo), Yy(la))); x.closePath(); } x.fillStyle = css('--land'); x.fill('evenodd');
   let sum = 0, n = 0; for (const cell of D.grid) { const mm = cell.rain_24h || 0; sum += mm; n++; if (mm < 0.2) continue; let b = bounds.get(cell.h3_cell); if (!b) bounds.set(cell.h3_cell, b = h3.cellToBoundary(cell.h3_cell));
     x.beginPath(); b.forEach(([la, lo], i) => i ? x.lineTo(X(lo), Yy(la)) : x.moveTo(X(lo), Yy(la))); x.closePath(); x.fillStyle = css('--f' + (stepOf(mm, STEPS) + 1)); x.fill(); }
-  $('rain-mean').innerHTML = `${fmt(n ? sum / n : 0, 1)} <span style="font-size:20px">l/m²</span>`;
-  $('rain-top').innerHTML = D.gauges.slice(0, 4).map(g => `<div><span>${esc(title(g.station_name))} <span class="muted small">(${esc(g.basin_name || '')})</span></span><b>${fmt(g.rain_24h_mm, 1)} l/m²</b></div>`).join(''); }
+  $('rain-mean').innerHTML = `${fmt(n ? sum / n : 0, 1)} <small>l/m²</small>`; $('rain-total').textContent = fmt(sum * 37.2 / 1000) + ' hm³';   // an H3 cell at this size covers about 37 km²
+  const wet = [...D.res].filter(r => r.rain_24h_mm > 0).sort((a, b) => b.rain_24h_mm - a.rain_24h_mm)[0]; $('rain-catch').textContent = wet ? `Cuenca de ${wet.reservoir_name} · ${fmt(wet.rain_24h_mm, 1)} mm` : '—';
+  const asOf = D.grid.find(c => c.as_of)?.as_of; $('rain-sub').textContent = 'Acumulada en las últimas 24 h' + (asOf ? ' · hasta las ' + new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '');
+  $('rain-top').innerHTML = D.gauges.slice(0, 4).map(g => `<div><div><div class="n">${esc(title(g.station_name))}</div><div class="s">${esc(g.basin_name || '')}</div></div><div class="v">${fmt(g.rain_24h_mm, 1)} l/m²</div></div>`).join(''); }
 $('rain-btn').onclick = () => { setLayer('rain'); $('panorama').scrollIntoView(); };
 const norm = s => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 function table() { const qv = norm($('q').value), rows = D.res.filter(r => inScope(r) && (!qv || norm(`${r.reservoir_name} ${r.river_name} ${r.province} ${r.basin_name}`).includes(qv)));
@@ -479,23 +506,35 @@ function table() { const qv = norm($('q').value), rows = D.res.filter(r => inSco
   $('t-res').innerHTML = `<thead><tr><th>Embalse</th><th>Cuenca</th><th class="r">Embalsado</th><th class="r">Capacidad</th><th>Nivel</th><th class="r">Cambio</th><th>Dato</th></tr></thead><tbody>` + rows.slice(0, shown).map(r => { const v = trend(r);
     return `<tr data-id="${r.reservoir_id}" class="${scope.t === 'r' && r.reservoir_id === scope.k ? 'on' : ''}"><td><div class="name">${esc(r.reservoir_name)}</div><div class="sub">${esc([title(r.river_name), r.province].filter(Boolean).join(' · '))}</div></td><td>${esc(r.basin_name || '')}</td><td class="r num">${fmt(r.stored_hm3)} hm³</td><td class="r num">${fmt(r.capacity_hm3)} hm³</td>
       <td><div class="fillcell"><div class="bar"><span style="width:${Math.min(100, r.fill_pct || 0)}%"></span>${r.fill_10y != null ? `<b style="left:${Math.min(100, r.fill_10y)}%" title="Media de 10 años"></b>` : ''}</div><span class="num">${fmt(r.fill_pct, 0)} %</span></div></td>
-      <td class="r num ${v > 0 ? 'upc' : v < 0 ? 'downc' : ''}">${v == null ? '—' : `${v > 0 ? '↑' : v < 0 ? '↓' : ''} ${signed(v, Math.abs(v) < 10 ? 1 : 0)} hm³`}</td><td><span class="pill ${r.data_source === 'miteco-weekly' ? 'w' : ''}"><i></i>${r.data_source === 'miteco-weekly' ? 'semanal' : 'en directo'}</span></td></tr>`; }).join('') + '</tbody>'; }
+      <td class="r num ${v > 0 ? 'upc' : v < 0 ? 'downc' : ''}">${v == null ? '—' : `${signed(v, Math.abs(v) < 10 ? 1 : 0)} hm³`}</td><td><span class="pill ${r.data_source === 'miteco-weekly' ? 'w' : ''}"><i></i>${r.data_source === 'miteco-weekly' ? 'semanal' : 'en directo'}</span></td></tr>`; }).join('') + '</tbody>'; }
 for (const [id, k] of [['t-up', 'up'], ['t-fill', 'fill'], ['t-cap', 'cap']]) $(id).onclick = () => { sortBy = k; shown = 8; press(['t-up', 't-fill', 't-cap'], id); table(); };
 $('t-res').onclick = e => { const tr = e.target.closest('tr[data-id]'); if (tr) { setScope('r', +tr.dataset.id); $('panorama').scrollIntoView(); } };
 $('q').oninput = () => { shown = 8; table(); }; $('more').onclick = () => { shown += 30; table(); };
 $('full-btn').onclick = () => { sortBy = 'fill'; shown = 20; press(['t-up', 't-fill', 't-cap'], 't-fill'); table(); $('embalses').scrollIntoView(); };
 
 const when = iso => { const d = new Date(iso); return isNaN(d) ? '—' : d.toLocaleString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); };
+function drawCatchment(r) { const c = $('catch'), cat = catchment(r.reservoir_id); if (!c) return; const x = c.getContext('2d'), Wd = 190, Hh = 130, dpr = devicePixelRatio || 1; c.width = Wd * dpr; c.height = Hh * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (!cat) return; const gw = (cat.bb.e - cat.bb.w) * KX, gh = cat.bb.n - cat.bb.s, k = Math.min((Wd - 12) / gw, (Hh - 12) / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2, X = lon => ox + (lon - cat.bb.w) * KX * k, Y = lat => oy + (cat.bb.n - lat) * k;
+  x.beginPath(); for (const poly of polys(cat.geometry)) for (const ring of poly) { ring.forEach(([lo, la], i) => i ? x.lineTo(X(lo), Y(la)) : x.moveTo(X(lo), Y(la))); x.closePath(); }
+  x.fillStyle = css('--a4'); x.fill('evenodd'); x.strokeStyle = css('--a6'); x.lineWidth = 1.2; x.stroke();
+  x.strokeStyle = css('--brand'); x.lineCap = 'round';
+  for (const rv of D.rivers) { const ls = rv.geometry.type === 'LineString' ? [rv.geometry.coordinates] : rv.geometry.coordinates, m = ls[0][ls[0].length >> 1];
+    if (m[0] < cat.bb.w || m[0] > cat.bb.e || m[1] < cat.bb.s || m[1] > cat.bb.n || !hit.isPointInPath(cat.lonlat, m[0], m[1], 'evenodd')) continue;
+    x.lineWidth = rv.mean_flow_m3s > 80 ? 2 : rv.mean_flow_m3s > 20 ? 1.4 : 0.9; x.beginPath(); for (const l of ls) l.forEach(([lo, la], i) => i ? x.lineTo(X(lo), Y(la)) : x.moveTo(X(lo), Y(la))); x.stroke(); }
+  if (r.lon != null) { x.beginPath(); x.arc(X(r.lon), Y(r.lat), 4.5, 0, 7); x.fillStyle = css('--ink'); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 2; x.stroke(); } }
 async function ficha() { const r = selRes(), el = $('ficha'); el.hidden = !r; if (!r) return;
-  const live = r.data_source !== 'miteco-weekly', row = (k, v) => v == null || v === '' || v === '—' ? '' : `<div><dt>${k}</dt><dd class="num">${v}</dd></div>`, n = (v, d, u) => v == null ? null : `${fmt(v, d)} ${u}`;
-  const head = `<h3>Ficha del embalse</h3><dl>` + row('Agua embalsada', n(r.stored_hm3, 0, 'hm³')) + row('Capacidad', n(r.capacity_hm3, 0, 'hm³')) + row('Último dato', live ? `en directo · ${when(r.reading_at)}` : 'boletín semanal')
-    + row('Cambio en 24 h', r.change_24h_hm3 == null ? null : signed(r.change_24h_hm3, 1) + ' hm³') + row('Entrada', n(r.inflow_m3s, 1, 'm³/s')) + row('Salida', n(r.outflow_m3s, 1, 'm³/s'))
-    + row('Lluvia en su cuenca, 24 h', r.rain_24h_mm == null ? null : `${fmt(r.rain_24h_mm, 1)} mm${r.rain_24h_hm3 != null ? ` · ${fmt(r.rain_24h_hm3, 1)} hm³` : ''}`);
-  el.innerHTML = head + '</dl>'; const id = r.reservoir_id;
-  try { const f = (await q(SQL.ficha(id))).rows[0]; if (!f || scope.k !== id) return;
-    el.innerHTML = head + row('Presa', esc(title(f.dam_name))) + row('Tipo de presa', esc(f.dam_type)) + row('Usos', esc((f.uses || []).join(', '))) + row('Cuenca vertiente', n(f.catchment_area_km2, 0, 'km²'))
-      + row('Superficie del embalse', n(f.surface_area_ha, 0, 'ha')) + row('Aportación media anual', n(f.mean_annual_inflow_hm3, 0, 'hm³')) + row('Hidroeléctrico', f.is_hydroelectric == null ? null : f.is_hydroelectric ? `sí${f.energy_capacity_gwh ? ` · ${fmt(f.energy_capacity_gwh, 0)} GWh` : ''}` : 'no')
-      + '</dl><p class="muted small" style="margin:8px 0 0">Fuentes: MITECO (Boletín Hidrológico e Inventario de Presas y Embalses)' + (live ? ' y SAIH de la confederación; el dato en directo es provisional' : '') + '.</p>'; } catch (e) { console.error(e); } }
+  const live = r.data_source !== 'miteco-weekly', row = (k, v) => v == null || v === '' || v === '—' ? '' : `<div><dt>${k}</dt><dd>${v}</dd></div>`, n = (v, d, u) => v == null ? null : `${fmt(v, d)} ${u}`, id = r.reservoir_id;
+  const paint = f => { const open = el.querySelector('details')?.open;
+    el.innerHTML = `<div class="top3"><canvas id="catch" role="img" aria-label="Contorno de la cuenca que vierte al embalse, con sus ríos"></canvas><div><h3>${esc(r.reservoir_name)} y su cuenca</h3><div class="figs">
+      <div><b class="rain">${r.rain_24h_mm == null ? '—' : fmt(r.rain_24h_mm, 1) + ' mm'}</b>Lluvia sobre su cuenca · últimas 24 h<button class="linkbtn" id="f-rain" style="margin-top:4px">Ver lluvia en el mapa →</button></div>
+      <div><b>${f?.catchment_area_km2 != null ? fmt(f.catchment_area_km2) + ' km²' : '—'}</b>Cuenca vertiente</div><div><b>${f?.surface_area_ha != null ? fmt(f.surface_area_ha) + ' ha' : '—'}</b>Superficie del embalse</div></div></div></div>
+      <details${open ? ' open' : ''}><summary>Sobre la presa y sus usos</summary><dl>` + row('Presa', f && esc(title(nice(f.dam_name)))) + row('Tipo de presa', f && esc(f.dam_type)) + row('Usos', f && esc((f.uses || []).join(', ')))
+      + row('Hidroeléctrico', !f || f.is_hydroelectric == null ? null : f.is_hydroelectric ? `sí${f.energy_capacity_gwh ? ` · ${fmt(f.energy_capacity_gwh, 0)} GWh` : ''}` : 'no') + row('Aportación media anual', f && n(f.mean_annual_inflow_hm3, 0, 'hm³'))
+      + row('Último dato', live ? `en directo · ${when(r.reading_at)}` : 'boletín semanal') + row('Cambio en 24 h', r.change_24h_hm3 == null ? null : signed(r.change_24h_hm3, 1) + ' hm³') + row('Entrada', n(r.inflow_m3s, 1, 'm³/s')) + row('Salida', n(r.outflow_m3s, 1, 'm³/s'))
+      + row('Precipitación caída sobre la cuenca, 24 h', r.rain_24h_hm3 == null ? null : `${fmt(r.rain_24h_hm3, 1)} hm³`) + `</dl><p class="muted small" style="margin:10px 0 0">La precipitación sobre la cuenca es lluvia caída, no agua que haya entrado en el embalse: parte se infiltra, se evapora o tarda días en llegar. Fuentes: MITECO (Boletín Hidrológico e Inventario de Presas y Embalses), AEMET${live ? ' y SAIH de la confederación; el dato en directo es provisional' : ''}.</p></details>`;
+    $('f-rain').onclick = () => setLayer('rain'); drawCatchment(r); };
+  paint(null);
+  try { const f = (await q(SQL.ficha(id))).rows[0]; if (f && scope.t === 'r' && scope.k === id) paint(f); } catch (e) { console.error(e); } }
 // ───────── links: every view has its own address (#/cuenca/tajo, #/provincia/guadalajara, #/embalse/15-alcantara) ─────────
 const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const WORD = { b: 'cuenca', c: 'comunidad', p: 'provincia', r: 'embalse' }, CAPA = { res: '', var: 'variaciones', rain: 'lluvia' };
@@ -513,10 +552,10 @@ $('share').onclick = async () => { try { await navigator.clipboard.writeText(loc
 async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; mtip.hidden = true;
   if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
     const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
-    scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? { t: 'p', k: r.in.p } : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
+    scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? (regionOf(r.in.p) || !r.in.c ? { t: 'p', k: r.in.p } : { t: 'c', k: r.in.c }) : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
   else scope = { t, k };
   if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); } else if (t === 'p') { group = 'c'; press(['g-b', 'g-c'], 'g-c'); }
-  $('back').hidden = t === 'es'; $('back').textContent = '← ' + scopeName(parentOf(scope)); $('groupseg').hidden = t !== 'es';
+  crumbs(); $('groupseg').hidden = t !== 'es';
   const an = AREA_NOTES[AS().k]; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
   remember(push); animate(from, target()); shown = 8; table(); ficha();
   try { const S = await series(); if (scope.t === t && scope.k === k) { ST = stats(S); numbers(); yearChart(); } } catch (e) { console.error(e); } }
@@ -530,7 +569,7 @@ const EXAMPLES = [
 ];
 let lastResult = null;
 $('examples').innerHTML = EXAMPLES.map((e, i) => `<button data-i="${i}">${e[0]}</button>`).join(''); $('sql').value = EXAMPLES[0][1];
-$('examples').onclick = e => { const i = e.target.dataset?.i; if (i != null) { $('sql').value = EXAMPLES[i][1]; run(); } };
+$('examples').onclick = e => { const i = e.target.dataset?.i; if (i != null) { for (const b of $('examples').children) b.classList.toggle('on', b === e.target); $('sql').value = EXAMPLES[i][1]; run(); } };
 async function run() { if (!conn) { $('q-status').textContent = 'Conectando todavía…'; return; } const t0 = performance.now(); $('q-status').textContent = 'Ejecutando…';
   try { const sql = $('sql').value.trim().replace(/;\s*$/, ''); const { cols, rows } = await q(/\blimit\b/i.test(sql) ? sql : `SELECT * FROM (${sql}) LIMIT 1000`); lastResult = { cols, rows };
     $('result').hidden = false; $('result').innerHTML = `<table><thead><tr>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${rows.slice(0, 200).map(r => `<tr>${cols.map(c => `<td>${esc(typeof r[c] === 'number' && !Number.isInteger(r[c]) ? r[c].toFixed(2) : r[c] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
@@ -547,21 +586,22 @@ const toSeries = rows => rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.
 const CACHE = 'embalses:v2';   // last answer, shown at once on the next visit while the live data loads
 const saved = () => { try { return JSON.parse(localStorage.getItem(CACHE)); } catch (e) { return null; } };
 const save = o => { try { localStorage.setItem(CACHE, JSON.stringify(o)); } catch (e) {} };
-const SHAPES = 'embalses:outlines:v1';   // outlines never change between visits: keep them so the map is there at once
+const SHAPES = 'embalses:outlines:v2';   // outlines never change between visits: keep them so the map is there at once
 const savedShapes = () => { try { return JSON.parse(localStorage.getItem(SHAPES))?.rows || null; } catch (e) { return null; } };
 const stillFresh = () => { try { return Date.now() - JSON.parse(localStorage.getItem(SHAPES)).at < 864e5; } catch (e) { return false; } };
 const saveShapes = rows => { try { localStorage.setItem(SHAPES, JSON.stringify({ at: Date.now(), rows })); } catch (e) {} };
 function showOutlines(rows) { const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson))).filter(a => !island(a.cx, a.cy));
   AREAS = { b: of('basin', 'b'), c: of('region', 'c'), p: of('province', 'p') };
   D.rivers = rows.filter(r => r.layer === 'river').map(r => ({ mean_flow_m3s: r.mean_flow_m3s, geometry: JSON.parse(r.geojson) })).filter(r => { const c = r.geometry.coordinates, p = r.geometry.type === 'LineString' ? c[0] : c[0][0]; return !island(p[0], p[1]); });
-  if (D.res.length) { assign(); if (!routed) { routed = true; route(); } } animate(BB, BB); }
+  CATCH = new Map(rows.filter(r => r.layer === 'catchment').map(r => [+r.outline_id, r.geojson]));
+  if (D.res.length) { assign(); if (!routed) { routed = true; route(); } } animate(BB, BB); if (scope.t === 'r') ficha(); }
 let routed = false;
-function showReservoirs(rows) { D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
+const nice = n => String(n || '').replace(/^(.*), (El|La|Los|Las)$/i, '$2 $1');   // the bulletin writes "Atazar, El"
+function showReservoirs(rows) { for (const r of rows) r.reservoir_name = nice(r.reservoir_name); D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
   if (!routed && AREAS.b.length) { routed = true; route(); } }
 function showNational(rows) { SER.es = toSeries(rows); const N = stats(SER.es); if (scope.t === 'es') { ST = N; numbers(); yearChart(); }
   const { last, avg10, lw, prev } = N, av = avg10[lw], d = last.f - av;
-  $('headline').textContent = d > 3 ? 'España tiene más agua embalsada de lo normal' : d < -3 ? 'España tiene menos agua embalsada de lo normal' : 'El agua embalsada en España está en niveles normales';
-  $('subhead').textContent = `Los embalses están al ${fmt(last.f, 1)} %, ${fmt(Math.abs(d), 1)} puntos ${d >= 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años en estas fechas, y han ${last.s >= prev.s ? 'ganado' : 'perdido'} ${fmt(Math.abs(last.s - prev.s))} hm³ en la última semana.`; }
+  $('subhead').textContent = `${d > 3 ? 'Por encima de' : d < -3 ? 'Por debajo de' : 'En línea con'} la media de 10 años, con ${last.s >= prev.s ? 'ascenso' : 'descenso'} en la última semana.`; }
 (async () => {
   try {
     const ready = READY = connect();
