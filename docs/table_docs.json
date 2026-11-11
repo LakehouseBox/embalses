@@ -226,7 +226,14 @@
       "upstream_rain_72h_mm": "From now.upstream_rain.",
       "fill_pct_same_week_last_year": "Fill in the bulletin closest to the same date last year, %.",
       "fill_pct_10y_average": "Average fill in the same week over the last 10 years, %.",
-      "data_age_minutes": "Minutes since latest_reading_at."
+      "data_age_minutes": "Minutes since latest_reading_at.",
+      "reservoir_name": "Reservoir name, as in the weekly bulletin (copied from ref.reservoirs so a reader needs no join).",
+      "basin_name": "Name of the river basin district (ref.basins).",
+      "river_name": "River the dam is on (MITECO inventory).",
+      "province": "Province where the dam stands (MITECO inventory).",
+      "region": "Comunidad autónoma where the dam stands (MITECO inventory).",
+      "longitude": "Longitude of the dam, WGS84 degrees: the same point as ref.reservoirs.dam_location, as a number, so no spatial extension is needed.",
+      "latitude": "Latitude of the dam, WGS84 degrees."
     }
   },
   "now.basin_summary": {
@@ -263,7 +270,11 @@
       "rain_same_period_last_year_mm": "Rain from 1 October to the same date last year, mm.",
       "rain_last_hydro_year_total_mm": "Total of the previous October–September year, mm.",
       "rain_two_years_ago_total_mm": "Total of the October–September year before that, mm.",
-      "data_age_minutes": "Minutes since latest_observation_at."
+      "data_age_minutes": "Minutes since latest_observation_at.",
+      "station_name": "Station name (copied from ref.stations so a reader needs no join).",
+      "basin_name": "Name of the river basin district the station is in (ref.basins).",
+      "longitude": "Longitude of the station, WGS84 degrees: the same point as ref.stations.location, as a number, so no spatial extension is needed.",
+      "latitude": "Latitude of the station, WGS84 degrees."
     }
   },
   "obs.reservoir_weekly": {

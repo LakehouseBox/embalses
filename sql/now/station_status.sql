@@ -65,8 +65,14 @@ SELECT s.station_id,
        round(d.same_last, 1)                               AS rain_same_period_last_year_mm,
        round(d.last_total, 1)                              AS rain_last_hydro_year_total_mm,
        round(d.two_ago_total, 1)                           AS rain_two_years_ago_total_mm,
-       datediff('minute', wx.observed_at, now())::INTEGER  AS data_age_minutes
+       datediff('minute', wx.observed_at, now())::INTEGER  AS data_age_minutes,
+       -- what a map or a list needs, so a reader draws this table without joining ref.* or loading a spatial extension
+       s.station_name                                      AS station_name,
+       b.basin_name                                        AS basin_name,
+       round(ST_X(s.location), 5)                          AS longitude,
+       round(ST_Y(s.location), 5)                          AS latitude
 FROM embalses.ref.stations s
+LEFT JOIN embalses.ref.basins b USING (basin_id)
 LEFT JOIN wx USING (station_id)
 LEFT JOIN win USING (station_id)
 LEFT JOIN daily d USING (station_id)

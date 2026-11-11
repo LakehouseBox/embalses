@@ -63,8 +63,17 @@ SELECT r.reservoir_id,
        u72.areal_rain_mm                                                                  AS upstream_rain_72h_mm,
        ly.fill_pct                                                                        AS fill_pct_same_week_last_year,
        a.fill                                                                             AS fill_pct_10y_average,
-       datediff('minute', coalesce(v.observed_at, l.bulletin_date::TIMESTAMPTZ), now())::INTEGER AS data_age_minutes
+       datediff('minute', coalesce(v.observed_at, l.bulletin_date::TIMESTAMPTZ), now())::INTEGER AS data_age_minutes,
+       -- what a map or a list needs, so a reader draws this table without joining ref.* or loading a spatial extension
+       r.reservoir_name                                                                   AS reservoir_name,
+       b.basin_name                                                                       AS basin_name,
+       r.river_name                                                                       AS river_name,
+       r.province                                                                         AS province,
+       r.region                                                                           AS region,
+       round(ST_X(r.dam_location), 5)                                                     AS longitude,
+       round(ST_Y(r.dam_location), 5)                                                     AS latitude
 FROM embalses.ref.reservoirs r
+LEFT JOIN embalses.ref.basins b USING (basin_id)
 LEFT JOIN latest l USING (reservoir_id)
 LEFT JOIN live_now v USING (reservoir_id)
 LEFT JOIN same_week ly ON ly.reservoir_id = r.reservoir_id AND ly.years_back = 1

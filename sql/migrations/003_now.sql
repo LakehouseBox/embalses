@@ -64,7 +64,14 @@ CREATE TABLE IF NOT EXISTS embalses."now".reservoir_status (
   upstream_rain_72h_mm DOUBLE,
   fill_pct_same_week_last_year DOUBLE,
   fill_pct_10y_average DOUBLE,
-  data_age_minutes INTEGER
+  data_age_minutes INTEGER,
+  reservoir_name VARCHAR,
+  basin_name VARCHAR,
+  river_name VARCHAR,
+  province VARCHAR,
+  region VARCHAR,
+  longitude DOUBLE,
+  latitude DOUBLE
 );
 COMMENT ON TABLE embalses."now".reservoir_status IS 'One row per bulletin reservoir with its latest state, recent change, the rain upstream and how it compares with the same week last year and the 10-year average. The main table the map draws. Live SAIH fields fill in as obs.reservoir_readings is ingested; until then the source is the weekly bulletin. Rebuilt hourly inside LakehouseBox by sql/now/reservoir_status.sql.';
 COMMENT ON COLUMN embalses."now".reservoir_status.reservoir_id IS 'Reservoir (ref.reservoirs).';
@@ -87,6 +94,13 @@ COMMENT ON COLUMN embalses."now".reservoir_status.upstream_rain_72h_mm IS 'From 
 COMMENT ON COLUMN embalses."now".reservoir_status.fill_pct_same_week_last_year IS 'Fill in the bulletin closest to the same date last year, %.';
 COMMENT ON COLUMN embalses."now".reservoir_status.fill_pct_10y_average IS 'Average fill in the same week over the last 10 years, %.';
 COMMENT ON COLUMN embalses."now".reservoir_status.data_age_minutes IS 'Minutes since latest_reading_at.';
+COMMENT ON COLUMN embalses."now".reservoir_status.reservoir_name IS 'Reservoir name, as in the weekly bulletin (copied from ref.reservoirs so a reader needs no join).';
+COMMENT ON COLUMN embalses."now".reservoir_status.basin_name IS 'Name of the river basin district (ref.basins).';
+COMMENT ON COLUMN embalses."now".reservoir_status.river_name IS 'River the dam is on (MITECO inventory).';
+COMMENT ON COLUMN embalses."now".reservoir_status.province IS 'Province where the dam stands (MITECO inventory).';
+COMMENT ON COLUMN embalses."now".reservoir_status.region IS 'Comunidad autónoma where the dam stands (MITECO inventory).';
+COMMENT ON COLUMN embalses."now".reservoir_status.longitude IS 'Longitude of the dam, WGS84 degrees: the same point as ref.reservoirs.dam_location, as a number, so no spatial extension is needed.';
+COMMENT ON COLUMN embalses."now".reservoir_status.latitude IS 'Latitude of the dam, WGS84 degrees.';
 
 -- lhbox: format-version=2
 CREATE TABLE IF NOT EXISTS embalses."now".basin_summary (
@@ -133,7 +147,11 @@ CREATE TABLE IF NOT EXISTS embalses."now".station_status (
   rain_same_period_last_year_mm DOUBLE,
   rain_last_hydro_year_total_mm DOUBLE,
   rain_two_years_ago_total_mm DOUBLE,
-  data_age_minutes INTEGER
+  data_age_minutes INTEGER,
+  station_name VARCHAR,
+  basin_name VARCHAR,
+  longitude DOUBLE,
+  latitude DOUBLE
 );
 COMMENT ON TABLE embalses."now".station_status IS 'What a station page shows: latest weather, recent rain, and rain since 1 October compared with the previous two hydrological years. Rebuilt hourly inside LakehouseBox by sql/now/station_status.sql.';
 COMMENT ON COLUMN embalses."now".station_status.station_id IS 'Station (ref.stations).';
@@ -151,3 +169,7 @@ COMMENT ON COLUMN embalses."now".station_status.rain_same_period_last_year_mm IS
 COMMENT ON COLUMN embalses."now".station_status.rain_last_hydro_year_total_mm IS 'Total of the previous October–September year, mm.';
 COMMENT ON COLUMN embalses."now".station_status.rain_two_years_ago_total_mm IS 'Total of the October–September year before that, mm.';
 COMMENT ON COLUMN embalses."now".station_status.data_age_minutes IS 'Minutes since latest_observation_at.';
+COMMENT ON COLUMN embalses."now".station_status.station_name IS 'Station name (copied from ref.stations so a reader needs no join).';
+COMMENT ON COLUMN embalses."now".station_status.basin_name IS 'Name of the river basin district the station is in (ref.basins).';
+COMMENT ON COLUMN embalses."now".station_status.longitude IS 'Longitude of the station, WGS84 degrees: the same point as ref.stations.location, as a number, so no spatial extension is needed.';
+COMMENT ON COLUMN embalses."now".station_status.latitude IS 'Latitude of the station, WGS84 degrees.';

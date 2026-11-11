@@ -5,10 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Embalses de España · agua embalsada, lluvia y cuencas en directo</title>
 <meta name="description" content="El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://extensions.duckdb.org" crossorigin>
+<link rel="preconnect" href="https://public-catalog.lakehousebox.com" crossorigin>
+<link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev114.0/+esm">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&family=JetBrains+Mono:wght@400&display=swap">
-<script src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&family=Source+Sans+3:wght@400;600;700&display=swap">
+<script defer src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
 <style>
 :root {
   --bg: #f3f6f9; --surface: #ffffff; --ink: #0f2233; --muted: #55697a; --faint: #8b9aa8; --line: #e1e8ee; --border: #9fb0be; --land: #eef2f5;
@@ -16,7 +20,7 @@
   --up: #1a7f3c; --up-bg: #e6f4ea; --down: #b4541a; --down-bg: #fbeee4; --s1: #1b6fd1; --s2: #f08a3c; --avg: #6b7a86;
   --a1: #f2b48c; --a2: #f6d2b0; --a3: #f3ecd9; --a4: #e3eefb; --a5: #c3dbf7; --a6: #93bff0; --a7: #559ae6; --a8: #1b6fd1;
   --f1: #d6e6fb; --f2: #a9cbf5; --f3: #79adee; --f4: #4a8fe3; --f5: #2a6fc6; --f6: #123f85;
-  --serif: "Source Serif 4", Georgia, serif; --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --serif: "Source Serif 4", Georgia, serif; --sans: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif; --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --shadow: 0 1px 2px rgb(15 34 51 / 0.06), 0 8px 24px rgb(15 34 51 / 0.06);
 }
 * { box-sizing: border-box; }
@@ -206,7 +210,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg,
   ENDPOINT 'https://public-catalog.lakehousebox.com',
   AUTHORIZATION_TYPE 'none');</pre>
-      <p><a href="https://github.com/LakehouseBox/embalses">Código y documentación en GitHub</a> · <a id="about" href="https://github.com/LakehouseBox/embalses#how-it-works">Cómo está hecho</a></p>
+      <p><a href="https://github.com/LakehouseBox/embalses">Código y documentación en GitHub</a> · <a id="about" href="https://lakehousebox.com/examples/embalses/">Cómo está hecho</a></p>
     </div>
     <div>
       <div class="label" style="color:#9fb4c6">Pruébalo aquí: la consulta se ejecuta en tu navegador</div>
@@ -221,7 +225,7 @@ ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg,
 <footer><div class="wrap cols">
   <div><h3>Qué es esto</h3><p>Una vista clara del agua embalsada en España, la lluvia y cómo llega a los embalses, hecha solo con datos oficiales y abiertos. Los datos en tiempo real son provisionales: los organismos todavía no los han validado.</p></div>
   <div><h3>Fuentes</h3><p>MITECO (Boletín Hidrológico, Inventario de Presas y Embalses) · AEMET OpenData · SAIH de las confederaciones del Ebro, Guadalquivir, Guadiana, Segura, Miño-Sil y Cantábrico · HydroSHEDS (CC BY 4.0).</p></div>
-  <div><h3>Cómo está hecho</h3><p>Los datos se recogen y se publican con <a href="https://lakehousebox.com">LakehouseBox</a>. Tu navegador los consulta directamente, sin servidor intermedio.</p><p><a href="https://github.com/LakehouseBox/embalses">Proyecto abierto en GitHub</a></p></div>
+  <div><h3>Cómo está hecho</h3><p>Los datos se recogen y se publican con <a href="https://lakehousebox.com">LakehouseBox</a>. Tu navegador los consulta directamente, sin servidor intermedio. <a href="https://lakehousebox.com/examples/embalses/">Cómo está hecho</a>.</p><p><a href="https://github.com/LakehouseBox/embalses">Proyecto abierto en GitHub</a></p></div>
 </div></footer>
 
 <script type="module">
@@ -240,33 +244,28 @@ const setStatus = (t, cls = '') => { const s = $('status'); s.className = 'statu
 const CAT = `ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg, ENDPOINT 'https://public-catalog.lakehousebox.com', AUTHORIZATION_TYPE 'none')`;
 let conn;
 async function connect() {
-  const duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev57.0/+esm');
+  const duckdb = await import('https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.33.1-dev114.0/+esm');
   const bundle = await duckdb.selectBundle(duckdb.getJsDelivrBundles());
   const worker = new Worker(URL.createObjectURL(new Blob([`importScripts("${bundle.mainWorker}");`], { type: 'text/javascript' })));
   const db = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
   await db.instantiate(bundle.mainModule, bundle.pthreadWorker);
   conn = await db.connect();
-  for (const s of ['INSTALL httpfs', 'LOAD httpfs', 'INSTALL iceberg', 'LOAD iceberg', 'INSTALL spatial', 'LOAD spatial', CAT]) await conn.query(s);
+  for (const s of ['INSTALL httpfs', 'LOAD httpfs', 'INSTALL iceberg', 'LOAD iceberg', CAT]) await conn.query(s);
 }
 const plain = v => typeof v === 'bigint' ? Number(v) : v instanceof Date ? v.toISOString() : (v && typeof v === 'object' && typeof v.toArray === 'function') ? Array.from(v.toArray(), plain) : v;
 async function q(sql) { const t = await conn.query(sql); const cols = t.schema.fields.map(f => f.name); return { cols, rows: t.toArray().map(r => Object.fromEntries(cols.map(c => [c, plain(r[c])]))) }; }
 const SQL = {
-  res: `SELECT r.reservoir_id, r.reservoir_name, b.basin_name, r.province, r.region, r.river_name,
-       round(ST_X(r.dam_location), 4) AS lon, round(ST_Y(r.dam_location), 4) AS lat,
-       s.capacity_hm3, round(s.stored_volume_hm3, 1) AS stored_hm3, round(s.fill_pct, 1) AS fill_pct,
-       s.fill_pct_same_week_last_year AS fill_last_year, s.fill_pct_10y_average AS fill_10y,
-       s.weekly_change_hm3, s.change_since_bulletin_hm3, s.data_source,
-       u.areal_rain_mm AS rain_24h_mm, u.rain_volume_hm3 AS rain_24h_hm3
-FROM embalses.ref.reservoirs r JOIN embalses."now".reservoir_status s USING (reservoir_id)
-LEFT JOIN embalses.ref.basins b USING (basin_id)
-LEFT JOIN embalses."now".upstream_rain u ON u.reservoir_id = r.reservoir_id AND u.time_window = '24h'`,
+  res: `SELECT reservoir_id, reservoir_name, basin_name, province, region, river_name, longitude AS lon, latitude AS lat,
+       capacity_hm3, round(stored_volume_hm3, 1) AS stored_hm3, round(fill_pct, 1) AS fill_pct,
+       fill_pct_same_week_last_year AS fill_last_year, fill_pct_10y_average AS fill_10y,
+       weekly_change_hm3, change_since_bulletin_hm3, data_source,
+       upstream_rain_24h_mm AS rain_24h_mm, upstream_rain_volume_24h_hm3 AS rain_24h_hm3
+FROM embalses."now".reservoir_status`,
   grid: `SELECT h3_cell, max(rain_mm) FILTER (WHERE time_window = '1h') AS rain_1h, max(rain_mm) FILTER (WHERE time_window = '6h') AS rain_6h,
        max(rain_mm) FILTER (WHERE time_window = '12h') AS rain_12h, max(rain_mm) FILTER (WHERE time_window = '24h') AS rain_24h, strftime(max(as_of), '%Y-%m-%dT%H:%M:%SZ') AS as_of
 FROM embalses."now".rain_grid GROUP BY 1`,
-  gauges: `SELECT s.station_name, b.basin_name, round(ST_X(s.location), 4) AS lon, round(ST_Y(s.location), 4) AS lat,
-       st.rain_1h_mm, st.rain_6h_mm, st.rain_12h_mm, st.rain_24h_mm
-FROM embalses."now".station_status st JOIN embalses.ref.stations s USING (station_id) LEFT JOIN embalses.ref.basins b USING (basin_id)
-WHERE st.rain_24h_mm IS NOT NULL ORDER BY st.rain_24h_mm DESC LIMIT 80`,
+  gauges: `SELECT station_name, basin_name, longitude AS lon, latitude AS lat, rain_1h_mm, rain_6h_mm, rain_12h_mm, rain_24h_mm
+FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_24h_mm DESC LIMIT 80`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
 FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
 };
@@ -439,9 +438,9 @@ async function setScope(t, k) { scope = { t, k }; if (t === 'b' || t === 'c') { 
 
 // ───────── open data console ─────────
 const EXAMPLES = [
-  ['Los 10 embalses más llenos', `SELECT r.reservoir_name, s.fill_pct, s.stored_volume_hm3, s.capacity_hm3\nFROM embalses."now".reservoir_status s JOIN embalses.ref.reservoirs r USING (reservoir_id)\nWHERE s.capacity_hm3 >= 50\nORDER BY s.fill_pct DESC LIMIT 10;`],
+  ['Los 10 embalses más llenos', `SELECT reservoir_name, basin_name, fill_pct, stored_volume_hm3, capacity_hm3\nFROM embalses."now".reservoir_status\nWHERE capacity_hm3 >= 50\nORDER BY fill_pct DESC LIMIT 10;`],
   ['España, esta semana en cada año', `SELECT year(bulletin_date) AS anio, round(100 * sum(stored_volume_hm3) / sum(capacity_hm3), 1) AS pct\nFROM embalses.obs.reservoir_weekly\nWHERE strftime(bulletin_date, '%V') = strftime(current_date, '%V')\nGROUP BY 1 ORDER BY 1 DESC LIMIT 30;`],
-  ['Dónde ha llovido más en 24 h', `SELECT s.station_name, st.rain_24h_mm\nFROM embalses."now".station_status st JOIN embalses.ref.stations s USING (station_id)\nORDER BY st.rain_24h_mm DESC NULLS LAST LIMIT 15;`],
+  ['Dónde ha llovido más en 24 h', `SELECT station_name, basin_name, rain_24h_mm\nFROM embalses."now".station_status\nORDER BY rain_24h_mm DESC NULLS LAST LIMIT 15;`],
   ['Lluvia sobre la cuenca de cada embalse', `SELECT r.reservoir_name, u.areal_rain_mm, u.rain_volume_hm3, u.upstream_area_km2\nFROM embalses."now".upstream_rain u JOIN embalses.ref.reservoirs r USING (reservoir_id)\nWHERE u.time_window = '24h'\nORDER BY u.rain_volume_hm3 DESC LIMIT 15;`],
 ];
 let lastResult = null;
@@ -459,24 +458,33 @@ $('csv').onclick = () => { if (!lastResult) return; const cell = v => v == null 
 
 // ───────── start ─────────
 addEventListener('resize', () => { if (P) { fit(); draw(); rainCard(); } });
+const toSeries = rows => rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.s, c: r.c, f: r.c ? 100 * r.s / r.c : null }));
+const CACHE = 'embalses:v2';   // last answer, shown at once on the next visit while the live data loads
+const saved = () => { try { return JSON.parse(localStorage.getItem(CACHE)); } catch (e) { return null; } };
+const save = o => { try { localStorage.setItem(CACHE, JSON.stringify(o)); } catch (e) {} };
+function showReservoirs(rows) { D.res = rows; assign(); fit(); draw(); table(); }
+function showNational(rows) { SER.es = toSeries(rows); if (scope.t !== 'es') return; ST = stats(SER.es); numbers(); yearChart();
+  const { last, avg10, lw, prev } = ST, av = avg10[lw], d = last.f - av;
+  $('headline').textContent = d > 3 ? 'España tiene más agua embalsada de lo normal' : d < -3 ? 'España tiene menos agua embalsada de lo normal' : 'El agua embalsada en España está en niveles normales';
+  $('subhead').textContent = `Los embalses están al ${fmt(last.f, 1)} %, ${fmt(Math.abs(d), 1)} puntos ${d >= 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años en estas fechas, y han ${last.s >= prev.s ? 'ganado' : 'perdido'} ${fmt(Math.abs(last.s - prev.s))} hm³ en la última semana.`; }
 (async () => {
   try {
-    const geo = Promise.all(['basins', 'ccaa', 'prov', 'rivers'].map(n => fetch(`geo/${n}.json`).then(r => r.json())));
-    const [basins, ccaa, prov, rivers] = await geo; D.rivers = rivers;
+    const ready = connect();   // DuckDB starts downloading while the outlines load
+    ready.catch(() => {});
+    const [basins, ccaa, prov, rivers] = await Promise.all(['basins', 'ccaa', 'prov', 'rivers'].map(n => fetch(`geo/${n}.json`).then(r => r.json())));
+    D.rivers = rivers;
     AREAS = { b: basins.map(b => area('b', b.basin_name, b.geometry)), c: ccaa.map(c => area('c', c.name, c.geometry)), p: prov.map(p => area('p', p.name, p.geometry)) };
     fit(); draw(); $('map-note').textContent = 'Cargando los datos en directo…';
-    await connect(); setStatus('Leyendo los datos…');
-    D.res = (await q(SQL.res)).rows; assign(); fit(); draw(); table();
-    SER.es = (await q(SQL.weekly(''))).rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.s, c: r.c, f: r.c ? 100 * r.s / r.c : null }));
-    ST = stats(SER.es); numbers(); yearChart();
-    const { last, Y, byYear, avg10, lw, prev } = ST, av = avg10[lw], d = last.f - av;
-    $('headline').textContent = d > 3 ? 'España tiene más agua embalsada de lo normal' : d < -3 ? 'España tiene menos agua embalsada de lo normal' : 'El agua embalsada en España está en niveles normales';
-    $('subhead').textContent = `Los embalses están al ${fmt(last.f, 1)} %, ${fmt(Math.abs(d), 1)} puntos ${d >= 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años en estas fechas, y han ${last.s >= prev.s ? 'ganado' : 'perdido'} ${fmt(Math.abs(last.s - prev.s))} hm³ en la última semana.`;
+    const old = saved();
+    if (old?.res && old?.weekly) { showReservoirs(old.res); showNational(old.weekly); setStatus('Actualizando los datos…'); }
+    await ready; if (!old) setStatus('Leyendo los datos…');
+    const res = (await q(SQL.res)).rows; showReservoirs(res);
+    const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly); save({ res, weekly });
     D.grid = (await q(SQL.grid)).rows; gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows;
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
     cards(); rainCard(); draw();
     const asOf = D.grid.find(c => c.as_of)?.as_of; setStatus(asOf ? `Datos en directo · lluvia hasta las ${new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Datos en directo', 'ok');
-  } catch (e) { console.error(e); setStatus('No se han podido cargar los datos', 'err'); $('map-note').textContent = 'No se han podido cargar los datos en directo. Vuelve a intentarlo en unos minutos.'; }
+  } catch (e) { console.error(e); setStatus('No se han podido cargar los datos', 'err'); if (!D.res.length) $('map-note').textContent = 'No se han podido cargar los datos en directo. Vuelve a intentarlo en unos minutos.'; }
 })();
 </script>
 </body>
