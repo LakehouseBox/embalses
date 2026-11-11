@@ -1,0 +1,362 @@
+<title>Embalses en directo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Source+Sans+3:wght@400;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+<style>
+/* Layout: one full-bleed relief model of Spain at dusk; type floats in the corners. Deliberately single-theme. */
+:root {
+  --night: #070d12;        /* sky and sea */
+  --ink: #eef3f6;          /* text */
+  --muted: #94a7b3;        /* secondary text */
+  --rain: #8fd0ff;         /* rain and wet ground */
+  --water: #39a0ff;        /* reservoir at or above normal */
+  --low: #f2a33a;          /* reservoir below normal */
+  --line: rgb(238 243 246 / 0.16);
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "Source Sans 3", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--night); color: var(--ink); font-family: var(--font-body); overflow: hidden; }
+#scene { position: fixed; inset: 0; }
+#scene canvas { display: block; }
+.hud { position: fixed; inset: 0; pointer-events: none;
+       padding-top: max(20px, env(safe-area-inset-top, 0px)); padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
+       padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+       display: grid; grid-template-rows: auto 1fr auto; }
+.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.title { display: grid; gap: 8px; max-width: 520px; }
+.wordmark { font-family: var(--font-display); font-weight: 800; font-stretch: 68%; font-size: 14px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font-family: var(--font-display); font-weight: 700; font-stretch: 72%; font-size: clamp(26px, 3.6vw, 48px); line-height: 1; text-wrap: balance; text-shadow: 0 2px 24px rgb(0 0 0 / 0.7); }
+h1 em { font-style: normal; color: var(--rain); }
+.sub { margin: 0; color: var(--muted); font-size: 15px; max-width: 48ch; text-shadow: 0 1px 10px rgb(0 0 0 / 0.9); }
+.controls { pointer-events: auto; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; overflow: hidden; background: rgb(7 13 18 / 0.6); backdrop-filter: blur(6px); }
+.seg button { font: inherit; font-size: 13px; padding: 6px 12px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--night); }
+.seg button:disabled { opacity: 0.35; cursor: not-allowed; }
+.seg button:focus-visible { outline: 2px solid var(--rain); outline-offset: -2px; }
+.bottom { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.key { display: grid; gap: 6px; font-size: 13px; color: var(--ink); background: rgb(7 13 18 / 0.55); backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+.key div { display: flex; align-items: center; gap: 8px; }
+.key i { display: inline-block; flex: none; }
+.key .tube { width: 10px; height: 18px; border: 1px solid rgb(238 243 246 / 0.6); border-radius: 2px; position: relative; overflow: hidden; }
+.key .tube b { position: absolute; left: 0; right: 0; bottom: 0; }
+.key .ring { width: 14px; height: 0; border-top: 2px solid #fff; }
+.key .halo { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--rain); box-shadow: 0 0 8px var(--rain); }
+.key .wet { width: 14px; height: 10px; border-radius: 2px; background: linear-gradient(90deg, #2a6fb0, #bfe6ff); }
+.side { display: grid; gap: 4px; text-align: right; font-size: 12px; color: var(--muted); }
+.credit { font-size: 11px; opacity: 0.75; }
+.card { position: fixed; left: 0; top: 0; pointer-events: none; font-size: 13px; line-height: 1.3; white-space: nowrap;
+        background: rgb(7 13 18 / 0.82); backdrop-filter: blur(6px); border: 1px solid var(--rain); border-radius: 10px; padding: 8px 12px;
+        box-shadow: 0 0 18px rgb(143 208 255 / 0.25); }
+.card.low { border-color: var(--low); box-shadow: 0 0 18px rgb(242 163 58 / 0.22); }
+.card b { font-family: var(--font-display); font-stretch: 78%; font-size: 17px; font-weight: 700; }
+.card .arrow { font-weight: 700; margin-left: 6px; font-size: 18px; }
+.card .up { color: var(--rain); } .card .down { color: var(--low); }
+.card .pct { font-weight: 600; } .card .pct.low { color: var(--low); } .card .pct.ok { color: var(--rain); }
+.card .m { color: var(--muted); }
+.card div { margin-top: 1px; }
+#leaders { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#leaders line { stroke: rgb(238 243 246 / 0.75); stroke-width: 1.2; }
+.live { display: inline-flex; align-items: center; gap: 8px; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: #3ddc84; box-shadow: 0 0 8px #3ddc84; display: inline-block; }
+.stats { margin: 0; font-size: 15px; color: var(--muted); text-shadow: 0 1px 10px rgb(0 0 0 / 0.9); display: flex; gap: 6px 18px; flex-wrap: wrap; }
+.stats b { color: var(--ink); font-family: var(--font-display); font-stretch: 78%; font-size: 19px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.stats b.r { color: var(--rain); } .stats b.l { color: var(--low); }
+.tip { position: fixed; pointer-events: none; background: rgb(7 13 18 / 0.9); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.4; max-width: 290px; backdrop-filter: blur(6px); z-index: 3; }
+.tip b { font-family: var(--font-display); font-stretch: 80%; font-size: 17px; }
+.tip .m { color: var(--muted); }
+.tip .lvl { display: block; height: 6px; background: rgb(238 243 246 / 0.12); border-radius: 3px; margin: 6px 0 4px; position: relative; }
+.tip .lvl i { display: block; height: 100%; border-radius: 3px; }
+.tip .lvl u { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #fff; }
+@media (max-width: 640px) { .side { text-align: left; } .key { font-size: 12px; } }
+</style>
+
+<div id="scene" aria-label="Maqueta 3D de España con lluvia, ríos y embalses"></div>
+<svg id="leaders" aria-hidden="true"></svg><div id="labels"></div>
+<div class="hud">
+  <div class="top">
+    <div class="title">
+      <div class="wordmark live"><i></i>embalses · en directo</div>
+      <h1>El agua de España, ahora.</h1>
+      <p class="stats" id="stats"></p>
+    </div>
+    <div class="controls">
+      <span class="seg" role="group" aria-label="Ventana de tiempo">
+        <button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="true">12 h</button><button id="w-24h" aria-pressed="false">24 h</button>
+      </span>
+    </div>
+  </div>
+  <div></div>
+  <div class="bottom">
+    <div class="key">
+      <div><i class="tube"><b style="height:75%;background:var(--water)"></b></i> Embalse en su nivel normal o por encima</div>
+      <div><i class="tube"><b style="height:25%;background:var(--low)"></b></i> Embalse por debajo de lo normal</div>
+      <div><i class="ring"></i> Su nivel medio de los últimos 10 años</div>
+      <div><i class="halo"></i> Está lloviendo en su cuenca</div>
+      <div><b style="color:var(--rain)">↑</b><b style="color:var(--low)">↓</b> Ganando o perdiendo agua</div>
+      <div><i class="wet"></i> Suelo mojado: lluvia acumulada</div>
+    </div>
+    <div class="side">
+      <span id="nat"></span>
+      <span>Arrastra para girar · rueda para acercar · pasa por un embalse</span>
+      <span class="credit">AEMET · MITECO · SAIH · HydroSHEDS · relieve: Mapzen/AWS Terrain Tiles · prototipo con datos reales de hoy</span>
+    </div>
+  </div>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script type="application/json" id="d-basins">/*DATA:basins*/</script>
+<script type="application/json" id="d-rivers">/*DATA:rivers*/</script>
+<script type="application/json" id="d-grid">/*DATA:rain_grid*/</script>
+<script type="application/json" id="d-res">/*DATA:reservoirs*/</script>
+<script type="application/json" id="d-weekly">/*DATA:national_weekly*/</script>
+<script type="application/json" id="d-dem">/*DATA:dem*/</script>
+
+<script>
+const J = id => JSON.parse(document.getElementById(id).textContent);
+const D = { basins: J('d-basins'), rivers: J('d-rivers'), grid: J('d-grid'), res: J('d-res'), weekly: J('d-weekly'), dem: J('d-dem') };
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = (v, d = 0) => v == null ? '—' : Number(v).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let win = '12h';
+const winKey = w => 'rain_' + w;
+
+// ── terrain grid
+const G = D.dem, NX = G.nx, NY = G.ny;
+const H = (() => { const bin = atob(G.b64), a = new Int16Array(bin.length / 2); for (let i = 0; i < a.length; i++) a[i] = (bin.charCodeAt(2 * i) | (bin.charCodeAt(2 * i + 1) << 8)) << 16 >> 16; return a; })();
+const LON0 = -3.7, LAT0 = 40.0, S = 10, KX = Math.cos(LAT0 * Math.PI / 180), EX = 9 * S / 111000;   // 9× vertical exaggeration
+const px = lon => (lon - LON0) * KX * S, pz = lat => -(lat - LAT0) * S;
+const gi = lon => (lon - G.w) / G.step, gj = lat => (G.n - lat) / G.step;
+function elev(lon, lat) {
+  const x = Math.max(0, Math.min(NX - 1.001, gi(lon))), y = Math.max(0, Math.min(NY - 1.001, gj(lat)));
+  const i = x | 0, j = y | 0, fx = x - i, fy = y - j, o = j * NX + i;
+  return Math.max(0, (H[o] * (1 - fx) + H[o + 1] * fx) * (1 - fy) + (H[o + NX] * (1 - fx) + H[o + NX + 1] * fx) * fy);
+}
+const ground = (lon, lat) => elev(lon, lat) * EX;
+
+// ── Spain mask and rain fields on the terrain grid
+const mask = (() => {
+  const c = document.createElement('canvas'); c.width = NX; c.height = NY; const x = c.getContext('2d');
+  x.fillStyle = '#fff'; x.beginPath();
+  for (const b of D.basins) { const g = b.geometry, polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+    for (const p of polys) for (const ring of p) { ring.forEach(([lo, la], k) => k ? x.lineTo(gi(lo), gj(la)) : x.moveTo(gi(lo), gj(la))); x.closePath(); } }
+  x.fill('evenodd'); const d = x.getImageData(0, 0, NX, NY).data, m = new Uint8Array(NX * NY);
+  for (let k = 0; k < m.length; k++) m[k] = d[k * 4] > 127 ? 1 : 0; return m;
+})();
+const cells = D.grid.map(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return { ...c, la, lo, x: px(lo), z: pz(la) }; });
+const RAIN = {};
+function rainField(w) {
+  if (RAIN[w]) return RAIN[w];
+  let a = new Float32Array(NX * NY), n = new Float32Array(NX * NY);
+  for (const c of cells) { const mm = c[winKey(w)]; if (mm == null) continue; const i = Math.round(gi(c.lo)), j = Math.round(gj(c.la));
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ii = i + di, jj = j + dj; if (ii < 0 || jj < 0 || ii >= NX || jj >= NY) continue; a[jj * NX + ii] += mm; n[jj * NX + ii] += 1; } }
+  for (let k = 0; k < a.length; k++) a[k] = n[k] ? a[k] / n[k] : 0;
+  for (let pass = 0; pass < 2; pass++) { const b = new Float32Array(a.length);
+    for (let j = 1; j < NY - 1; j++) for (let i = 1; i < NX - 1; i++) { let s = 0; for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) s += a[(j + dj) * NX + i + di]; b[j * NX + i] = s / 9; }
+    a = b; }
+  return RAIN[w] = a;
+}
+const rainAt = (w, lon, lat) => { const i = Math.round(gi(lon)), j = Math.round(gj(lat)); return (i < 0 || j < 0 || i >= NX || j >= NY) ? 0 : rainField(w)[j * NX + i]; };
+
+// ── renderer
+const host = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+host.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#070d12');
+scene.fog = new THREE.Fog('#070d12', 110, 230);
+const camera = new THREE.PerspectiveCamera(36, 1, 0.5, 600);
+camera.position.set(-50, 58, 84);
+const controls = new THREE.OrbitControls(camera, renderer.domElement);
+controls.target.set(-3, 0, 3);
+controls.enableDamping = true; controls.dampingFactor = 0.06;
+controls.maxPolarAngle = Math.PI * 0.46; controls.minDistance = 14; controls.maxDistance = 190;
+controls.autoRotate = !reduced; controls.autoRotateSpeed = 0.18;
+controls.addEventListener('start', () => { controls.autoRotate = false; });
+scene.add(new THREE.HemisphereLight('#b9cbd8', '#141a1f', 0.55));
+const sun = new THREE.DirectionalLight('#fff1dc', 1.05); sun.position.set(-70, 45, -30); scene.add(sun);
+
+// ── terrain mesh with a painted texture (land, wet ground, borders, rivers)
+const TW = 2048, TH = Math.round(TW * (NY - 1) / ((NX - 1) * KX));
+const tex = document.createElement('canvas'); tex.width = TW; tex.height = TH; const tx = tex.getContext('2d');
+const small = document.createElement('canvas'); small.width = NX; small.height = NY; const sx = small.getContext('2d');
+const u = lon => gi(lon) / (NX - 1) * TW, v = lat => gj(lat) / (NY - 1) * TH;
+const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+function paint() {
+  const img = sx.createImageData(NX, NY), d = img.data, R = rainField(win);
+  const SEA = [9, 20, 29], OUT_LO = [30, 35, 37], OUT_HI = [56, 60, 60], LO = [40, 37, 30], HI = [104, 94, 76], WET_LO = [30, 92, 156], WET_HI = [120, 190, 245];
+  const div = win === '1h' ? 6 : win === '6h' ? 18 : 28;
+  for (let k = 0; k < NX * NY; k++) {
+    const h = H[k]; let c;
+    if (h <= 0 && !mask[k]) c = SEA;
+    else { const e = Math.min(1, Math.max(0, h) / 2200);
+      c = mask[k] ? mix(LO, HI, Math.pow(e, 0.7)) : mix(OUT_LO, OUT_HI, e);
+      const mm = R[k]; const floor = win === '1h' ? 0.5 : win === '6h' ? 1.5 : 3; if (mask[k] && mm >= floor) { const t = Math.min(1, (mm - floor) / div); c = mix(c, mix(WET_LO, WET_HI, t), 0.3 + 0.45 * Math.pow(t, 0.7)); } }
+    d[k * 4] = c[0]; d[k * 4 + 1] = c[1]; d[k * 4 + 2] = c[2]; d[k * 4 + 3] = 255;
+  }
+  sx.putImageData(img, 0, 0);
+  tx.imageSmoothingEnabled = true; tx.imageSmoothingQuality = 'high'; tx.drawImage(small, 0, 0, TW, TH);
+  tx.lineJoin = 'round'; tx.lineCap = 'round';
+  tx.strokeStyle = 'rgba(238,243,246,0.22)'; tx.lineWidth = 1.6; tx.beginPath();
+  for (const b of D.basins) { const g = b.geometry, polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+    for (const p of polys) for (const ring of p) { ring.forEach(([lo, la], k) => k ? tx.lineTo(u(lo), v(la)) : tx.moveTo(u(lo), v(la))); tx.closePath(); } }
+  tx.stroke();
+  for (const r of D.rivers) { const q = r.mean_flow_m3s || 0; tx.lineWidth = q > 300 ? 4.2 : q > 80 ? 3 : q > 20 ? 2.1 : 1.3;
+    tx.strokeStyle = q > 80 ? 'rgba(120,190,255,0.95)' : 'rgba(96,160,225,0.8)'; tx.beginPath();
+    const lines = r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates;
+    for (const l of lines) l.forEach(([lo, la], k) => k ? tx.lineTo(u(lo), v(la)) : tx.moveTo(u(lo), v(la))); tx.stroke(); }
+}
+const terrainTex = new THREE.CanvasTexture(tex); terrainTex.anisotropy = 8;
+{
+  const pos = new Float32Array(NX * NY * 3), uv = new Float32Array(NX * NY * 2), idx = [];
+  for (let j = 0; j < NY; j++) for (let i = 0; i < NX; i++) { const k = j * NX + i, lon = G.w + i * G.step, lat = G.n - j * G.step;
+    pos[k * 3] = px(lon); pos[k * 3 + 1] = Math.max(0, H[k]) * EX; pos[k * 3 + 2] = pz(lat); uv[k * 2] = i / (NX - 1); uv[k * 2 + 1] = 1 - j / (NY - 1); }
+  for (let j = 0; j < NY - 1; j++) for (let i = 0; i < NX - 1; i++) { const a = j * NX + i; idx.push(a, a + NX, a + 1, a + 1, a + NX, a + NX + 1); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
+  scene.add(new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: terrainTex, roughness: 0.92, metalness: 0 })));
+  const sea = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshBasicMaterial({ color: '#09141d' })); sea.rotation.x = -Math.PI / 2; sea.position.y = -0.02; scene.add(sea);
+}
+
+// ── falling rain where it rained in the last hour
+const N = reduced ? 0 : 6000, rainPos = new Float32Array(N * 6), rainSpeed = new Float32Array(N), rainFloor = new Float32Array(N);
+const w1 = cells.map(c => Math.pow(Math.max(0, c.rain_1h || 0), 0.9)), cum = []; let tot = 0; for (const w of w1) { tot += w; cum.push(tot); }
+function pick(cumArr, total) { const r = Math.random() * total; let lo = 0, hi = cumArr.length - 1; while (lo < hi) { const m = (lo + hi) >> 1; if (cumArr[m] < r) lo = m + 1; else hi = m; } return lo; }
+function spawn(i, any) { const c = cells[pick(cum, tot)], lo = c.lo + (Math.random() - 0.5) * 0.08, la = c.la + (Math.random() - 0.5) * 0.06, x = px(lo), z = pz(la);
+  rainFloor[i] = ground(lo, la); const y = rainFloor[i] + (any ? Math.random() * 11 : 9 + Math.random() * 3); rainSpeed[i] = 8 + Math.random() * 5;
+  rainPos.set([x, y, z, x - 0.04, y + 0.55, z + 0.04], i * 6); }
+let rainLines = null;
+if (N && tot > 0) { for (let i = 0; i < N; i++) spawn(i, true);
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
+  rainLines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: '#a9d8ff', transparent: true, opacity: 0.38, blending: THREE.AdditiveBlending, depthWrite: false })); scene.add(rainLines); }
+
+// ── water running down the rivers: more and faster where it has rained
+const paths = [];
+for (const r of D.rivers) { const lines = r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates;
+  for (let l of lines) { if (l.length < 2) continue;
+    if (elev(l[0][0], l[0][1]) < elev(l[l.length - 1][0], l[l.length - 1][1])) l = [...l].reverse();           // make it run downhill
+    const pts = l.map(([lo, la]) => [px(lo), ground(lo, la) + 0.07, pz(la)]), cl = [0];
+    for (let k = 1; k < pts.length; k++) cl.push(cl[k - 1] + Math.hypot(pts[k][0] - pts[k - 1][0], pts[k][2] - pts[k - 1][2]));
+    const mid = l[l.length >> 1]; paths.push({ pts, cl, len: cl[cl.length - 1], lo: mid[0], la: mid[1], q: r.mean_flow_m3s || 0 }); } }
+const M = reduced ? 0 : 3200, flowPos = new Float32Array(M * 3), flowPath = new Int32Array(M), flowS = new Float32Array(M), flowV = new Float32Array(M);
+let pcum = [], ptot = 0;
+function weighPaths() { pcum = []; ptot = 0; const div = win === '1h' ? 3 : win === '6h' ? 9 : 14;
+  for (const p of paths) { p.wet = Math.min(1.5, rainAt(win, p.lo, p.la) / div); ptot += p.len * (0.04 + p.wet) * (0.5 + Math.min(1, Math.log10(1 + p.q) / 2.5)); pcum.push(ptot); } }
+function spawnFlow(i, any) { const k = flowPath[i] = pick(pcum, ptot), p = paths[k]; flowS[i] = any ? Math.random() * p.len : 0; flowV[i] = 0.8 + p.wet * 2.2 + Math.random() * 0.6; }
+let flow = null;
+if (M) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(flowPos, 3));
+  flow = new THREE.Points(g, new THREE.PointsMaterial({ color: '#d9f1ff', size: 2.4, sizeAttenuation: false, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false })); scene.add(flow); }
+
+// ── reservoirs: glass gauges standing on the ground
+const glassMat = new THREE.MeshPhysicalMaterial({ color: '#dcecf7', transparent: true, opacity: 0.2, roughness: 0.15, depthWrite: false, side: THREE.DoubleSide });
+const okMat = new THREE.MeshStandardMaterial({ color: '#39a0ff', emissive: '#0c5a9e', emissiveIntensity: 0.9, roughness: 0.35 });
+const lowMat = new THREE.MeshStandardMaterial({ color: '#f2a33a', emissive: '#9a5a08', emissiveIntensity: 0.85, roughness: 0.35 });
+const edge = new THREE.LineBasicMaterial({ color: '#eef3f6', transparent: true, opacity: 0.55 });
+const mark = new THREE.LineBasicMaterial({ color: '#ffffff' });
+const circle = (x, y, z, r) => new THREE.BufferGeometry().setFromPoints(Array.from({ length: 41 }, (_, i) => new THREE.Vector3(x + r * Math.cos(i / 40 * 2 * Math.PI), y, z + r * Math.sin(i / 40 * 2 * Math.PI))));
+const isLow = r => r.fill_10y != null && r.fill_pct != null && r.fill_pct < r.fill_10y - 5;
+const res = [];
+for (const r of D.res) {
+  if (r.lon == null || !(r.capacity_hm3 > 0)) continue;
+  const rad = 0.16 + Math.sqrt(r.capacity_hm3) * 0.017, h = 1.2 + Math.sqrt(r.capacity_hm3) * 0.115;
+  const x = px(r.lon), z = pz(r.lat), y0 = ground(r.lon, r.lat), f = Math.max(0.015, Math.min(1, (r.fill_pct || 0) / 100));
+  const glass = new THREE.Mesh(new THREE.CylinderGeometry(rad, rad, h, 28, 1, true), glassMat); glass.position.set(x, y0 + h / 2, z);
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(rad * 0.93, rad * 0.93, h * f, 28), isLow(r) ? lowMat : okMat); water.position.set(x, y0 + h * f / 2, z);
+  scene.add(glass, water, new THREE.Line(circle(x, y0 + h, z, rad), edge), new THREE.Line(circle(x, y0 + 0.02, z, rad), edge));
+  if (r.fill_10y != null) scene.add(new THREE.Line(circle(x, y0 + h * Math.min(1, r.fill_10y / 100), z, rad * 1.18), mark));
+  const halo = new THREE.Mesh(new THREE.RingGeometry(rad * 1.25, rad * 1.25 + 0.09, 48), new THREE.MeshBasicMaterial({ color: '#8fd0ff', transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  halo.rotation.x = -Math.PI / 2; halo.position.set(x, y0 + 0.12, z); halo.visible = false; scene.add(halo);
+  glass.userData.r = r; res.push({ r, glass, halo, top: new THREE.Vector3(x, y0 + h + 0.25, z), phase: Math.random() });
+}
+
+// ── cards for the reservoirs with the most going on
+const labelHost = document.getElementById('labels'), leaders = document.getElementById('leaders'); let labelled = [];
+function trend(r) { return r.change_since_bulletin_hm3 != null ? [r.change_since_bulletin_hm3, 'desde el último boletín'] : r.weekly_change_hm3 != null ? [r.weekly_change_hm3, 'en la última semana'] : null; }
+function chooseLabels() {
+  const k = 'upstream_rain_' + win + '_hm3';
+  const byRain = [...res].filter(o => o.r[k] != null).sort((a, b) => b.r[k] - a.r[k]);
+  byRain.forEach((o, i) => { o.halo.visible = i < 24 && o.r[k] > 1; o.haloK = o.halo.visible ? 1 - i / 30 : 0; });
+  // activity: rain arriving and water moving, relative to the reservoir's size
+  const score = o => { const r = o.r, t = trend(r); return ((r[k] || 0) * 0.2 + Math.abs(t ? t[0] : 0) * 3) / (r.capacity_hm3 + 150) + (r[k] || 0) / 4000; };
+  const chosen = [];
+  for (const o of [...res].filter(o => o.r.capacity_hm3 >= 80).sort((a, b) => score(b) - score(a))) {
+    if (chosen.length >= 6) break;
+    if (chosen.every(c => Math.hypot(c.top.x - o.top.x, c.top.z - o.top.z) > 7)) chosen.push(o); }
+  labelHost.innerHTML = ''; leaders.innerHTML = ''; labelled = [];
+  chosen.forEach((o, n) => { const r = o.r, t = trend(r), low = isLow(r), el = document.createElement('div'); el.className = 'card' + (low ? ' low' : '');
+    const arrow = t && Math.abs(t[0]) >= 0.5 ? `<span class="arrow ${t[0] > 0 ? 'up' : 'down'}">${t[0] > 0 ? '↑' : '↓'}</span>` : '';
+    el.innerHTML = `<b>${esc(r.reservoir_name)}</b>${arrow}
+      <div><span class="pct ${low ? 'low' : 'ok'}">${fmt(r.fill_pct, 0)} %</span> <span class="m">/ normal ${fmt(r.fill_10y, 0)} %</span></div>
+      ${r[k] >= 1 ? `<div>☁ ${fmt(r[k])} hm³ de lluvia en su cuenca</div>` : ''}
+      ${t && Math.abs(t[0]) >= 0.5 ? `<div class="m">${t[0] > 0 ? '+' : '−'}${fmt(Math.abs(t[0]), Math.abs(t[0]) < 10 ? 1 : 0)} hm³ ${t[1]}</div>` : ''}`;
+    labelHost.appendChild(el);
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line'); leaders.appendChild(line);
+    labelled.push({ o, el, line, side: n % 2 ? 1 : -1 }); });
+}
+const proj = new THREE.Vector3();
+function placeLabels() { const taken = [];
+  for (const L of labelled) { proj.copy(L.o.top).project(camera); const x = (proj.x + 1) / 2 * innerWidth, y = (1 - proj.y) / 2 * innerHeight;
+    const w = L.el.offsetWidth || 190, h = L.el.offsetHeight || 80;
+    let cx = x + L.side * 70, cy = y - 46 - h; cx = Math.max(12 + w / 2, Math.min(innerWidth - 12 - w / 2, cx)); cy = Math.max(120, cy);
+    const box = [cx - w / 2 - 6, cy - 6, cx + w / 2 + 6, cy + h + 6];
+    let ok = proj.z < 1 && x > 20 && x < innerWidth - 20 && y > 140 && y < innerHeight - 40 && cy + h < y;
+    if (ok) for (const t of taken) if (box[0] < t[2] && box[2] > t[0] && box[1] < t[3] && box[3] > t[1]) { ok = false; break; }
+    L.el.hidden = !ok; L.line.style.display = ok ? '' : 'none';
+    if (ok) { taken.push(box); L.el.style.transform = `translate(${(cx - w / 2).toFixed(1)}px,${cy.toFixed(1)}px)`;
+      L.line.setAttribute('x1', x); L.line.setAttribute('y1', y); L.line.setAttribute('x2', cx); L.line.setAttribute('y2', cy + h); } } }
+
+// ── words
+const CELL_KM2 = 37.2, weekly = D.weekly, latest = weekly[weekly.length - 1];
+function sameWeek(yb) { const t = new Date(latest.bulletin_date); t.setFullYear(t.getFullYear() - yb); let b = null; for (const w of weekly) { const d = Math.abs(new Date(w.bulletin_date) - t); if (!b || d < b[0]) b = [d, w]; } return b && b[0] < 5 * 864e5 ? b[1] : null; }
+const avg10 = (() => { const a = []; for (let y = 1; y <= 10; y++) { const w = sameWeek(y); if (w) a.push(w.fill_pct); } return a.reduce((x, y) => x + y, 0) / a.length; })();
+function words() {
+  const k = winKey(win), hours = win.replace('h', ''), vol = cells.reduce((s, c) => s + (c[k] || 0) * CELL_KM2 / 1000, 0);
+  const big = res.filter(o => o.r.capacity_hm3 >= 50), low = big.filter(o => isLow(o.r)).length;
+  document.getElementById('stats').innerHTML = `<span><b class="r">${fmt(vol)} hm³</b> de lluvia en ${hours} h</span><span><b>${fmt(latest.fill_pct, 1)} %</b> embalsado · normal ${fmt(avg10, 1)} %</span><span><b class="l">${low}</b> de ${big.length} grandes embalses bajo su nivel normal</span>`;
+  document.getElementById('nat').textContent = 'Tarjetas: los embalses con más actividad ahora';
+}
+function setWindow(w) { win = w; paint(); terrainTex.needsUpdate = true; weighPaths(); for (let i = 0; i < M; i++) spawnFlow(i, true); chooseLabels(); words(); }
+for (const w of ['1h', '6h', '12h', '24h']) { const b = document.getElementById('w-' + w);
+  if (!D.grid.some(c => c[winKey(w)] != null)) { b.disabled = true; b.title = 'Disponible cuando haya 24 h de datos'; }
+  b.addEventListener('click', () => { for (const x of ['1h', '6h', '12h', '24h']) document.getElementById('w-' + x).setAttribute('aria-pressed', x === w); setWindow(w); }); }
+
+// ── hover
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2(), tip = document.getElementById('tip'), glasses = res.map(o => o.glass);
+renderer.domElement.addEventListener('pointermove', e => {
+  mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(glasses)[0];
+  if (!hit) { tip.hidden = true; renderer.domElement.style.cursor = ''; return; }
+  const r = hit.object.userData.r, mm = r['upstream_rain_' + win + '_mm'], vol = r['upstream_rain_' + win + '_hm3'], low = isLow(r);
+  tip.innerHTML = `<b>${esc(r.reservoir_name)}</b> <span class="m">· ${esc(r.basin_name || '')}</span>
+    <span class="lvl"><i style="width:${Math.min(100, r.fill_pct || 0)}%;background:var(${low ? '--low' : '--water'})"></i>${r.fill_10y != null ? `<u style="left:${Math.min(100, r.fill_10y)}%"></u>` : ''}</span>
+    ${fmt(r.fill_pct, 1)} % lleno (${fmt(r.stored_hm3)} de ${fmt(r.capacity_hm3)} hm³)<br>
+    <span class="m">normal para esta semana: ${fmt(r.fill_10y, 1)} % · hace un año: ${fmt(r.fill_last_year, 1)} %</span><br>
+    ${mm != null ? `Lluvia en su cuenca (${win.replace('h', ' h')}): ${fmt(mm, 1)} mm, unos ${fmt(vol, 1)} hm³<br>` : ''}
+    ${(t => t && Math.abs(t[0]) >= 0.5 ? `${t[0] > 0 ? '↑ +' : '↓ −'}${fmt(Math.abs(t[0]), 1)} hm³ ${t[1]}<br>` : '')(trend(r))}
+    <span class="m">${r.data_source === 'miteco-weekly' ? 'Nivel del boletín semanal' : 'Nivel en directo'}</span>`;
+  tip.hidden = false; renderer.domElement.style.cursor = 'pointer';
+  tip.style.left = Math.min(e.clientX + 16, innerWidth - 310) + 'px'; tip.style.top = Math.min(e.clientY + 16, innerHeight - 170) + 'px';
+});
+
+// ── loop
+function resize() { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize(); setWindow('12h');
+const clock = new THREE.Clock(); let T = 0;
+function frame() {
+  const dt = Math.min(0.05, clock.getDelta()); T += dt;
+  if (rainLines) { for (let i = 0; i < N; i++) { const o = i * 6, dy = rainSpeed[i] * dt; rainPos[o + 1] -= dy; rainPos[o + 4] -= dy; if (rainPos[o + 1] < rainFloor[i]) spawn(i, false); } rainLines.geometry.attributes.position.needsUpdate = true; }
+  if (flow) { for (let i = 0; i < M; i++) { const p = paths[flowPath[i]]; flowS[i] += flowV[i] * dt; if (flowS[i] >= p.len) { spawnFlow(i, false); continue; }
+      let k = 1; while (k < p.cl.length - 1 && p.cl[k] < flowS[i]) k++; const t = (flowS[i] - p.cl[k - 1]) / Math.max(1e-6, p.cl[k] - p.cl[k - 1]), a = p.pts[k - 1], b = p.pts[k];
+      flowPos[i * 3] = a[0] + (b[0] - a[0]) * t; flowPos[i * 3 + 1] = a[1] + (b[1] - a[1]) * t; flowPos[i * 3 + 2] = a[2] + (b[2] - a[2]) * t; }
+    flow.geometry.attributes.position.needsUpdate = true; }
+  for (const o of res) if (o.halo.visible) { const ph = reduced ? 0.4 : (T * 0.45 + o.phase) % 1; o.halo.scale.setScalar(1 + ph * 2.2); o.halo.material.opacity = (1 - ph) * 0.75 * (0.4 + 0.6 * o.haloK); }
+  controls.update(); renderer.render(scene, camera); placeLabels(); requestAnimationFrame(frame);
+}
+frame();
+</script>

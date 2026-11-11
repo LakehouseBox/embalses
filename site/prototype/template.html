@@ -1,0 +1,364 @@
+<title>Embalses de España</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Source+Sans+3:wght@400;600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
+<style>
+/* Layout: the map is the navigation. Map on the left, the selected area's figures on the right, detail tables below. */
+:root {
+  --bg: #f6f8f9; --surface: #ffffff; --land: #e8ecee; --ink: #10202a; --muted: #56676f; --faint: #8b999f; --line: #dde3e6; --border: #9aa7ad;
+  --water: #1c5cab; --accent: #1c5cab; --s1: #2a78d6; --s2: #eb6834; --avg: #6b7a82; --up: #1c5cab; --down: #b4541a; --low: #d9822b; --live: #1baf7a; --river: #5d93b6;
+  --f1: #cde2fb; --f2: #9ec5f4; --f3: #6da7ec; --f4: #3987e5; --f5: #256abf; --f6: #104281;
+  /* % embalsado, from empty (warm) to full (blue) */
+  --a1: #c9562c; --a2: #e58f5e; --a3: #f3c99b; --a4: #f0ead2; --a5: #cfe3f8; --a6: #9cc4f1; --a7: #5a9be6; --a8: #1f62b3;
+  --font-display: "Archivo", "Arial Narrow", system-ui, sans-serif; --font-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d1418; --surface: #131d23; --land: #1b272e; --ink: #e6eef2; --muted: #a3b3bb; --faint: #73848d; --line: #25333b; --border: #55666f;
+  --water: #6da7ec; --accent: #86b6ef; --s1: #3987e5; --s2: #d95926; --avg: #93a3ab; --up: #86b6ef; --down: #e9955a; --low: #f2a33a; --live: #199e70; --river: #3f7397;
+  --f1: #184f95; --f2: #1c5cab; --f3: #2a78d6; --f4: #5598e7; --f5: #86b6ef; --f6: #cde2fb;
+  --a1: #b84a22; --a2: #cf7a4a; --a3: #d9aa78; --a4: #b9b49a; --a5: #9dbbdc; --a6: #76a6dd; --a7: #4a8ad6; --a8: #2267bd; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0d1418; --surface: #131d23; --land: #1b272e; --ink: #e6eef2; --muted: #a3b3bb; --faint: #73848d; --line: #25333b; --border: #55666f;
+  --water: #6da7ec; --accent: #86b6ef; --s1: #3987e5; --s2: #d95926; --avg: #93a3ab; --up: #86b6ef; --down: #e9955a; --low: #f2a33a; --live: #199e70; --river: #3f7397;
+  --f1: #184f95; --f2: #1c5cab; --f3: #2a78d6; --f4: #5598e7; --f5: #86b6ef; --f6: #cde2fb;
+  --a1: #b84a22; --a2: #cf7a4a; --a3: #d9aa78; --a4: #b9b49a; --a5: #9dbbdc; --a6: #76a6dd; --a7: #4a8ad6; --a8: #2267bd; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.num { font-variant-numeric: tabular-nums; }
+[hidden] { display: none !important; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--surface); }
+nav.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: var(--surface); border-bottom: 1px solid var(--line); }
+nav.bar .in { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; gap: 12px; padding-block: 8px; flex-wrap: wrap;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wordmark { font-family: var(--font-display); font-weight: 800; font-stretch: 70%; font-size: 24px; margin-right: 8px; }
+.sp { flex: 1; }
+select, input[type="search"] { font: inherit; font-size: 15px; padding: 6px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--ink); min-width: 0; max-width: 100%; }
+input[type="search"] { width: min(320px, 100%); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-block: 20px 56px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 40px; }
+section { display: grid; gap: 14px; min-width: 0; }
+h1, h2 { font-family: var(--font-display); font-stretch: 80%; font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: 30px; } h2 { font-size: 24px; }
+.note { color: var(--muted); margin: 0; max-width: 72ch; font-size: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; min-width: 0; }
+.main { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+.side { display: grid; gap: 18px; min-width: 0; }
+.head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.crumb { font: inherit; font-size: 14px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--accent); cursor: pointer; }
+.big { font-family: var(--font-display); font-weight: 800; font-stretch: 72%; font-size: 76px; line-height: 0.95; }
+.big small { font-size: 30px; font-weight: 700; color: var(--muted); }
+.kv { display: grid; grid-template-columns: 1fr auto; gap: 5px 12px; font-size: 15px; margin-top: 12px; }
+.kv span:nth-child(odd) { color: var(--muted); } .kv span:nth-child(even) { text-align: right; font-weight: 600; }
+.cmp { display: grid; gap: 7px; margin-top: 14px; }
+.cmp .row { display: grid; grid-template-columns: 7.5em minmax(0, 1fr) 3.6em; gap: 8px; align-items: center; font-size: 14px; color: var(--muted); }
+.bar { height: 12px; background: var(--land); border-radius: 0 4px 4px 0; position: relative; }
+.bar > span { position: absolute; inset: 0 auto 0 0; background: var(--water); border-radius: 0 4px 4px 0; }
+.bar.alt > span { background: color-mix(in srgb, var(--water) 40%, var(--land)); }
+.bar > b { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); }
+.chart { position: relative; } .chart svg { display: block; width: 100%; height: auto; } .chart h3 { margin: 0 0 6px; font-size: 15px; font-weight: 600; }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.legend i { display: inline-block; width: 18px; height: 0; border-top: 3px solid; vertical-align: middle; margin-right: 6px; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 13px; line-height: 1.35; box-shadow: 0 4px 16px rgb(0 0 0 / 0.14); z-index: 5; white-space: nowrap; }
+.tip .m { color: var(--muted); }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.seg button { font: inherit; font-size: 14px; padding: 5px 11px; border: 0; background: transparent; color: var(--muted); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.seg button:disabled { color: var(--faint); cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.maptools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.mapbox { position: relative; padding: 0; overflow: hidden; }
+.mapbox canvas { display: block; width: 100%; }
+.mapkey { position: absolute; left: 10px; bottom: 10px; background: color-mix(in srgb, var(--surface) 92%, transparent); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font-size: 12px; color: var(--muted); display: grid; gap: 5px; max-width: calc(100% - 20px); }
+.ramp { display: flex; } .ramp span { width: 30px; height: 10px; } .ticks { display: flex; font-size: 11px; color: var(--faint); } .ticks span { width: 30px; }
+.tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.scroll { overflow-x: auto; min-width: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+th { text-align: left; font-weight: 600; font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding: 6px 12px 6px 0; white-space: nowrap; }
+th button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+th button[aria-sort]::after { content: " ▾"; } th button[aria-sort="ascending"]::after { content: " ▴"; }
+td { border-bottom: 1px solid var(--line); padding: 8px 12px 8px 0; vertical-align: middle; }
+.r { text-align: right; } td.r { white-space: nowrap; }
+.name { font-weight: 600; } .sub { color: var(--muted); font-size: 13px; }
+.fillcell { display: grid; grid-template-columns: minmax(70px, 130px) 3.2em; gap: 8px; align-items: center; }
+.pill { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--live); display: inline-block; } .pill.w i { background: transparent; border: 1.5px solid var(--faint); }
+.up { color: var(--up); } .down { color: var(--down); }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.more { font: inherit; font-size: 14px; color: var(--accent); background: none; border: 1px solid var(--line); border-radius: 6px; padding: 6px 12px; cursor: pointer; justify-self: start; }
+footer { font-size: 13px; color: var(--muted); display: grid; gap: 6px; border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 900px) { .main, .two { grid-template-columns: minmax(0, 1fr); } .big { font-size: 60px; } }
+</style>
+
+<nav class="bar"><div class="in">
+  <span class="wordmark">embalses</span>
+  <span class="sp"></span>
+  <select id="s-b" aria-label="Elegir cuenca"></select>
+  <select id="s-c" aria-label="Elegir comunidad autónoma"></select>
+  <select id="s-p" aria-label="Elegir provincia"></select>
+</div></nav>
+
+<div class="wrap">
+  <section>
+    <div class="head"><button class="crumb" id="back" hidden>← España</button><h1 id="h-title"></h1></div>
+    <div class="main">
+      <div style="display:grid;gap:10px;min-width:0">
+        <div class="maptools">
+          <span class="seg" role="group" aria-label="Qué muestra el mapa"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Mayores variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
+          <span class="seg" role="group" aria-label="Dividir por" id="groupseg"><button id="g-b" aria-pressed="true">Cuencas</button><button id="g-c" aria-pressed="false">Comunidades</button></span>
+          <span class="seg" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="true">12 h</button><button id="w-24h" aria-pressed="false">24 h</button></span>
+        </div>
+        <div class="panel mapbox" id="mapbox"><canvas id="map"></canvas><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
+        <p class="note" id="map-note"></p>
+        <p class="note" id="area-note" hidden></p>
+      </div>
+      <div class="side">
+        <div class="panel"><div class="big num" id="n-pct"></div><div class="note" id="n-date"></div><div class="kv num" id="n-kv"></div><div class="cmp" id="n-cmp"></div></div>
+        <div class="panel chart" id="yearbox"><h3>Este año frente al pasado y a lo normal</h3><div class="legend" id="year-legend"></div>
+          <svg id="year" viewBox="0 0 460 300" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="embalses">
+    <h2 id="res-title">Embalses</h2>
+    <div class="tools"><input type="search" id="q" placeholder="Buscar embalse, río o provincia" aria-label="Buscar embalse"><span class="note num" id="count"></span></div>
+    <div class="scroll"><table id="t-res"></table></div>
+    <button class="more" id="more">Ver más</button>
+  </section>
+
+  <section>
+    <h2>Mayores variaciones</h2>
+    <p class="note" id="var-note"></p>
+    <div class="two"><div class="scroll"><table id="t-up"></table></div><div class="scroll"><table id="t-down"></table></div></div>
+  </section>
+
+  <section>
+    <h2>Mayores precipitaciones</h2>
+    <p class="note">Lluvia en cada pluviómetro, en litros por metro cuadrado (mm). El año hidrológico empieza el 1 de octubre.</p>
+    <div class="scroll"><table id="t-rain"></table></div>
+  </section>
+
+  <footer>
+    <div>Fuentes: MITECO (Boletín Hidrológico, Inventario de Presas y Embalses, límites administrativos) · AEMET OpenData · SAIH de las confederaciones del Ebro, Guadalquivir, Segura, Miño-Sil y Cantábrico · HydroSHEDS (CC BY 4.0).</div>
+    <div>Los datos en tiempo real son provisionales: los organismos todavía no los han validado. Los niveles semanales son los oficiales del boletín.</div>
+    <div>Los datos son abiertos: un catálogo Apache Iceberg público en LakehouseBox que cualquiera puede consultar con SQL. Prototipo con una instantánea real de hoy.</div>
+  </footer>
+</div>
+
+<script type="application/json" id="d-basins">/*DATA:basins*/</script>
+<script type="application/json" id="d-ccaa">/*DATA:ccaa*/</script>
+<script type="application/json" id="d-prov">/*DATA:prov*/</script>
+<script type="application/json" id="d-rivers">/*DATA:rivers*/</script>
+<script type="application/json" id="d-grid">/*DATA:rain_grid*/</script>
+<script type="application/json" id="d-res">/*DATA:reservoirs*/</script>
+<script type="application/json" id="d-gauges">/*DATA:wettest_stations*/</script>
+<script type="application/json" id="d-scope">/*DATA:scope*/</script>
+<script type="application/json" id="d-weekly">/*DATA:national_weekly*/</script>
+
+<script>
+const J = id => JSON.parse(document.getElementById(id).textContent);
+const D = { basins: J('d-basins'), ccaa: J('d-ccaa'), prov: J('d-prov'), rivers: J('d-rivers'), grid: J('d-grid'), res: J('d-res'), gauges: J('d-gauges'), weekly: J('d-weekly') };
+const $ = id => document.getElementById(id), css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const fmt = (v, d = 0) => v == null || isNaN(v) ? '—' : Number(v).toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const title = s => String(s || '').toLowerCase().replace(/(^|[\s\-(/.])(\p{L})/gu, (m, a, b) => a + b.toUpperCase());
+const signed = (v, d = 0) => v == null ? '—' : (v > 0 ? '+' : v < 0 ? '−' : '') + fmt(Math.abs(v), d);
+const dfmt = d => d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const polys = g => g.type === 'Polygon' ? [g.coordinates] : g.coordinates;
+const trend = r => r.change_since_bulletin_hm3 ?? r.weekly_change_hm3;
+const isLow = r => r.fill_10y != null && r.fill_pct != null && r.fill_pct < r.fill_10y - 5;
+
+// ── areas: basins, comunidades, provinces. Each reservoir is placed in its area by its dam's position.
+const hit = document.createElement('canvas').getContext('2d');
+function area(type, name, geometry) { let x0 = 99, x1 = -99, y0 = 99, y1 = -99, best = null; const path = new Path2D();
+  for (const p of polys(geometry)) { for (const ring of p) { ring.forEach(([x, y], i) => i ? path.lineTo(x, y) : path.moveTo(x, y)); path.closePath(); }
+    const ring = p[0]; if (!best || ring.length > best.length) best = ring; for (const [x, y] of ring) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } }
+  let ax = 0, ay = 0, A = 0; for (let i = 0; i < best.length - 1; i++) { const f = best[i][0] * best[i + 1][1] - best[i + 1][0] * best[i][1]; A += f; ax += (best[i][0] + best[i + 1][0]) * f; ay += (best[i][1] + best[i + 1][1]) * f; }
+  return { type, name, geometry, lonlat: path, bb: { w: x0, e: x1, s: y0, n: y1 }, cx: ax / (3 * A), cy: ay / (3 * A), res: [] }; }
+const AREAS = { b: D.basins.map(b => area('b', b.basin_name, b.geometry)), c: D.ccaa.map(c => area('c', c.name, c.geometry)), p: D.prov.map(p => area('p', p.name, p.geometry)) };
+for (const r of D.res) { if (r.lon == null) continue; r.in = {};
+  for (const t of ['b', 'c', 'p']) { const a = t === 'b' ? AREAS.b.find(a => a.name === r.basin_name) : AREAS[t].find(a => hit.isPointInPath(a.lonlat, r.lon, r.lat, 'evenodd')); if (a) { r.in[t] = a.name; a.res.push(r); } } }
+const mode = a => { const c = {}; let best = null; for (const v of a) if (v) { c[v] = (c[v] || 0) + 1; if (!best || c[v] > c[best]) best = v; } return best; };
+// The outlines only tell us which official name each polygon carries; membership then follows the dam inventory's own
+// province and comunidad, so a dam on a border is counted where MITECO's inventory places it.
+for (const t of ['c', 'p']) { const f = t === 'c' ? 'region' : 'province';
+  for (const a of AREAS[t]) a.key = mode(a.res.map(r => r[f]));
+  for (const a of AREAS[t]) a.res = a.key ? D.res.filter(r => r.lon != null && r[f] === a.key) : [];
+  for (const r of D.res) if (r.in) { const a = AREAS[t].find(a => a.key && a.key === r[f]); if (a) r.in[t] = a.name; else delete r.in[t]; } }
+for (const t of ['b', 'c', 'p']) for (const a of AREAS[t]) { const cap = a.res.reduce((s, r) => s + (r.capacity_hm3 || 0), 0), sto = a.res.reduce((s, r) => s + (r.stored_hm3 || 0), 0);
+  a.fill = cap ? 100 * sto / cap : null; a.stored = sto; a.cap = cap; a.avg = cap ? a.res.reduce((s, r) => s + (r.fill_10y ?? r.fill_pct ?? 0) * r.capacity_hm3, 0) / cap : null;
+  if (t === 'b') a.key = a.name; }
+const SHORT = { 'Cuencas Mediterráneas Andaluzas': 'Med. Andaluza', 'Cuencas Internas de Cataluña': 'Cataluña', 'Tinto, Odiel y Piedras': 'Tinto-Odiel', 'Guadalete y Barbate': 'Guadalete', 'Cantábrico Occidental': 'Cantábrico Occ.', 'Cantábrico Oriental': 'Cantábrico Or.', 'Comunidad de Madrid': 'Madrid', 'Comunidad Foral de Navarra': 'Navarra', 'Principado de Asturias': 'Asturias', 'Región de Murcia': 'Murcia', 'Comunitat Valenciana': 'C. Valenciana', 'Comunidad Valenciana': 'C. Valenciana', 'Illes Balears': 'Baleares' };
+
+// ── selection and its weekly series
+let scope = { t: 'es', k: null }, group = 'b', layer = 'res', win = '12h';
+const inScope = r => scope.t === 'es' || (r.in && r.in[scope.t] === scope.k);
+const selArea = () => scope.t === 'es' ? null : AREAS[scope.t].find(a => a.name === scope.k);
+const W = D.weekly.map(r => ({ d: new Date(r.bulletin_date + 'T00:00:00Z'), f: r.fill_pct, s: r.stored_hm3, c: r.capacity_hm3 }));
+const SC = J('d-scope'), SER = { es: W };
+for (const x of SC.series) SER[x.t + ':' + x.k] = SC.dates.map((d, i) => x.s[i] == null ? null : { d: new Date(d + 'T00:00:00Z'), s: x.s[i], c: x.c[i], f: x.c[i] ? 100 * x.s[i] / x.c[i] : null }).filter(Boolean);
+const wk = d => Math.min(51, Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 / 7));
+let last, prev, Y, byYear, avg10, lw;
+function setSeries() { const a = selArea(), S = (a && SER[a.type + ':' + a.key]) || W;
+  last = S[S.length - 1]; prev = S[S.length - 2]; Y = last.d.getUTCFullYear(); byYear = {};
+  for (const w of S) (byYear[w.d.getUTCFullYear()] ??= [])[wk(w.d)] = w.f;
+  avg10 = Array.from({ length: 52 }, (_, i) => { const v = []; for (let y = Y - 10; y < Y; y++) if (byYear[y]?.[i] != null) v.push(byYear[y][i]); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; });
+  lw = wk(last.d); }
+function numbers() {
+  $('h-title').textContent = scope.t === 'es' ? 'Agua embalsada en España' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.k;
+  $('n-pct').innerHTML = `${fmt(last.f, 1)}<small> %</small>`; $('n-date').textContent = `Boletín del ${dfmt(last.d)}`;
+  const dw = last.s - prev.s;
+  $('n-kv').innerHTML = `<span>Agua embalsada</span><span>${fmt(last.s)} hm³</span><span>Capacidad</span><span>${fmt(last.c)} hm³</span><span>Última semana</span><span class="${dw >= 0 ? 'up' : 'down'}">${signed(dw)} hm³</span>`;
+  $('n-cmp').innerHTML = [['Ahora', last.f, ''], ['Hace un año', byYear[Y - 1]?.[lw], 'alt'], ['Media 10 años', avg10[lw], 'alt']].map(([k, v, c]) =>
+    `<div class="row"><span>${k}</span><div class="bar ${c}"><span style="width:${Math.min(100, v || 0)}%"></span></div><span class="num r" style="color:var(--ink)">${fmt(v, 1)} %</span></div>`).join('');
+}
+const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+function yearChart() {
+  const svg = $('year'), VW = 460, VH = 300, m = { l: 40, r: 14, t: 22, b: 26 }, cur = byYear[Y] || [], ly = byYear[Y - 1] || [];
+  const all = [...cur, ...ly, ...avg10].filter(v => v != null), y0 = Math.floor(Math.min(...all) / 10) * 10, y1 = Math.max(y0 + 20, Math.ceil(Math.max(...all) / 10) * 10), stepY = (y1 - y0) > 50 ? 20 : 10;
+  const X = i => m.l + i / 51 * (VW - m.l - m.r), Yy = v => m.t + (y1 - v) / (y1 - y0) * (VH - m.t - m.b);
+  const path = a => { let d = '', pen = false; a.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${X(i).toFixed(1)},${Yy(v).toFixed(1)}`; pen = true; }); return d; };
+  let g = ''; for (let v = y0; v <= y1; v += stepY) g += `<line x1="${m.l}" x2="${VW - m.r}" y1="${Yy(v)}" y2="${Yy(v)}" stroke="var(--line)"/><text x="${m.l - 6}" y="${Yy(v) + 4}" text-anchor="end" font-size="12" fill="var(--faint)">${v} %</text>`;
+  MES.forEach((n, k) => { if (k % 2 === 0) g += `<text x="${X((Date.UTC(2025, k, 15) - Date.UTC(2025, 0, 1)) / 864e5 / 7)}" y="${VH - 8}" text-anchor="middle" font-size="12" fill="var(--faint)">${n}</text>`; });
+  const lx = X(lw), anchor = lw > 40 ? 'end' : 'start';
+  svg.innerHTML = `<rect width="${VW}" height="${VH}" fill="var(--surface)"/>${g}
+    <path d="${path(avg10)}" fill="none" stroke="var(--avg)" stroke-width="2" stroke-dasharray="5 4"/><path d="${path(ly)}" fill="none" stroke="var(--s2)" stroke-width="2"/>
+    <path d="${path(cur)}" fill="none" stroke="var(--s1)" stroke-width="3" stroke-linejoin="round"/><circle cx="${lx}" cy="${Yy(cur[lw])}" r="5" fill="var(--s1)" stroke="var(--surface)" stroke-width="2"/>
+    <text x="${lx + (anchor === 'end' ? -8 : 8)}" y="${Yy(cur[lw]) - 10}" text-anchor="${anchor}" font-size="13" font-weight="700" fill="var(--ink)" paint-order="stroke" stroke="var(--surface)" stroke-width="4">${fmt(cur[lw], 1)} %</text>
+    <line class="xh" y1="${m.t}" y2="${VH - m.b}" stroke="var(--faint)" visibility="hidden"/><rect class="hit" x="${m.l}" y="${m.t}" width="${VW - m.l - m.r}" height="${VH - m.t - m.b}" fill="transparent"/>`;
+  $('year-legend').innerHTML = `<span><i style="border-color:var(--s1)"></i>${Y}</span><span><i style="border-color:var(--s2)"></i>${Y - 1}</span><span><i style="border-color:var(--avg);border-top-style:dashed"></i>Media 10 años</span>`;
+  const tip = $('year-tip'), xh = svg.querySelector('.xh'), h = svg.querySelector('.hit');
+  h.onmousemove = e => { const rc = svg.getBoundingClientRect(), i = Math.max(0, Math.min(51, Math.round(((e.clientX - rc.left) * VW / rc.width - m.l) / (VW - m.l - m.r) * 51))), d = new Date(Date.UTC(Y, 0, 4 + i * 7));
+    xh.setAttribute('x1', X(i)); xh.setAttribute('x2', X(i)); xh.setAttribute('visibility', 'visible'); tip.hidden = false;
+    tip.innerHTML = `<b>${d.getUTCDate()} ${MES[d.getUTCMonth()]}</b><br>${Y}: <b class="num">${fmt(cur[i], 1)} %</b><br>${Y - 1}: <span class="num">${fmt(ly[i], 1)} %</span><br><span class="m">Media: <span class="num">${fmt(avg10[i], 1)} %</span></span>`;
+    const bw = $('yearbox').clientWidth; tip.style.left = Math.max(4, Math.min(X(i) * rc.width / VW + 24, bw - tip.offsetWidth - 4)) + 'px'; tip.style.top = '60px'; };
+  h.onmouseleave = () => { tip.hidden = true; xh.setAttribute('visibility', 'hidden'); };
+}
+
+// ── map
+const cv = $('map'), ctx = cv.getContext('2d'), ES = { w: -9.45, e: 4.45, s: 35.85, n: 43.9 }, KX = Math.cos(40 * Math.PI / 180);
+let P, BB = ES, shown_areas = [], marks = [];
+const BAND = [0, 20, 30, 40, 50, 60, 70, 80], STEPS = [0.2, 1, 5, 10, 20, 40];
+const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v >= st[s]) i = s; return i; };
+const gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])), bounds = new Map();
+function fit() { const a = selArea(); BB = ES;
+  if (a) { const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); BB = { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
+  const Wd = $('mapbox').clientWidth, Hh = Math.round(Math.min(Wd * 0.82, 720)), dpr = devicePixelRatio || 1; cv.width = Wd * dpr; cv.height = Hh * dpr; cv.style.height = Hh + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const gw = (BB.e - BB.w) * KX, gh = BB.n - BB.s, k = Math.min((Wd - 20) / gw, (Hh - 20) / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2;
+  P = { k, ox, oy, W: Wd, H: Hh, x: lon => ox + (lon - BB.w) * KX * k, y: lat => oy + (BB.n - lat) * k };
+  shown_areas = AREAS[scope.t === 'es' ? group : scope.t].map(a => { const p = new Path2D(); for (const poly of polys(a.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? p.lineTo(P.x(x), P.y(y)) : p.moveTo(P.x(x), P.y(y))); p.closePath(); } return { a, p }; }); }
+function text(t, x, y, size, weight, color, align = 'center') { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = align; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = css('--surface'); ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
+function gauge(r, rad) { const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
+  ctx.beginPath(); ctx.arc(x, y, rad + 1.5, 0, 7); ctx.fillStyle = css('--surface'); ctx.fill();
+  ctx.save(); ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.clip(); ctx.fillStyle = isLow(r) ? css('--low') : css('--water'); ctx.fillRect(x - rad, y + rad - 2 * rad * f, rad * 2, 2 * rad * f); ctx.restore();
+  ctx.beginPath(); ctx.arc(x, y, rad, 0, 7); ctx.strokeStyle = css('--ink'); ctx.lineWidth = 1; ctx.stroke(); marks.push({ r, x, y, rad }); }
+function draw() {
+  ctx.clearRect(0, 0, P.W, P.H); ctx.fillStyle = css('--surface'); ctx.fillRect(0, 0, P.W, P.H); marks = [];
+  const es = scope.t === 'es', ink = css('--ink'), muted = css('--muted'), taken = [];
+  const free = box => { if (taken.some(t => box[0] < t[2] && box[2] > t[0] && box[1] < t[3] && box[3] > t[1])) return false; taken.push(box); return true; };
+  for (const { a, p } of shown_areas) { const sel = !es && a.name === scope.k;
+    ctx.fillStyle = layer === 'res' && (es || sel) && a.fill != null ? css('--a' + (stepOf(a.fill, BAND) + 1)) : css('--land'); ctx.globalAlpha = sel && layer === 'res' ? 0.5 : 1; ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; }
+  if (layer === 'rain') { const A = [0.3, 0.5, 0.7, 0.85, 0.95, 1];
+    for (const c of D.grid) { const mm = c['rain_' + win]; if (mm == null || mm < 0.2) continue; let b = bounds.get(c.h3_cell); if (!b) bounds.set(c.h3_cell, b = h3.cellToBoundary(c.h3_cell));
+      const s = stepOf(mm, STEPS); ctx.beginPath(); b.forEach(([la, lo], i) => i ? ctx.lineTo(P.x(lo), P.y(la)) : ctx.moveTo(P.x(lo), P.y(la))); ctx.closePath(); ctx.globalAlpha = A[s]; ctx.fillStyle = css('--f' + (s + 1)); ctx.fill(); } ctx.globalAlpha = 1; }
+  if (!es || layer !== 'res') { ctx.strokeStyle = css('--river'); ctx.lineCap = 'round'; const zf = es ? 1 : 1.6;
+    for (const r of D.rivers) { const q = r.mean_flow_m3s || 0; ctx.lineWidth = (q > 300 ? 2 : q > 80 ? 1.4 : q > 20 ? 1 : 0.6) * zf; ctx.beginPath();
+      for (const l of (r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates)) l.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.stroke(); } }
+  for (const { a, p } of shown_areas) { ctx.strokeStyle = css('--surface'); ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === scope.k ? 1.8 : 0.8; ctx.stroke(p); }
+  const rs = D.res.filter(r => r.lon != null && inScope(r)).sort((a, b) => b.capacity_hm3 - a.capacity_hm3);
+  if (layer === 'res' && es) {                                   // the country: one figure per area
+    for (const { a } of shown_areas) { if (a.fill == null) continue; const x = P.x(a.cx), y = P.y(a.cy), small = (a.bb.e - a.bb.w) * KX * P.k < 95, n = SHORT[a.name] || a.name;
+      text(n, x, y - 4, small ? 12 : 14, 600, ink); text(`${fmt(a.fill, 0)} %`, x, y + (small ? 11 : 15), small ? 13 : 17, 700, ink); }
+  } else if (layer === 'res') {                                  // one area: its reservoirs
+    for (const r of rs) gauge(r, Math.min(34, Math.max(4, Math.sqrt(r.capacity_hm3) * 0.26 * P.k / 60)));
+    for (const m of marks.slice(0, 14)) { ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(m.r.reservoir_name).width, 110) + 8;
+      if (free([m.x - w / 2, m.y + m.rad + 2, m.x + w / 2, m.y + m.rad + 34])) { text(m.r.reservoir_name, m.x, m.y + m.rad + 15, 13, 600, ink); text(`${fmt(m.r.fill_pct, 0)} % · normal ${fmt(m.r.fill_10y, 0)} %`, m.x, m.y + m.rad + 30, 12, 400, muted); } }
+  } else if (layer === 'var') {                                  // biggest changes
+    for (const r of rs) { ctx.beginPath(); ctx.arc(P.x(r.lon), P.y(r.lat), es ? 1.6 : 2.6, 0, 7); ctx.fillStyle = css('--faint'); ctx.fill(); }
+    const top = rs.filter(r => Math.abs(trend(r) || 0) >= 0.5).sort((a, b) => Math.abs(trend(b)) - Math.abs(trend(a))).slice(0, es ? 16 : 12);
+    for (const r of top) { const v = trend(r), x = P.x(r.lon), y = P.y(r.lat), sz = Math.min(26, 7 + Math.sqrt(Math.abs(v)) * 1.6), up = v > 0;
+      ctx.beginPath(); if (up) { ctx.moveTo(x, y - sz); ctx.lineTo(x + sz * 0.8, y + sz * 0.6); ctx.lineTo(x - sz * 0.8, y + sz * 0.6); } else { ctx.moveTo(x, y + sz); ctx.lineTo(x + sz * 0.8, y - sz * 0.6); ctx.lineTo(x - sz * 0.8, y - sz * 0.6); }
+      ctx.closePath(); ctx.fillStyle = up ? css('--up') : css('--down'); ctx.fill(); ctx.strokeStyle = css('--surface'); ctx.lineWidth = 2; ctx.stroke(); marks.push({ r, x, y, rad: sz }); }
+    for (const m of marks) { const v = trend(m.r), t2 = `${signed(v, Math.abs(v) < 10 ? 1 : 0)} hm³`; ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(m.r.reservoir_name).width, 60) + 8, yy = m.y + m.rad + 4;
+      if (free([m.x - w / 2, yy, m.x + w / 2, yy + 32])) { text(m.r.reservoir_name, m.x, yy + 13, 13, 600, ink); text(t2, m.x, yy + 28, 13, 700, v > 0 ? css('--up') : css('--down')); } }
+  } else {                                                       // rain: the wettest gauges
+    for (const r of rs) if (!es) gauge(r, Math.min(20, Math.max(3, Math.sqrt(r.capacity_hm3) * 0.18 * P.k / 60)));
+    const k = 'rain_' + win + '_mm', gs = D.gauges.filter(g => g[k] > 0 && g.lon > BB.w && g.lon < BB.e && g.lat > BB.s && g.lat < BB.n).sort((a, b) => b[k] - a[k]).slice(0, 12);
+    for (const g of gs) { const x = P.x(g.lon), y = P.y(g.lat); ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fillStyle = ink; ctx.fill(); ctx.strokeStyle = css('--surface'); ctx.lineWidth = 2; ctx.stroke();
+      const n = title(g.station_name); ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(n).width, 60) + 8;
+      if (free([x - w / 2, y + 7, x + w / 2, y + 39])) { text(n, x, y + 20, 13, 600, ink); text(`${fmt(g[k], 1)} mm`, x, y + 35, 13, 700, css('--accent')); } }
+  }
+  $('mapkey').innerHTML = layer === 'rain' ? `<div>Lluvia en ${win.replace('h', ' h')} (mm) · puntos: los pluviómetros con más lluvia</div><div class="ramp">${STEPS.map((s, i) => `<span style="background:var(--f${i + 1})"></span>`).join('')}</div><div class="ticks num">${STEPS.map(s => `<span>${fmt(s, s < 1 ? 1 : 0)}</span>`).join('')}</div>`
+    : layer === 'var' ? `<div><span class="up">▲</span> gana agua · <span class="down">▼</span> pierde agua · tamaño: hm³ de cambio</div>`
+    : `<div>% embalsado</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> embalse por debajo de lo normal · <span style="color:var(--water)">●</span> en su nivel o por encima</div>`);
+  $('map-note').textContent = es ? (layer === 'res' ? 'Pulsa una zona del mapa para ver sus embalses.' : layer === 'var' ? 'Los embalses que más agua han ganado o perdido. Pulsa una zona para verla de cerca.' : 'Lluvia acumulada y los pluviómetros que más han recogido. Pulsa una zona para verla de cerca.')
+    : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.';
+}
+const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of shown_areas) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
+const mtip = $('map-tip');
+cv.addEventListener('mousemove', e => { const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
+  for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) { m = p.r; break; } }
+  const a = areaAt(mx, my); cv.style.cursor = a && a.name !== scope.k && a.res.length ? 'pointer' : '';
+  if (m) { const v = trend(m); mtip.innerHTML = `<b>${esc(m.reservoir_name)}</b> <span class="m">· ${esc(m.basin_name || '')}</span><br><span class="num">${fmt(m.fill_pct, 1)} % · ${fmt(m.stored_hm3)} de ${fmt(m.capacity_hm3)} hm³</span><br><span class="m num">media 10 años ${fmt(m.fill_10y, 1)} % · hace un año ${fmt(m.fill_last_year, 1)} %</span>${v != null && Math.abs(v) >= 0.5 ? `<br><span class="${v > 0 ? 'up' : 'down'} num">${signed(v, 1)} hm³</span> <span class="m">${m.change_since_bulletin_hm3 != null ? 'desde el último boletín' : 'en la última semana'}</span>` : ''}`; }
+  else if (layer === 'rain') { const lon = BB.w + (mx - P.ox) / (KX * P.k), lat = BB.n - (my - P.oy) / P.k, c = gridIndex.get(h3.latLngToCell(lat, lon, 6)), mm = c && c['rain_' + win]; if (!(mm >= 0.2)) { mtip.hidden = true; return; } mtip.innerHTML = `<b class="num">${fmt(mm, 1)} mm</b> <span class="m">en ${win.replace('h', ' h')}</span>`; }
+  else if (a && a.fill != null) mtip.innerHTML = `<b>${esc(a.name)}</b><br><span class="num">${fmt(a.fill, 1)} % · ${fmt(a.stored)} de ${fmt(a.cap)} hm³</span><br><span class="m num">media 10 años ${fmt(a.avg, 1)} % · ${a.res.length} embalses</span>`;
+  else { mtip.hidden = true; return; }
+  mtip.hidden = false; mtip.style.left = Math.max(4, Math.min(mx + 14, P.W - mtip.offsetWidth - 6)) + 'px'; mtip.style.top = Math.min(my + 14, P.H - mtip.offsetHeight - 6) + 'px'; });
+cv.addEventListener('mouseleave', () => mtip.hidden = true);
+cv.addEventListener('click', e => { const rc = cv.getBoundingClientRect(), a = areaAt(e.clientX - rc.left, e.clientY - rc.top); if (a && a.res.length && a.name !== scope.k) setScope(a.type, a.name); });
+const press = (ids, on) => { for (const i of ids) $(i).setAttribute('aria-pressed', i === on); };
+for (const l of ['res', 'var', 'rain']) $('l-' + l).onclick = () => { layer = l; press(['l-res', 'l-var', 'l-rain'], 'l-' + l); $('winseg').hidden = l !== 'rain'; draw(); };
+for (const g of ['b', 'c']) $('g-' + g).onclick = () => { group = g; press(['g-b', 'g-c'], 'g-' + g); fit(); draw(); };
+for (const w of ['1h', '6h', '12h', '24h']) { const b = $('w-' + w); if (!D.grid.some(c => c['rain_' + w] != null)) { b.disabled = true; b.title = 'Disponible cuando haya 24 h de datos'; }
+  b.onclick = () => { win = w; press(['w-1h', 'w-6h', 'w-12h', 'w-24h'], 'w-' + w); draw(); }; }
+$('back').onclick = () => setScope('es', null);
+
+// ── tables
+const fillCell = (f, n) => `<div class="fillcell"><div class="bar"><span style="width:${Math.min(100, f || 0)}%"></span>${n != null ? `<b style="left:${Math.min(100, n)}%"></b>` : ''}</div><span class="num r">${fmt(f, 0)} %</span></div>`;
+const chg = v => `<span class="${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${signed(v, Math.abs(v) < 10 ? 1 : 0)}</span>`;
+function sortable(tbl, cols, rows, state, render) {
+  const go = () => { const c = cols[state.i], dir = state.asc ? 1 : -1, data = [...rows()].sort((a, b) => { const x = c.v(a), y = c.v(b); return (x == null) - (y == null) || (typeof x === 'string' ? x.localeCompare(y, 'es') : x - y) * dir; });
+    tbl.innerHTML = `<thead><tr>${cols.map((c, i) => `<th class="${c.r ? 'r' : ''}"><button data-i="${i}" ${i === state.i ? `aria-sort="${state.asc ? 'ascending' : 'descending'}"` : ''}>${c.h}</button></th>`).join('')}</tr></thead><tbody>${render(data).map(r => `<tr>${cols.map(c => `<td class="${c.r ? 'r num' : ''}">${c.c(r)}</td>`).join('')}</tr>`).join('')}</tbody>`;
+    tbl.querySelectorAll('th button').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (state.i === i) state.asc = !state.asc; else { state.i = i; state.asc = i === 0 || i === 1; } go(); }); };
+  go(); return go;
+}
+let shown = 15;
+const norm = s => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
+const redrawRes = sortable($('t-res'), [
+  { h: 'Embalse', v: r => r.reservoir_name, c: r => `<div class="name">${esc(r.reservoir_name)}</div><div class="sub">${esc([title(r.river_name), r.province].filter(Boolean).join(' · '))}</div>` },
+  { h: 'Cuenca', v: r => r.basin_name || '', c: r => esc(r.basin_name || '') },
+  { h: 'Embalsado', r: 1, v: r => r.stored_hm3, c: r => `${fmt(r.stored_hm3)} hm³` }, { h: 'Capacidad', r: 1, v: r => r.capacity_hm3, c: r => `${fmt(r.capacity_hm3)} hm³` },
+  { h: 'Nivel', v: r => r.fill_pct, c: r => fillCell(r.fill_pct, r.fill_10y) }, { h: 'Media 10 años', r: 1, v: r => r.fill_10y, c: r => `${fmt(r.fill_10y, 0)} %` },
+  { h: 'Cambio', r: 1, v: r => trend(r), c: r => trend(r) == null ? '—' : chg(trend(r)) + ' hm³' },
+  { h: 'Dato', v: r => r.data_source, c: r => `<span class="pill ${r.data_source === 'miteco-weekly' ? 'w' : ''}"><i></i>${r.data_source === 'miteco-weekly' ? 'semanal' : 'en directo'}</span>` },
+], () => { const q = norm($('q').value); return D.res.filter(r => inScope(r) && (!q || norm(`${r.reservoir_name} ${r.river_name} ${r.province} ${r.basin_name}`).includes(q))); },
+  { i: 3, asc: false }, d => { $('count').textContent = `${d.length} embalses`; $('more').hidden = d.length <= shown; return d.slice(0, shown); });
+$('q').oninput = () => { shown = 15; redrawRes(); }; $('more').onclick = () => { shown += 40; redrawRes(); };
+function variations() { const rs = D.res.filter(inScope), live = rs.filter(r => r.change_since_bulletin_hm3 != null).length, rows = rs.filter(r => trend(r) != null && Math.abs(trend(r)) >= 0.5);
+  $('var-note').textContent = `Cambio de agua embalsada: desde el último boletín en los ${live} embalses con lectura en directo, y en la última semana en el resto.`;
+  const tb = (x, h) => `<thead><tr><th>${h}</th><th class="r">Cambio</th><th class="r">Nivel</th></tr></thead><tbody>${x.map(r => `<tr><td><span class="name">${esc(r.reservoir_name)}</span> <span class="sub">· ${esc(r.basin_name || '')}</span></td><td class="r num">${chg(trend(r))} hm³</td><td class="r num">${fmt(r.fill_pct, 0)} %</td></tr>`).join('')}</tbody>`;
+  $('t-up').innerHTML = tb(rows.filter(r => trend(r) > 0).sort((a, b) => trend(b) - trend(a)).slice(0, 8), 'Suben'); $('t-down').innerHTML = tb(rows.filter(r => trend(r) < 0).sort((a, b) => trend(a) - trend(b)).slice(0, 8), 'Bajan'); }
+const gaugeIn = g => { const a = selArea(); return !a || hit.isPointInPath(a.lonlat, g.lon, g.lat, 'evenodd'); };
+const redrawRain = sortable($('t-rain'), [
+  { h: 'Pluviómetro', v: g => g.station_name || '', c: g => `<span class="name">${esc(title(g.station_name))}</span> <span class="sub">· ${esc(g.basin_name || '')}</span>` },
+  { h: '1 h', r: 1, v: g => g.rain_1h_mm, c: g => fmt(g.rain_1h_mm, 1) }, { h: '6 h', r: 1, v: g => g.rain_6h_mm, c: g => fmt(g.rain_6h_mm, 1) },
+  { h: '12 h', r: 1, v: g => g.rain_12h_mm, c: g => `<b>${fmt(g.rain_12h_mm, 1)}</b>` }, { h: '24 h', r: 1, v: g => g.rain_24h_mm, c: g => fmt(g.rain_24h_mm, 1) },
+  { h: 'Desde el 1 de octubre', r: 1, v: g => g.rain_hydro_year_mm, c: g => fmt(g.rain_hydro_year_mm, 0) }, { h: 'Un año antes', r: 1, v: g => g.rain_same_period_last_year_mm, c: g => fmt(g.rain_same_period_last_year_mm, 0) },
+], () => D.gauges.filter(gaugeIn), { i: 3, asc: false }, d => d.slice(0, 15));
+
+// ── selection
+const AREA_NOTES = { 'Región de Murcia': 'El embalse del Cenajo (437 hm³) se cuenta aquí porque el Inventario de Presas y Embalses de MITECO sitúa su presa en Murcia. Está en el límite con Albacete, y otras fuentes lo cuentan allí: sin él, la Región de Murcia estaría en torno al 23 %.', 'Murcia': 'El embalse del Cenajo (437 hm³) se cuenta aquí porque el Inventario de Presas y Embalses de MITECO sitúa su presa en Murcia. Está en el límite con Albacete, y otras fuentes lo cuentan allí.' };
+const SEL = { b: $('s-b'), c: $('s-c'), p: $('s-p') }, LBL = { b: 'Cuenca…', c: 'Comunidad…', p: 'Provincia…' };
+for (const t of ['b', 'c', 'p']) { SEL[t].innerHTML = `<option value="">${LBL[t]}</option>` + AREAS[t].filter(a => a.res.length).map(a => a.name).sort((a, b) => a.localeCompare(b, 'es')).map(n => `<option>${esc(n)}</option>`).join('');
+  SEL[t].onchange = () => SEL[t].value ? setScope(t, SEL[t].value) : setScope('es', null); }
+function setScope(t, k) { scope = { t, k }; for (const x of ['b', 'c', 'p']) SEL[x].value = x === t ? k : ''; if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); }
+  $('back').hidden = t === 'es'; $('groupseg').hidden = t !== 'es'; $('res-title').textContent = t === 'es' ? 'Embalses' : `Embalses de ${k}`;
+  const an = t === 'c' || t === 'p' ? AREA_NOTES[k] : null; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
+  setSeries(); numbers(); yearChart(); fit(); draw(); shown = 15; redrawRes(); variations(); redrawRain(); }
+addEventListener('resize', () => { fit(); draw(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', draw);
+new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+document.fonts?.ready.then(draw);
+setScope('es', null);
+</script>

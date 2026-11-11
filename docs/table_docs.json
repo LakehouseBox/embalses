@@ -1,0 +1,300 @@
+{
+  "ref.basins": {
+    "doc": "Spain's 25 river basin districts (demarcaciones hidrográficas), one row each. Each is managed by one authority, most with their own SAIH real-time network. Source: MITECO ArcGIS 'Demarcaciones' (outlines simplified to ~200 m). Static; refreshed when MITECO republishes.",
+    "columns": {
+      "basin_id": "EU water-framework district code, e.g. ES030 (Tajo). Key.",
+      "miteco_code": "MITECO's own district code, e.g. 31 (Tajo).",
+      "basin_name": "Spanish name, e.g. Tajo.",
+      "basin_name_en": "English name, e.g. Tagus.",
+      "authority_name": "Body that manages the district and its SAIH network.",
+      "saih_network": "Network key used in ref.stations.network for this district's live data (e.g. saih-tajo); null where there is none.",
+      "area_km2": "Land area of the district in km².",
+      "geometry": "District outline, MultiPolygon, EPSG:4326.",
+      "source": "Key of the source (miteco-arcgis)."
+    }
+  },
+  "ref.catchments": {
+    "doc": "Small drainage units (HydroBASINS level 12, ~130 km² median) covering Spain's river basin districts, each linked to the unit it drains into. Used to collect all land upstream of a reservoir. Source: HydroSHEDS HydroBASINS v1c (CC BY 4.0). Static.",
+    "columns": {
+      "catchment_id": "HydroBASINS unit id (HYBAS_ID). Key.",
+      "downstream_catchment_id": "Unit this one drains into; null at the sea or an inland sink.",
+      "pfafstetter_code": "Hierarchical Pfafstetter code: shared prefixes mean nested catchments.",
+      "basin_id": "River basin district (ref.basins) the unit belongs to.",
+      "local_area_km2": "Area of this unit alone, km².",
+      "upstream_area_km2": "Total area draining through this unit, itself included, km².",
+      "is_endorheic": "True for units draining to an inland sink rather than the sea; excluded from upstream areas.",
+      "geometry": "Unit outline, Polygon, EPSG:4326.",
+      "source": "Key of the source (hydrobasins)."
+    }
+  },
+  "ref.rivers": {
+    "doc": "River network for maps: one row per HydroRIVERS segment in Spain's basin districts, with its size so line width can follow the river. Source: HydroSHEDS HydroRIVERS v1.0 (CC BY 4.0). Static.",
+    "columns": {
+      "river_segment_id": "HydroRIVERS segment id (HYRIV_ID). Key.",
+      "downstream_segment_id": "Next segment downstream; null at the mouth.",
+      "river_name": "Official river name where matched (not yet filled).",
+      "stream_order": "Strahler order: 1 for headwater streams, rising as tributaries join.",
+      "length_km": "Segment length, km.",
+      "upstream_area_km2": "Area draining through this segment, km².",
+      "mean_flow_m3s": "Long-term modelled mean flow (HydroSHEDS, 1971–2000), m³/s. For scale on the map, not a measurement.",
+      "catchment_id": "Catchment unit (ref.catchments) the segment lies in.",
+      "basin_id": "River basin district (ref.basins).",
+      "geometry": "Segment line, LineString, EPSG:4326.",
+      "source": "Key of the source (hydrorivers)."
+    }
+  },
+  "ref.reservoirs": {
+    "doc": "The 375 reservoirs in MITECO's weekly reservoir bulletin (practically all of Spain's stored water), one row each, enriched with the national dam inventory, the reservoir's water outline and its upstream catchment. Key reservoir_id is MITECO's EMBALSE_ID, stable since 1988. Links to the inventory, outlines and catchments were made automatically by location, name and capacity; see quality_flags. Sources: MITECO ArcGIS (Embalses_Mapa, UP_Presas_y_embalses, Láminas_Embalses), HydroSHEDS.",
+    "columns": {
+      "reservoir_id": "MITECO bulletin EMBALSE_ID, stable since 1988. Key.",
+      "reservoir_name": "Name as in the weekly bulletin.",
+      "bulletin_area_name": "Area the bulletin groups it under (ámbito); close to, but not the same as, the basin district.",
+      "basin_id": "River basin district the dam is in (ref.basins).",
+      "capacity_hm3": "Capacity used by the weekly bulletin, hm³.",
+      "is_hydroelectric": "True when the bulletin also reports stored energy for it.",
+      "energy_capacity_gwh": "Energy the full reservoir could generate, GWh (bulletin).",
+      "dam_inventory_code": "Code of the main dam in MITECO's national dam inventory.",
+      "dam_name": "Dam name in the inventory; can differ from the reservoir name (Alcántara's dam is José María de Oriol).",
+      "river_name": "River dammed, as in the inventory.",
+      "province": "Province of the dam.",
+      "region": "Autonomous community of the dam.",
+      "uses": "Uses listed in the inventory (Abastecimiento, Riego, Hidroeléctrico, Defensa frente avenidas, …).",
+      "dam_type": "Construction type, from the inventory.",
+      "catchment_area_km2": "Area draining into the dam, km², computed from HydroRIVERS at the dam's river segment. Median error vs the inventory is 2% for catchments over 200 km²; preferred over inventory_catchment_area_km2.",
+      "inventory_catchment_area_km2": "Catchment area as recorded in the dam inventory, km² (filled for about half; some values are wrong).",
+      "mean_annual_inflow_hm3": "Average yearly inflow from the dam inventory, hm³/yr. Lets a storm be expressed as a share of a normal year.",
+      "surface_area_ha": "Area of the water outline (Láminas_Embalses), hectares.",
+      "river_segment_id": "HydroRIVERS segment the dam was snapped to (ref.rivers).",
+      "catchment_id": "Catchment unit the dam sits in (ref.catchments).",
+      "gauges_upstream": "Rain gauges (AEMET + SAIH) inside the upstream catchment. 0 means upstream rain is interpolated from outside.",
+      "quality_flags": "Caveats: no_upstream_gauges, small_catchment (<50 km²), no_river_segment, inventory_catchment_area_differs (>25%), no_water_outline.",
+      "dam_location": "Dam position from the bulletin, Point, EPSG:4326.",
+      "water_outline": "Reservoir water surface, Polygon, EPSG:4326 (null for 7).",
+      "link_status": "How inventory, outline and catchment were attached: auto or reviewed.",
+      "source": "Key of the source (miteco-arcgis)."
+    }
+  },
+  "ref.reservoir_catchments": {
+    "doc": "Bridge table: for each bulletin reservoir, every catchment unit upstream of its dam (traced up the HydroRIVERS network). Makes 'rain over the land that drains into this reservoir' a plain join: obs.precipitation → ref.stations.catchment_id → this table → reservoir. Endorheic units excluded.",
+    "columns": {
+      "reservoir_id": "Reservoir (ref.reservoirs).",
+      "catchment_id": "Catchment unit upstream of the dam (ref.catchments).",
+      "is_dam_unit": "True for the unit the dam sits in.",
+      "area_km2": "Area of the unit, km².",
+      "area_weight": "Share of the reservoir's total upstream area (sums to 1 per reservoir), for area-weighted rain.",
+      "upstream_reservoir_id": "Nearest other bulletin reservoir between this unit and the dam, if any: water from here is regulated by it before arriving."
+    }
+  },
+  "ref.stations": {
+    "doc": "Every measuring station in one register: AEMET weather stations (official inventory) and the SAIH real-time stations of each basin authority (MITECO's national SAIH register): reservoirs, river gauges and rain gauges. One row per physical station per network; station_id is network:native_code. SiAR agro-weather stations to be added. Sources: AEMET OpenData, MITECO ArcGIS 'SAIH'.",
+    "columns": {
+      "station_id": "network:native_code, unique across networks, e.g. saih-tajo:E_36, aemet:5769X. Key.",
+      "network": "Network: aemet, aca, or saih-<basin> (saih-tajo, saih-ebro, …).",
+      "operator": "Organisation that runs the station.",
+      "native_code": "The station's code in its own network, as its feed uses it (for Júcar, Segura and Andalusia the register uses names).",
+      "station_name": "Name as published (for reservoir stations without one, the reservoir's name).",
+      "station_type": "reservoir, river_gauge, rain_gauge or weather_station.",
+      "variables": "What it measures: water_level, stored_volume, fill_pct, flow, precipitation, air_temperature, relative_humidity, wind.",
+      "reservoir_id": "Reservoir it measures (ref.reservoirs); set for reservoir stations within 1.5 km of a bulletin dam.",
+      "basin_id": "River basin district (ref.basins).",
+      "catchment_id": "Catchment unit it sits in (ref.catchments); drives upstream-rain calculations. Null outside the Iberian peninsula.",
+      "elevation_m": "Station altitude, m (AEMET).",
+      "update_interval_minutes": "How often its source publishes a new value.",
+      "first_seen_at": "When it entered this register (UTC).",
+      "last_seen_at": "Last time a feed returned a value for it (UTC); filled by the ingestion.",
+      "location": "Station position, Point, EPSG:4326.",
+      "source": "Key of the source (aemet-opendata, miteco-arcgis)."
+    }
+  },
+  "obs.precipitation": {
+    "doc": "Rain measured at each gauge, always as the amount over an explicit interval, so 10-, 15- and 60-minute networks can be added up. Append-only, partitioned by day of period_end_at. Today: AEMET hourly observations (~830 stations) since 2026-11-10 22:00 UTC; SAIH and SiAR gauges to follow. Real-time values are provisional (not validated by the publisher).",
+    "columns": {
+      "station_id": "Gauge (ref.stations).",
+      "period_start_at": "Start of the interval the rain fell in (UTC).",
+      "period_end_at": "End of the interval (UTC). AEMET's fint.",
+      "period_minutes": "Interval length in minutes (60 for AEMET).",
+      "precipitation_mm": "Rain in the interval, mm (1 mm = 1 litre per m²).",
+      "is_provisional": "True for real-time values not yet validated by the publisher.",
+      "source": "Key of the source (aemet-opendata, …)."
+    }
+  },
+  "obs.weather": {
+    "doc": "Hourly temperature, humidity, wind and pressure at weather stations. Append-only, partitioned by day of observed_at. Today: AEMET hourly observations (~850 stations) since 2026-11-10 22:00 UTC. Provisional real-time values.",
+    "columns": {
+      "station_id": "Weather station (ref.stations).",
+      "observed_at": "End of the hour the values describe (UTC).",
+      "air_temperature_c": "Air temperature at the observation time, °C.",
+      "air_temperature_min_c": "Lowest temperature in the previous hour, °C.",
+      "air_temperature_max_c": "Highest temperature in the previous hour, °C.",
+      "relative_humidity_pct": "Relative humidity, %.",
+      "dew_point_c": "Dew point, °C.",
+      "wind_speed_ms": "Mean wind speed, m/s.",
+      "wind_gust_ms": "Strongest gust in the previous hour, m/s.",
+      "wind_direction_deg": "Direction the wind comes from, degrees (0 = north).",
+      "pressure_hpa": "Station-level air pressure, hPa.",
+      "is_provisional": "True for real-time values not yet validated.",
+      "source": "Key of the source (aemet-opendata)."
+    }
+  },
+  "obs.reservoir_readings": {
+    "doc": "Live reservoir level and storage from each basin's SAIH network, plus inflow and outflow where published. Append-only, partitioned by day of observed_at. One row per station and observation time; sinks deliver at least once, so de-duplicate on (station_id, observed_at). Provisional real-time values.",
+    "columns": {
+      "station_id": "Reservoir station (ref.stations).",
+      "reservoir_id": "Reservoir (ref.reservoirs), copied from ref.stations for easy filtering.",
+      "observed_at": "Time of the reading (UTC).",
+      "water_level_masl": "Water surface height, metres above sea level.",
+      "stored_volume_hm3": "Water stored, hm³.",
+      "fill_pct": "Stored volume as a share of capacity, %, as published by the source.",
+      "inflow_m3s": "Water entering, m³/s, where published.",
+      "outflow_m3s": "Water released through the dam, m³/s, where published.",
+      "is_provisional": "True for real-time values not yet validated.",
+      "source": "Key of the source (saih-ebro, saih-guadalquivir, …)."
+    }
+  },
+  "obs.river_flow": {
+    "doc": "Flow and water depth at SAIH river gauges. A storm shows here as rising flow hours before reservoir levels move. Append-only, partitioned by day of observed_at; de-duplicate on (station_id, observed_at). Provisional real-time values.",
+    "columns": {
+      "station_id": "River gauge (ref.stations).",
+      "observed_at": "Time of the reading (UTC).",
+      "flow_m3s": "Water flowing past the gauge, m³/s.",
+      "water_level_m": "Water depth at the gauge, m.",
+      "is_provisional": "True for real-time values not yet validated.",
+      "source": "Key of the source (saih-ebro, …)."
+    }
+  },
+  "ref.grid_cells": {
+    "doc": "H3 resolution-6 cells (~37 km²) covering Spain's river basin districts: the grid rain is interpolated onto (now.rain_grid). Built by sql/reference/grid.sql.",
+    "columns": {
+      "h3_cell": "H3 cell index (resolution 6), as a hex string. Key.",
+      "basin_id": "River basin district the cell centre lies in.",
+      "cell_area_km2": "Cell area, km².",
+      "geometry": "Cell outline, Polygon, EPSG:4326."
+    }
+  },
+  "ref.catchment_cells": {
+    "doc": "Which H3 grid cells make up each catchment unit, so gridded rain can be averaged over any catchment. Built by sql/reference/grid.sql.",
+    "columns": {
+      "catchment_id": "Catchment unit (ref.catchments).",
+      "h3_cell": "Grid cell (ref.grid_cells).",
+      "cell_weight": "Weight of the cell within the unit (equal weights, summing to 1 per unit)."
+    }
+  },
+  "now.rain_grid": {
+    "doc": "Rain over the last 1, 6, 12, 24 and 72 hours on the H3 grid, interpolated from every gauge within 40 km (inverse-distance weighting, power 2, 1 km smoothing). A gauge counts in a window when it reported at least 75% of it. Rebuilt hourly inside LakehouseBox by sql/now/rain_grid.sql.",
+    "columns": {
+      "h3_cell": "Grid cell (ref.grid_cells).",
+      "time_window": "1h, 6h, 12h, 24h or 72h, ending at as_of.",
+      "as_of": "End of the window: the latest hour at least half the gauges have reported (UTC).",
+      "rain_mm": "Interpolated rain depth, mm.",
+      "stations_used": "Gauges within 40 km that contributed.",
+      "nearest_station_km": "Distance to the nearest contributing gauge, km. Large values mean low confidence."
+    }
+  },
+  "now.upstream_rain": {
+    "doc": "Rain over all the land that drains into each reservoir, per window: the gridded rain averaged over the reservoir's upstream catchment units (ref.reservoir_catchments), also expressed as a volume so it compares with the reservoir's change. Rebuilt hourly inside LakehouseBox by sql/now/upstream_rain.sql.",
+    "columns": {
+      "reservoir_id": "Reservoir (ref.reservoirs).",
+      "time_window": "1h, 6h, 12h, 24h or 72h.",
+      "as_of": "End of the window (UTC).",
+      "areal_rain_mm": "Average rain depth over the upstream area, mm.",
+      "max_station_rain_mm": "Highest single gauge inside the upstream area, mm.",
+      "rain_volume_hm3": "areal_rain_mm × upstream area ÷ 1000: water that fell, hm³. Not all of it reaches the reservoir.",
+      "upstream_area_km2": "Upstream area the average is taken over, km².",
+      "area_covered_pct": "Share of the upstream area with an interpolated value (gauges within 40 km), %.",
+      "stations_reporting": "Gauges inside the upstream area that reported in the window."
+    }
+  },
+  "now.reservoir_status": {
+    "doc": "One row per bulletin reservoir with its latest state, recent change, the rain upstream and how it compares with the same week last year and the 10-year average. The main table the map draws. Live SAIH fields fill in as obs.reservoir_readings is ingested; until then the source is the weekly bulletin. Rebuilt hourly inside LakehouseBox by sql/now/reservoir_status.sql.",
+    "columns": {
+      "reservoir_id": "Reservoir (ref.reservoirs).",
+      "as_of": "When this row was computed (UTC).",
+      "latest_reading_at": "Time of the newest value used (UTC).",
+      "data_source": "saih-<basin> for a live reading, or miteco-weekly for the bulletin.",
+      "stored_volume_hm3": "Latest stored volume, hm³.",
+      "capacity_hm3": "Capacity, hm³.",
+      "fill_pct": "Latest fill level, %.",
+      "change_6h_hm3": "Change over 6 hours, hm³ (live stations only).",
+      "change_24h_hm3": "Change over 24 hours, hm³ (live stations only).",
+      "change_72h_hm3": "Change over 72 hours, hm³ (live stations only).",
+      "change_since_bulletin_hm3": "Change since the last weekly bulletin, hm³ (live stations only).",
+      "weekly_change_hm3": "Change in the last weekly bulletin, hm³.",
+      "inflow_m3s": "Latest inflow, m³/s, where published.",
+      "outflow_m3s": "Latest release, m³/s, where published.",
+      "upstream_rain_24h_mm": "From now.upstream_rain.",
+      "upstream_rain_volume_24h_hm3": "From now.upstream_rain.",
+      "upstream_rain_72h_mm": "From now.upstream_rain.",
+      "fill_pct_same_week_last_year": "Fill in the bulletin closest to the same date last year, %.",
+      "fill_pct_10y_average": "Average fill in the same week over the last 10 years, %.",
+      "data_age_minutes": "Minutes since latest_reading_at."
+    }
+  },
+  "now.basin_summary": {
+    "doc": "Totals per river basin district for headlines: stored water vs capacity, last year and the 10-year average, and rain over the district. Rebuilt hourly inside LakehouseBox by sql/now/basin_summary.sql.",
+    "columns": {
+      "basin_id": "District (ref.basins).",
+      "as_of": "When this row was computed (UTC).",
+      "stored_volume_hm3": "Sum over its bulletin reservoirs, hm³.",
+      "capacity_hm3": "Sum of capacities, hm³.",
+      "fill_pct": "Stored ÷ capacity, %.",
+      "weekly_change_hm3": "Change in the last weekly bulletin, hm³.",
+      "change_24h_hm3": "Change over 24 hours from live stations, hm³.",
+      "fill_pct_same_week_last_year": "District fill in the same week last year, %.",
+      "fill_pct_10y_average": "Average district fill in the same week over 10 years, %.",
+      "areal_rain_24h_mm": "Average interpolated rain over the district in 24 hours, mm.",
+      "reservoirs_live": "Reservoirs with a live reading under 3 hours old.",
+      "reservoirs_total": "Bulletin reservoirs in the district."
+    }
+  },
+  "now.station_status": {
+    "doc": "What a station page shows: latest weather, recent rain, and rain since 1 October compared with the previous two hydrological years. Rebuilt hourly inside LakehouseBox by sql/now/station_status.sql.",
+    "columns": {
+      "station_id": "Station (ref.stations).",
+      "as_of": "End of the rain windows (UTC).",
+      "latest_observation_at": "Newest weather observation (UTC).",
+      "air_temperature_c": "Latest temperature, °C.",
+      "relative_humidity_pct": "Latest humidity, %.",
+      "rain_1h_mm": "Rain in the last hour, mm.",
+      "rain_6h_mm": "Rain in the last 6 hours, mm.",
+      "rain_12h_mm": "Rain in the last 12 hours, mm.",
+      "rain_24h_mm": "Rain in the last 24 hours, mm.",
+      "rain_hydro_year_mm": "Rain since 1 October (daily values, then hourly after the last daily value), mm.",
+      "hydro_year_daily_through": "Last day covered by AEMET's daily values (they run ~4 days behind).",
+      "rain_same_period_last_year_mm": "Rain from 1 October to the same date last year, mm.",
+      "rain_last_hydro_year_total_mm": "Total of the previous October–September year, mm.",
+      "rain_two_years_ago_total_mm": "Total of the October–September year before that, mm.",
+      "data_age_minutes": "Minutes since latest_observation_at."
+    }
+  },
+  "obs.reservoir_weekly": {
+    "doc": "MITECO weekly reservoir bulletin (Boletin Hidrologico), one row per reservoir and bulletin, 1988-01-05 onward. Peninsular reservoirs > 5 hm3. Source: MITECO ArcGIS FeatureServer Embalses_Total (backfill by ingest/miteco_reservoir_weekly.py). Bulletins are Tuesdays.",
+    "columns": {
+      "reservoir_id": "MITECO EMBALSE_ID, stable reservoir id (note: Pajares/Ebro appears as 353 in 2003 and 362 from 2006)",
+      "bulletin_date": "Bulletin date (a Tuesday), from fecha at 00:00 UTC",
+      "bulletin_year": "boletin_anyo, calendar year of the bulletin",
+      "bulletin_number": "boletin_num, bulletin number within the year",
+      "stored_volume_hm3": "agua_actual: water stored on the bulletin date, hm3",
+      "capacity_hm3": "agua_total: capacity at normal maximum level, hm3 (0 for some rows)",
+      "fill_pct": "stored/capacity*100, 2 dp; null when capacity is 0 or null. Source errors make a few rows exceed 100 (max 700)",
+      "weekly_change_hm3": "stored_volume_hm3 minus the same reservoir's previous bulletin; null for its first bulletin (a few gaps span more than a week)",
+      "stored_energy_gwh": "energia_actual: theoretical hydroelectric energy stored, GWh (null/0 for non-hydro reservoirs)",
+      "energy_capacity_gwh": "energia_total: hydroelectric energy at capacity, GWh",
+      "source": "'miteco-arcgis'"
+    }
+  },
+  "obs.daily_weather": {
+    "doc": "AEMET daily climatological values, one row per station and day, all stations, 2023-10-01 onward (AEMET publishes ~4 days late). Source: AEMET OpenData valores/climatologicos/diarios (backfill by ingest/aemet_daily.py).",
+    "columns": {
+      "station_id": "'aemet:' || AEMET indicativo (same ids as obs.weather / obs.precipitation)",
+      "observation_date": "AEMET fecha (climatological day)",
+      "precipitation_mm": "prec: precipitation 07 to 07 UTC, mm. 'Ip' (<0.1 mm) -> 0.0; 'Acum' or missing -> null",
+      "air_temperature_mean_c": "tmed, daily mean air temperature, degC",
+      "air_temperature_min_c": "tmin, daily minimum air temperature, degC",
+      "air_temperature_max_c": "tmax, daily maximum air temperature, degC",
+      "relative_humidity_mean_pct": "hrMedia, daily mean relative humidity, %",
+      "hydrological_year": "Year of the 1 October the date falls on or after (2025-10-01..2026-09-30 -> 2025)",
+      "is_complete": "false when prec is missing, 'Acum' or non-numeric",
+      "source": "'aemet-climatological'"
+    }
+  }
+}

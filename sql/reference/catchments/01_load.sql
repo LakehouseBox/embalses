@@ -1,0 +1,11 @@
+load spatial;
+set geometry_always_xy=true;
+create or replace table b as select EMBALSE_ID, embalse_nombre nombre, agua_total, ambito_nombre, geometry::GEOMETRY g4, st_transform(geometry::GEOMETRY,'EPSG:4326','EPSG:3035',always_xy:=true) g from 'bulletin.parquet';
+create or replace table riv as select HYRIV_ID, NEXT_DOWN, UPLAND_SKM::double upland, DIS_AV_CMS::double dis, HYBAS_L12, ORD_STRA, geometry::GEOMETRY g4, st_transform(geometry::GEOMETRY,'EPSG:4326','EPSG:3035',always_xy:=true) g from 'data/geo/hydrosheds/rivers_iberia.parquet';
+create or replace table l12 as select HYBAS_ID id, NEXT_DOWN nd, SUB_AREA::double sub, UP_AREA::double up, PFAF_ID pfaf, geometry::GEOMETRY g4, st_transform(geometry::GEOMETRY,'EPSG:4326','EPSG:3035',always_xy:=true) g from 'lev12_iberia.parquet';
+create or replace table l10 as select HYBAS_ID id, NEXT_DOWN nd, SUB_AREA::double sub, UP_AREA::double up, PFAF_ID pfaf, geometry::GEOMETRY g4, st_transform(geometry::GEOMETRY,'EPSG:4326','EPSG:3035',always_xy:=true) g from 'lev10_iberia_full.parquet';
+create or replace table dams as select ID_INFRAES, CODIGO, NOMBRE, CAUCE, DEMARC, SUP_CUENCA, AP_M_ANUAL, NMN_CAPAC, geometry::GEOMETRY g4, st_transform(geometry::GEOMETRY,'EPSG:4326','EPSG:3035',always_xy:=true) g from 'dams.parquet';
+create or replace table embp as select ID_EMBALSE, CODIGO, NOMBRE, SUP_CUENCA, NMN_CAPAC, st_transform(geometry::GEOMETRY,'EPSG:4326','EPSG:3035',always_xy:=true) g from 'emb_poly.parquet';
+create or replace table saih as select IDPUNTO, IDSAIH, geometry::GEOMETRY g4 from 'saih.parquet';
+create or replace table aemet as select idema, lat, lon, n_prec, st_point(lon,lat) g4 from read_csv('aemet_stations.csv');
+create or replace table pfaf as select pfafrio, cod_uni, COD_MAR, nom_rio_1, Shape_Area, geometry::GEOMETRY g4 from 'pfaf.parquet';
