@@ -71,8 +71,8 @@ lhbox apply -f lakehouse.yaml         # connections, POST prefixes, the 14 sched
 
 ```sh
 export LHBOX_API_KEY=...     # `lhbox login` makes one
-tofu init                    # skip while using a development override (see below)
+tofu init
 tofu plan
 ```
 
-The provider is at v0.1.0 and not yet listed on the OpenTofu and Terraform registries; until it is, install it from its GitHub release with a [development override](https://opentofu.org/docs/cli/config/config-file/#development-overrides-for-provider-developers). [`tools/tofu_adopt.sh`](tools/tofu_adopt.sh) imports a catalog that already exists and shows the plan.
+The provider is published on the [Terraform registry](https://registry.terraform.io/providers/LakehouseBox/lakehousebox) and installs with both `tofu` and `terraform`. [`tools/tofu_adopt.sh`](tools/tofu_adopt.sh) imports a catalog that already exists and shows the plan.
