@@ -3,10 +3,10 @@ name: Lakehouse
 # Needs the repository secret LHBOX_API_KEY (an API key of the catalog's owner; `lhbox api-key create`).
 on:
   pull_request:
-    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'docs/agent_headline.md', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
+    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
   push:
     branches: [main]
-    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'docs/agent_headline.md', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
+    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
   workflow_dispatch:
 permissions:
   contents: read
