@@ -1,0 +1,44 @@
+name: Lakehouse
+# What runs on LakehouseBox is what is in main: a pull request shows the plan, a merge applies it.
+# Needs the repository secret LHBOX_API_KEY (an API key of the catalog's owner; `lhbox api-key create`).
+on:
+  pull_request:
+    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'docs/agent_headline.md', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
+  push:
+    branches: [main]
+    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'docs/agent_headline.md', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: lakehouse-${{ github.ref }}
+  cancel-in-progress: false
+env:
+  LHBOX_API_KEY: ${{ secrets.LHBOX_API_KEY }}
+  LHBOX_NO_VERSION_CHECK: '1'
+jobs:
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install lhbox
+        run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Plan (nothing is changed)
+        run: |
+          if [ -z "$LHBOX_API_KEY" ]; then echo "No LHBOX_API_KEY here (a fork, or the secret is not set): skipping the plan."; exit 0; fi
+          lhbox migrate --catalog embalses --dry-run
+          lhbox plan -f lakehouse.yaml
+  apply:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install lhbox
+        run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Migrate and apply
+        run: |
+          if [ -z "$LHBOX_API_KEY" ]; then echo "::warning::LHBOX_API_KEY is not set: nothing was applied."; exit 0; fi
+          lhbox migrate --catalog embalses
+          lhbox apply -f lakehouse.yaml
+          lhbox plan -f lakehouse.yaml
