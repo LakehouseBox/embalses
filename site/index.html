@@ -126,8 +126,7 @@ textarea.sql { min-height: 120px; resize: vertical; }
 footer { border-top: 1px solid var(--line); background: var(--surface); padding: 28px 0 40px; font-size: 14px; color: var(--muted); }
 footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; } footer h3 { color: var(--ink); margin-bottom: 6px; } footer p { margin: 0 0 6px; }
 .skeleton { color: var(--faint); }
-.ficha { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
-.ficha dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 18px; margin: 8px 0 0; }
+.ficha dl { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 18px; margin: 8px 0 0; }
 .ficha dt { font-size: 12px; color: var(--muted); } .ficha dd { margin: 0; font-weight: 600; font-size: 15px; }
 .labelrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .linkbtn { font: inherit; font-size: 13px; color: var(--brand); background: none; border: 0; padding: 2px 0; cursor: pointer; white-space: nowrap; }
@@ -182,9 +181,10 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
         <svg id="year" viewBox="0 0 560 250" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div>
       </div>
       <div class="muted small" id="n-date"></div>
-      <div class="ficha" id="ficha" hidden></div>
     </div>
   </div>
+
+  <div class="card ficha" id="ficha" hidden></div>
 
   <div class="grid3">
     <div class="card feature"><h2 id="f-title">Lluvia y embalses</h2><p id="f-text" class="skeleton">Cargando…</p></div>
@@ -196,7 +196,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
     <div class="card" id="lluvia">
       <h2>Lluvia reciente</h2><div class="muted small" id="rain-sub">Precipitación acumulada en las últimas 24 horas</div>
       <div class="rain" style="margin-top:10px"><canvas id="rainmap"></canvas>
-        <div><div class="muted small">Media nacional</div><div class="bigm num" id="rain-mean">—</div><div class="label" style="margin-top:12px">Donde más ha llovido</div><div class="list num" id="rain-top"></div></div></div>
+        <div><div class="muted small">Media peninsular</div><div class="bigm num" id="rain-mean">—</div><div class="label" style="margin-top:12px">Donde más ha llovido</div><div class="list num" id="rain-top"></div></div></div>
       <button class="btn" id="rain-btn" style="margin-top:10px">Ver la lluvia en el mapa</button>
     </div>
     <div class="card" id="embalses">
@@ -292,6 +292,7 @@ FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND 
 const D = { res: [], grid: [], gauges: [], rivers: [] };
 let AREAS = { b: [], c: [], p: [] }, scope = { t: 'es', k: null }, group = 'b', layer = 'res', win = '24h', sortBy = 'cap', shown = 8;
 const hit = document.createElement('canvas').getContext('2d');
+const island = (lon, lat) => lon > 1 && lat < 40.2;   // Balearic Islands: no reservoirs in the bulletin, so the map leaves them out
 function area(type, name, geometry) { let x0 = 99, x1 = -99, y0 = 99, y1 = -99, best = null; const path = new Path2D();
   for (const p of polys(geometry)) { for (const ring of p) { ring.forEach(([x, y], i) => i ? path.lineTo(x, y) : path.moveTo(x, y)); path.closePath(); }
     const ring = p[0]; if (!best || ring.length > best.length) best = ring; for (const [x, y] of ring) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } }
@@ -368,7 +369,7 @@ function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW 
   h.onmouseleave = () => { tip.hidden = true; xh.setAttribute('visibility', 'hidden'); }; }
 
 // ───────── map ─────────
-const cv = $('map'), ctx = cv.getContext('2d'), ES = { w: -9.45, e: 4.45, s: 35.85, n: 43.9 }, KX = Math.cos(40 * Math.PI / 180);
+const cv = $('map'), ctx = cv.getContext('2d'), ES = { w: -9.45, e: 3.45, s: 35.85, n: 43.9 }, KX = Math.cos(40 * Math.PI / 180);
 let P, BB = ES, shownAreas = [], marks = [];
 const BAND = [0, 20, 30, 40, 50, 60, 70, 80], STEPS = [0.2, 1, 5, 10, 20, 40], bounds = new Map(); let gridIndex = new Map();
 const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v >= st[s]) i = s; return i; };
@@ -460,7 +461,7 @@ addEventListener('keydown', e => { if (e.key === 'Escape' && $('mapcard').classL
 function cards() { const k24 = D.grid.reduce((s, c) => s + (c.rain_24h || 0) * 37.2 / 1000, 0), ups = D.res.filter(r => trend(r) > 0.5).sort((a, b) => trend(b) - trend(a)), { last, prev } = SER.es ? stats(SER.es) : ST;
   const rainy = [...D.res].filter(r => r.rain_24h_hm3 > 0).sort((a, b) => b.rain_24h_hm3 - a.rain_24h_hm3)[0];
   $('f-title').textContent = k24 > 300 ? 'Está lloviendo sobre las cuencas' : 'Pocas lluvias en las últimas horas';
-  $('f-text').className = ''; $('f-text').innerHTML = `En las últimas 24 horas han caído unos <b>${fmt(k24)} hm³</b> de lluvia sobre la España peninsular y Baleares.` + (rainy ? ` Donde más, sobre la cuenca que alimenta <b>${esc(rainy.reservoir_name)}</b>: ${fmt(rainy.rain_24h_mm, 1)} mm.` : '') + ` Los embalses han ${last.s >= prev.s ? 'ganado' : 'perdido'} <b>${fmt(Math.abs(last.s - prev.s))} hm³</b> en la última semana.`;
+  $('f-text').className = ''; $('f-text').innerHTML = `En las últimas 24 horas han caído unos <b>${fmt(k24)} hm³</b> de lluvia sobre la España peninsular.` + (rainy ? ` Donde más, sobre la cuenca que alimenta <b>${esc(rainy.reservoir_name)}</b>: ${fmt(rainy.rain_24h_mm, 1)} mm.` : '') + ` Los embalses han ${last.s >= prev.s ? 'ganado' : 'perdido'} <b>${fmt(Math.abs(last.s - prev.s))} hm³</b> en la última semana.`;
   $('ups').innerHTML = ups.slice(0, 4).map(r => `<div><span>${esc(r.reservoir_name)} <span class="muted small">(${esc(r.basin_name || '')})</span></span><b class="upc">${signed(trend(r), trend(r) < 10 ? 1 : 0)} hm³</b></div>`).join('') || '<div class="muted">Sin subidas destacadas ahora.</div>';
   const full = D.res.filter(r => r.fill_pct >= 90 && r.capacity_hm3 >= 10).length; $('full-text').textContent = `${full} embalses superan el 90 % de su capacidad.`; }
 function rainCard() { const c = $('rainmap'), x = c.getContext('2d'), Wd = c.clientWidth || 260, Hh = Math.round(Wd * 0.8), dpr = devicePixelRatio || 1; c.width = Wd * dpr; c.height = Hh * dpr; c.style.height = Hh + 'px'; x.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -550,9 +551,9 @@ const SHAPES = 'embalses:outlines:v1';   // outlines never change between visits
 const savedShapes = () => { try { return JSON.parse(localStorage.getItem(SHAPES))?.rows || null; } catch (e) { return null; } };
 const stillFresh = () => { try { return Date.now() - JSON.parse(localStorage.getItem(SHAPES)).at < 864e5; } catch (e) { return false; } };
 const saveShapes = rows => { try { localStorage.setItem(SHAPES, JSON.stringify({ at: Date.now(), rows })); } catch (e) {} };
-function showOutlines(rows) { const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson)));
+function showOutlines(rows) { const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson))).filter(a => !island(a.cx, a.cy));
   AREAS = { b: of('basin', 'b'), c: of('region', 'c'), p: of('province', 'p') };
-  D.rivers = rows.filter(r => r.layer === 'river').map(r => ({ mean_flow_m3s: r.mean_flow_m3s, geometry: JSON.parse(r.geojson) }));
+  D.rivers = rows.filter(r => r.layer === 'river').map(r => ({ mean_flow_m3s: r.mean_flow_m3s, geometry: JSON.parse(r.geojson) })).filter(r => { const c = r.geometry.coordinates, p = r.geometry.type === 'LineString' ? c[0] : c[0][0]; return !island(p[0], p[1]); });
   if (D.res.length) { assign(); if (!routed) { routed = true; route(); } } animate(BB, BB); }
 let routed = false;
 function showReservoirs(rows) { D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
@@ -573,7 +574,7 @@ function showNational(rows) { SER.es = toSeries(rows); const N = stats(SER.es); 
     if (!shapes) { shapes = (await q(SQL.outlines)).rows; showOutlines(shapes); saveShapes(shapes); }
     const res = (await q(SQL.res)).rows; showReservoirs(res);
     const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly); save({ res, weekly });
-    D.grid = (await q(SQL.grid)).rows; gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows;
+    D.grid = (await q(SQL.grid)).rows.filter(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return !island(lo, la); }); gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows.filter(g => !island(g.lon, g.lat));
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
     cards(); rainCard(); draw();
     if (!stillFresh()) q(SQL.outlines).then(r => saveShapes(r.rows)).catch(() => {});   // refresh the stored outlines once a day
