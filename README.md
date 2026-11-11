@@ -4,7 +4,7 @@
 
 A live, open dataset joining Spain's official rain gauges, river gauges and reservoirs, kept up to date inside [LakehouseBox](https://lakehousebox.com). It is published as a public Apache Iceberg catalog and read straight from the browser.
 
-- **Site:** in progress. [`site/prototype/`](site/prototype) is the design prototype with a data snapshot; the live site will read the catalog from the browser with DuckDB-WASM, with no backend.
+- **Site:** <https://lakehousebox.github.io/embalses/>. One static page ([`site/index.html`](site/index.html)) on GitHub Pages: the browser attaches the public catalog with DuckDB-WASM and queries it directly, with no backend. It includes a live SQL box and CSV download. [`site/prototype/`](site/prototype) keeps the earlier design prototypes.
 - **Data:** the public catalog `embalses`. Attach it from any DuckDB, no account needed:
 
   ```sql
