@@ -1,6 +1,6 @@
 # embalses on LakehouseBox, as OpenTofu / Terraform.
 #
-# The same deployment as lakehouse.yaml (which `lhbox apply` reads), for teams that keep infrastructure in Terraform:
+# The same deployment as lakehouse.yaml (which `lhbox apply` reads), for teams that keep infrastructure in Terraform (CI checks that the two agree):
 # the public catalog, what its scheduled SQL may reach, the 14 sinks that keep it filled, and its documentation.
 # Tables are not here: they come from sql/migrations/ (`lhbox migrate`), so no apply can drop a table or its rows.
 #

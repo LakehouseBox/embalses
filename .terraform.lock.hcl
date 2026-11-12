@@ -5,7 +5,10 @@ provider "registry.terraform.io/lakehousebox/lakehousebox" {
   version     = "0.1.1"
   constraints = "~> 0.1.1"
   hashes = [
+    "h1:+2teNTmvka3yF+Fz4MRXsR5WBOeW3inIbngqxtbplSA=",
     "h1:I59FVeSMwk2oluP2/IcvBGC/iHEXhlfBii9uRhVJ7x0=",
+    "h1:LvSt3JI6JN4ZwqxxkTuYBauseFaofoYTBzvzPKkizJA=",
+    "h1:YsID70v3+zilYXgr8duqz3mPK6+X0eLSOImwb/RSgqE=",
     "zh:6b0ca4b2d684a4bea727fbdbbdc374cbb5ca14d0c2e9ac07d6e780de9a94a011",
     "zh:6dc5651ffecf40345a494e91ed78cd7199d3be9283c029ee37e066724e2561de",
     "zh:a18277a6234978d0378475d33fa63d00347473fe562250e0bad61438fb823b51",

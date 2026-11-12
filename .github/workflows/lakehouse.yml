@@ -1,12 +1,13 @@
 name: Lakehouse
 # What runs on LakehouseBox is what is in main: a pull request shows the plan, a merge applies it.
+# The terraform job then checks that main.tf describes the same deployment: after a merge its plan must be empty.
 # Needs the repository secret LHBOX_API_KEY (an API key of the catalog's owner; `lhbox api-key create`).
 on:
   pull_request:
-    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
+    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'lakehouse.yaml', 'main.tf', '.terraform.lock.hcl', 'tools/tofu_adopt.sh', '.github/workflows/lakehouse.yml']
   push:
     branches: [main]
-    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'lakehouse.yaml', '.github/workflows/lakehouse.yml']
+    paths: ['sql/migrations/**', 'sql/ingest/**', 'sql/now/**', 'docs/AGENTS.md', 'docs/table_docs.json', 'lakehouse.yaml', 'main.tf', '.terraform.lock.hcl', 'tools/tofu_adopt.sh', '.github/workflows/lakehouse.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,3 +43,28 @@ jobs:
           lhbox migrate --catalog embalses
           lhbox apply -f lakehouse.yaml
           lhbox plan -f lakehouse.yaml
+  terraform:
+    # main.tf declares the same deployment as lakehouse.yaml. This job adopts the live catalog into a throwaway
+    # state (imports change nothing on LakehouseBox) and plans: on a pull request the plan is shown, on main it
+    # must be empty, so the two declarations cannot drift apart. It never applies.
+    needs: [plan, apply]
+    if: always() && !failure() && !cancelled()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - name: Install lhbox
+        run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Format and validate
+        run: |
+          tofu fmt -check -diff
+          tofu init -input=false -lockfile=readonly
+          tofu validate
+      - name: Plan against the live catalog
+        run: |
+          if [ -z "$LHBOX_API_KEY" ]; then echo "No LHBOX_API_KEY here: skipping the plan."; exit 0; fi
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            sh tools/tofu_adopt.sh -input=false
+          else
+            sh tools/tofu_adopt.sh -input=false -detailed-exitcode   # exit 2 = main.tf and the live catalog differ
+          fi

@@ -32,20 +32,41 @@ Every column is documented in the catalog itself ([`docs/table_docs.json`](docs/
 ```
 official sources ──► scheduled SQL in LakehouseBox ──► Iceberg tables (obs.*)
                                                             │
-                     scheduled SQL, sql/now/ (hourly) ◄──────┘──► now.*  ──► site (DuckDB-WASM)
-                                                                       └──► hosted agent writes the headline
+                     scheduled SQL, sql/now/ (hourly) ◄──────┘──► now.* ──► site (DuckDB-WASM in the browser)
 ```
 
 - **Ingestion is SQL.** Each source is one query in [`sql/ingest/`](sql/ingest) that LakehouseBox runs on a schedule. It fetches the publisher's own feed, reshapes it and appends it to an Iceberg table.
-- **Tables are migrations.** [`sql/migrations/`](sql/migrations) is plain DuckDB DDL with comments, applied in order.
 - **Derived tables are SQL too.** One query per table in [`sql/now/`](sql/now), run hourly by LakehouseBox itself:
   - rain is interpolated onto an H3 grid (inverse distance, gauges within 40 km);
   - it's averaged over every catchment upstream of each dam;
   - and compared with live storage and the same week in past years.
-- **Everything else is declared** in [`lakehouse.yaml`](lakehouse.yaml): catalog, sinks, connections, the headline agent.
-- **Reference geography** (basins, catchments, rivers, stations) is built once by [`sql/reference/`](sql/reference).
+- **The site is one file.** [`site/index.html`](site/index.html) has no build step and no backend. To run it locally: `python3 -m http.server -d site 8000`.
 
-All live ingestion runs inside LakehouseBox as scheduled SQL. [`tools/`](tools) only holds the one-off scripts that loaded history (MITECO weekly bulletin since 1988, AEMET daily values since 2023) and fetched the reference layers.
+There is no server, worker or cron job of ours anywhere: LakehouseBox runs the SQL, GitHub Pages serves the page.
+
+## Everything is code
+
+Nothing was set up by hand in a console. The whole deployment is in this repository, and CI keeps LakehouseBox equal to `main`.
+
+| What | Where | Applied by |
+|---|---|---|
+| Tables, partitioning, column comments | [`sql/migrations/`](sql/migrations): plain DuckDB DDL, numbered, append-only | `lhbox migrate` |
+| Catalog, connection, POST prefixes, the 14 scheduled sinks | [`lakehouse.yaml`](lakehouse.yaml), or the same in [`main.tf`](main.tf) | `lhbox apply`, or `tofu apply` |
+| The SQL each sink runs | [`sql/ingest/`](sql/ingest), [`sql/now/`](sql/now) | with its sink |
+| Documentation served by the catalog | [`docs/AGENTS.md`](docs/AGENTS.md), [`docs/table_docs.json`](docs/table_docs.json) | with the catalog |
+| The site | [`site/`](site) | GitHub Pages |
+
+Tables are migrations rather than Terraform resources on purpose: a schema is changed by a reviewed, ordered script, and no `apply` can ever drop a table or its rows. It is the usual split between Flyway or dbt for schemas and Terraform for infrastructure.
+
+**CI** ([`.github/workflows/lakehouse.yml`](.github/workflows/lakehouse.yml)):
+
+- a pull request shows what would change: `lhbox migrate --dry-run`, `lhbox plan` and `tofu plan`;
+- a merge to `main` runs `lhbox migrate` and `lhbox apply`;
+- then OpenTofu adopts the live catalog and plans [`main.tf`](main.tf) against it. That plan must be empty, so the two declarations cannot drift apart.
+
+The only secret is one LakehouseBox API key. The AEMET key is an integration held by LakehouseBox and never appears in the repository, in CI or in Terraform state.
+
+**Loaded once, not on every merge:** the reference geography in [`sql/reference/`](sql/reference) (basins, catchments, rivers, stations, map outlines) and the history backfills in [`tools/`](tools) (MITECO weekly bulletin since 1988, AEMET daily values since 2023). They are scripts you run when the source changes.
 
 ## Sources
 
@@ -69,12 +90,18 @@ lhbox apply -f lakehouse.yaml         # connections, POST prefixes, the 14 sched
 
 ### With OpenTofu or Terraform
 
-[`main.tf`](main.tf) declares the same deployment for the [LakehouseBox provider](https://github.com/lakehousebox/terraform-provider-lakehousebox): the public catalog, the URL prefixes and the connection its scheduled SQL may use, the 14 sinks, `AGENTS.md` and every table description. Tables still come from `sql/migrations/` with `lhbox migrate`, so no apply can drop a table or its rows.
+[`main.tf`](main.tf) declares the same deployment for the [LakehouseBox provider](https://registry.terraform.io/providers/LakehouseBox/lakehousebox), which installs with both `tofu` and `terraform`:
 
 ```sh
 export LHBOX_API_KEY=...     # `lhbox login` makes one
 tofu init
-tofu plan
+tofu apply -target=lakehousebox_catalog.embalses    # the catalog first
+lhbox migrate --catalog embalses                     # then its tables
+tofu apply                                           # then everything that fills and documents them
 ```
 
-The provider is published on the [Terraform registry](https://registry.terraform.io/providers/LakehouseBox/lakehousebox) and installs with both `tofu` and `terraform`. [`tools/tofu_adopt.sh`](tools/tofu_adopt.sh) imports a catalog that already exists and shows the plan.
+To adopt a catalog that already exists, [`tools/tofu_adopt.sh`](tools/tofu_adopt.sh) imports its 40 resources and shows the plan. It is what CI runs.
+
+## Licence
+
+The code is under the [Apache License 2.0](LICENSE). The data belongs to its publishers and keeps their terms: see [Sources](#sources).
