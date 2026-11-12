@@ -1,8 +1,9 @@
 name: Publish site
+# The page goes to two places: GitHub Pages (site/) and the LakehouseBox artifact built from it (artifact/).
 on:
   push:
     branches: [main]
-    paths: ['site/**', '.github/workflows/pages.yml']
+    paths: ['site/**', 'artifact/**', 'tools/build_artifact.py', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
@@ -25,3 +26,22 @@ jobs:
           path: site
       - id: deployment
         uses: actions/deploy-pages@v4
+  artifact:
+    # The same page as a LakehouseBox artifact: rebuilt from site/index.html, then published as the next version of
+    # the artifact named in artifact/artifact.json. Needs the repository secret LHBOX_API_KEY.
+    runs-on: ubuntu-latest
+    env:
+      LHBOX_API_KEY: ${{ secrets.LHBOX_API_KEY }}
+      LHBOX_NO_VERSION_CHECK: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build, and check the committed build is current
+        run: |
+          python3 tools/build_artifact.py
+          git diff --exit-code artifact/ || { echo "::error::artifact/ is out of date: run python3 tools/build_artifact.py and commit"; exit 1; }
+      - name: Install lhbox
+        run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Publish the next version
+        run: |
+          if [ -z "$LHBOX_API_KEY" ]; then echo "::warning::LHBOX_API_KEY is not set: the artifact was not published."; exit 0; fi
+          lhbox artifact publish artifact --note "$(git log -1 --format=%s | cut -c1-200)"

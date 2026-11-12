@@ -15,6 +15,7 @@ A live, open dataset joining Spain's official rain gauges, river gauges and rese
   SELECT * FROM embalses."now".reservoir_status LIMIT 10;
   ```
 
+- **As a LakehouseBox artifact:** the same page also runs inside LakehouseBox, where the platform attaches the catalog and the page reaches no other host. [`tools/build_artifact.py`](tools/build_artifact.py) derives it from `site/index.html` into [`artifact/`](artifact), and CI publishes each change as the next version (`lhbox artifact publish artifact`).
 - **For AI agents:** [`docs/AGENTS.md`](docs/AGENTS.md) explains every table, how they join, the units and the caveats. LakehouseBox serves it at the catalog root.
 
 ## What's in it
@@ -55,6 +56,7 @@ Nothing was set up by hand in a console. The whole deployment is in this reposit
 | The SQL each sink runs | [`sql/ingest/`](sql/ingest), [`sql/now/`](sql/now) | with its sink |
 | Documentation served by the catalog | [`docs/AGENTS.md`](docs/AGENTS.md), [`docs/table_docs.json`](docs/table_docs.json) | with the catalog |
 | The site | [`site/`](site) | GitHub Pages |
+| The same page as an artifact | [`artifact/`](artifact), built from `site/` | `lhbox artifact publish` |
 
 Tables are migrations rather than Terraform resources on purpose: a schema is changed by a reviewed, ordered script, and no `apply` can ever drop a table or its rows. It is the usual split between Flyway or dbt for schemas and Terraform for infrastructure.
 
@@ -104,4 +106,4 @@ To adopt a catalog that already exists, [`tools/tofu_adopt.sh`](tools/tofu_adopt
 
 ## Licence
 
-The code is under the [Apache License 2.0](LICENSE). The data belongs to its publishers and keeps their terms: see [Sources](#sources).
+The code is under the [Apache License 2.0](LICENSE). The artifact ships the Source Sans 3 font (Adobe, [SIL Open Font License 1.1](https://openfontlicense.org)). The data belongs to its publishers and keeps their terms: see [Sources](#sources).
