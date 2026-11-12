@@ -6,7 +6,10 @@
 set -eu
 cd "$(dirname "$0")/.."
 have=$(tofu state list 2>/dev/null || true)
-adopt() { printf '%s\n' "$have" | grep -qxF "$1" || tofu import "$1" "$2"; }   # skip what is already in state
+adopt() {   # skip what is already in state; retry, because 40 imports in a row do meet the odd network timeout
+  printf '%s\n' "$have" | grep -qxF "$1" && return 0
+  tofu import "$1" "$2" || { sleep 5; tofu import "$1" "$2"; } || { sleep 15; tofu import "$1" "$2"; }
+}
 
 adopt lakehousebox_catalog.embalses embalses
 adopt lakehousebox_catalog_agents_md.embalses embalses
