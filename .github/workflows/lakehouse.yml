@@ -61,7 +61,10 @@ jobs:
           tofu init -input=false -lockfile=readonly
           tofu validate
       - name: Plan against the live catalog
+        env:
+          GODEBUG: tlsmlkem=0,tlskyber=0   # trial: the provider's TLS handshake to the API times out from hosted runners
         run: |
+          curl -sS -o /dev/null -w 'api reachable with curl: %{http_code} in %{time_total}s (tls %{time_appconnect}s, %{remote_ip})\n' https://api.lakehousebox.com/v1/catalogs/embalses || true
           if [ -z "$LHBOX_API_KEY" ]; then echo "No LHBOX_API_KEY here: skipping the plan."; exit 0; fi
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             sh tools/tofu_adopt.sh -input=false
