@@ -53,6 +53,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_wrapper: false   # the wrapper hides tofu's exit code, and the plan's exit code is the check
       - name: Install lhbox
         run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Format and validate
@@ -62,9 +64,10 @@ jobs:
           tofu validate
       - name: Plan against the live catalog
         env:
-          GODEBUG: tlsmlkem=0,tlskyber=0   # trial: the provider's TLS handshake to the API times out from hosted runners
+          # Go's post-quantum key share makes a ClientHello too large for something on the path from hosted
+          # runners to the API: the handshake times out. Without it the provider connects.
+          GODEBUG: tlsmlkem=0
         run: |
-          curl -sS -o /dev/null -w 'api reachable with curl: %{http_code} in %{time_total}s (tls %{time_appconnect}s, %{remote_ip})\n' https://api.lakehousebox.com/v1/catalogs/embalses || true
           if [ -z "$LHBOX_API_KEY" ]; then echo "No LHBOX_API_KEY here: skipping the plan."; exit 0; fi
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             sh tools/tofu_adopt.sh -input=false
