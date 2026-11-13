@@ -38,7 +38,7 @@ jobs:
       - name: Build, and check the committed build is current
         run: |
           python3 tools/build_artifact.py
-          git diff --exit-code artifact/ || { echo "::error::artifact/ is out of date: run python3 tools/build_artifact.py and commit"; exit 1; }
+          git diff --exit-code artifact/page/ || { echo "::error::artifact/ is out of date: run python3 tools/build_artifact.py and commit"; exit 1; }
       - name: Install lhbox
         run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Publish the next version
