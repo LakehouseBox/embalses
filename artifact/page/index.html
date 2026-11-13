@@ -153,7 +153,6 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
   .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
 }
-#share, #csv { display: none !important; }
 </style>
 </head>
 <body>
@@ -533,16 +532,20 @@ async function ficha() { const r = selRes(), el = $('ficha'); el.hidden = !r; if
 const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 const WORD = { b: 'cuenca', c: 'comunidad', p: 'provincia', r: 'embalse' }, CAPA = { res: '', var: 'variaciones', rain: 'lluvia' };
 const address = () => '#/' + (scope.t === 'es' ? '' : WORD[scope.t] + '/' + (scope.t === 'r' ? scope.k + '-' + slug(scopeName(scope)) : slug(scope.k))) + (CAPA[layer] ? '?capa=' + CAPA[layer] : '');
-function remember(push) { const a = address(); if (location.hash !== a && !(a === '#/' && !location.hash.startsWith('#/'))) history[push ? 'pushState' : 'replaceState'](null, '', a);
+// lhbox.state is filled in when the runtime is ready (lhbox:init), not when the module loads
+let PLACE = ''; lhbox.ready().then(() => { if (!PLACE) PLACE = lhbox.state || ''; }, () => {});
+// the link to this view: the public page, with the place after #s=
+const SHARE = () => 'https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA' + (PLACE && PLACE !== '#/' ? '#s=' + encodeURIComponent(PLACE) : '');
+function remember(push) { const a = address(); if (PLACE !== a && !(a === '#/' && !PLACE.startsWith('#/'))) { PLACE = a; lhbox.setState(a, { push }); }
   document.title = (scope.t === 'es' ? '' : scopeName(scope) + ' · ') + 'Embalses de España'; }
-function route() { if (location.hash && !location.hash.startsWith('#/')) return;   // #panorama and the like are not views
-  const m = (location.hash || '#/').match(/^#\/(?:(cuenca|comunidad|provincia|embalse)\/([^?]+))?(?:\?capa=(\w+))?$/); if (!m) return;
+function route() { if (PLACE && !PLACE.startsWith('#/')) return;   // #panorama and the like are not views
+  const m = (PLACE || '#/').match(/^#\/(?:(cuenca|comunidad|provincia|embalse)\/([^?]+))?(?:\?capa=(\w+))?$/); if (!m) return;
   const l = Object.keys(CAPA).find(k => CAPA[k] === (m[3] || '')) || 'res', t = Object.keys(WORD).find(k => WORD[k] === m[1]);
   const k = !t ? null : t === 'r' ? D.res.find(r => r.reservoir_id === parseInt(m[2]))?.reservoir_id : AREAS[t].find(a => slug(a.name) === m[2] && a.res.length)?.name;
   if (l !== layer) setLayer(l, false); if ((k ?? null) !== scope.k || (k == null ? 'es' : t) !== scope.t) setScope(k == null ? 'es' : t, k ?? null, false); }
-addEventListener('popstate', route); addEventListener('hashchange', route);
+lhbox.onState(s => { PLACE = s || ''; route(); });
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').startsWith('#/')) return; e.preventDefault(); const el = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href')); (el || document.body).scrollIntoView(); });
-$('share').onclick = async () => { try { await navigator.clipboard.writeText(location.href); $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
+$('share').onclick = async () => { try { if (!await lhbox.copy(SHARE())) throw 0; $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
 async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; mtip.hidden = true;
   if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
     const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
@@ -572,7 +575,7 @@ async function run() { if (!conn) { $('q-status').textContent = 'Conectando toda
 $('run').onclick = run;
 $('csv').onclick = () => { if (!lastResult) return; const cell = v => v == null ? '' : /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
   const csv = [lastResult.cols.join(','), ...lastResult.rows.map(r => lastResult.cols.map(c => cell(r[c])).join(','))].join('\n'), a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'embalses.csv'; a.click(); };
+  lhbox.download('embalses.csv', csv); };
 
 // ───────── start ─────────
 addEventListener('resize', () => { if (P) { animRun++; ANIM = 1; fit(); draw(); rainCard(); } });

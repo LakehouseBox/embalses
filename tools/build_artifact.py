@@ -10,13 +10,15 @@ and the page may reach no other host. So the build changes only that edge:
   - the data layer: lhbox.query() instead of a DuckDB-WASM connection of our own;
   - the font: shipped as assets (Source Sans 3, SIL Open Font License) instead of Google Fonts;
   - links out: through lhbox.open(), which asks the viewer before a new tab opens;
-  - the CSV button and "Copiar enlace" are hidden: the frame may not download, copy or change the address.
+  - deep links, the CSV button and "Copiar enlace": through lhbox.setState, lhbox.download and lhbox.copy.
 Everything else (map, charts, routes, the SQL box) is the same code.
 """
 import pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 src = (ROOT / 'site/index.html').read_text()
+META = __import__('json').loads((ROOT / 'artifact/artifact.json').read_text())
+LINK = META.get('public_url') or META['url']   # what "Copiar enlace" copies
 out = src
 
 
@@ -58,9 +60,25 @@ swap_re(r"const CAT = `ATTACH.*?\nasync function q\(sql\) \{[^\n]*\n",
 swap('// ───────── data: DuckDB-WASM attached to the public LakehouseBox catalog ─────────',
      '// ───────── data: the LakehouseBox artifact runtime, reading the catalog the artifact names ─────────')
 
-# The page's frame may not download a file, write to the clipboard or change the address LakehouseBox shows, so the
-# CSV button and "Copiar enlace" cannot work there: hide them. LakehouseBox's own Share button shares the page.
-swap('</style>\n', '#share, #csv { display: none !important; }\n</style>\n')
+# Deep links: inside the frame location.hash is not the address people see. The page's place (#/cuenca/ebro?capa=lluvia)
+# is kept with lhbox.setState instead, which LakehouseBox puts in its own address, so a reload, Back and a copied link
+# come back to it. PLACE stands in for location.hash.
+swap("function remember(push) { const a = address(); if (location.hash !== a && !(a === '#/' && !location.hash.startsWith('#/'))) history[push ? 'pushState' : 'replaceState'](null, '', a);",
+     "// lhbox.state is filled in when the runtime is ready (lhbox:init), not when the module loads\n"
+     "let PLACE = ''; lhbox.ready().then(() => { if (!PLACE) PLACE = lhbox.state || ''; }, () => {});\n"
+     "// the link to this view: the public page, with the place after #s=\n"
+     f"const SHARE = () => {LINK!r} + (PLACE && PLACE !== '#/' ? '#s=' + encodeURIComponent(PLACE) : '');\n"
+     "function remember(push) { const a = address(); if (PLACE !== a && !(a === '#/' && !PLACE.startsWith('#/'))) { PLACE = a; lhbox.setState(a, { push }); }")
+swap("function route() { if (location.hash && !location.hash.startsWith('#/')) return;",
+     "function route() { if (PLACE && !PLACE.startsWith('#/')) return;")
+swap("const m = (location.hash || '#/').match(", "const m = (PLACE || '#/').match(")
+swap("addEventListener('popstate', route); addEventListener('hashchange', route);",
+     "lhbox.onState(s => { PLACE = s || ''; route(); });")
+
+# Files and the clipboard go through the runtime, which asks the viewer first.
+swap("a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = 'embalses.csv'; a.click(); };",
+     "lhbox.download('embalses.csv', csv); };")
+swap("await navigator.clipboard.writeText(location.href);", "if (!await lhbox.copy(SHARE())) throw 0;")
 
 # The frame has no storage, so the outlines are never "fresh": skip the daily refresh query, it would run on every open.
 swap("    if (!stillFresh()) q(SQL.outlines).then(r => saveShapes(r.rows)).catch(() => {});   // refresh the stored outlines once a day\n", "")

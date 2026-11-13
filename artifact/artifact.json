@@ -1,6 +1,11 @@
 {
   "artifact_id": "a_xfXMuSDMl2OvrKyGans2oA",
   "title": "Embalses: el agua en España",
-  "catalogs": ["jatorre/embalses"],
-  "url": "https://lakehousebox.com/app/a/a_xfXMuSDMl2OvrKyGans2oA"
+  "catalogs": [
+    "jatorre/embalses"
+  ],
+  "url": "https://lakehousebox.com/app/a/a_xfXMuSDMl2OvrKyGans2oA",
+  "version": 13,
+  "note": "Diagnostic: query timings on DuckDB 2.0 (temporary)",
+  "public_url": "https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA"
 }
