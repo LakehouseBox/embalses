@@ -534,8 +534,7 @@ const WORD = { b: 'cuenca', c: 'comunidad', p: 'provincia', r: 'embalse' }, CAPA
 const address = () => '#/' + (scope.t === 'es' ? '' : WORD[scope.t] + '/' + (scope.t === 'r' ? scope.k + '-' + slug(scopeName(scope)) : slug(scope.k))) + (CAPA[layer] ? '?capa=' + CAPA[layer] : '');
 // lhbox.state is filled in when the runtime is ready (lhbox:init), not when the module loads
 let PLACE = ''; lhbox.ready().then(() => { if (!PLACE) PLACE = lhbox.state || ''; }, () => {});
-// the link to this view: the public page, with the place after #s=
-const SHARE = () => 'https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA' + (PLACE && PLACE !== '#/' ? '#s=' + encodeURIComponent(PLACE) : '');
+const SHARE = () => lhbox.link;   // the address of this view, on the public page or the account page
 function remember(push) { const a = address(); if (PLACE !== a && !(a === '#/' && !PLACE.startsWith('#/'))) { PLACE = a; lhbox.setState(a, { push }); }
   document.title = (scope.t === 'es' ? '' : scopeName(scope) + ' · ') + 'Embalses de España'; }
 function route() { if (PLACE && !PLACE.startsWith('#/')) return;   // #panorama and the like are not views

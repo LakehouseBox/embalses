@@ -17,8 +17,6 @@ import pathlib, re, sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 src = (ROOT / 'site/index.html').read_text()
-META = __import__('json').loads((ROOT / 'artifact/artifact.json').read_text())
-LINK = META.get('public_url') or META['url']   # what "Copiar enlace" copies
 out = src
 
 
@@ -66,8 +64,7 @@ swap('// ───────── data: DuckDB-WASM attached to the public La
 swap("function remember(push) { const a = address(); if (location.hash !== a && !(a === '#/' && !location.hash.startsWith('#/'))) history[push ? 'pushState' : 'replaceState'](null, '', a);",
      "// lhbox.state is filled in when the runtime is ready (lhbox:init), not when the module loads\n"
      "let PLACE = ''; lhbox.ready().then(() => { if (!PLACE) PLACE = lhbox.state || ''; }, () => {});\n"
-     "// the link to this view: the public page, with the place after #s=\n"
-     f"const SHARE = () => {LINK!r} + (PLACE && PLACE !== '#/' ? '#s=' + encodeURIComponent(PLACE) : '');\n"
+     "const SHARE = () => lhbox.link;   // the address of this view, on the public page or the account page\n"
      "function remember(push) { const a = address(); if (PLACE !== a && !(a === '#/' && !PLACE.startsWith('#/'))) { PLACE = a; lhbox.setState(a, { push }); }")
 swap("function route() { if (location.hash && !location.hash.startsWith('#/')) return;",
      "function route() { if (PLACE && !PLACE.startsWith('#/')) return;")
