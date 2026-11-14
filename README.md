@@ -1,12 +1,12 @@
 # embalses
 
-[![The site: a map of Spain coloured by how full each basin is, beside the national level and its year chart](docs/img/embalses-home.png)](https://lakehousebox.github.io/embalses/)
+[![The page: a map of Spain coloured by how full each basin is, beside the national level and its year chart](docs/img/embalses-home.png)](https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA)
 
 **Where is it raining in Spain, and is that rain reaching the reservoirs?**
 
 A live, open dataset joining Spain's official rain gauges, river gauges and reservoirs, kept up to date inside [LakehouseBox](https://lakehousebox.com). It is published as a public Apache Iceberg catalog and read straight from the browser.
 
-- **Site:** <https://lakehousebox.github.io/embalses/>. One static page ([`site/index.html`](site/index.html)) on GitHub Pages: the browser attaches the public catalog with DuckDB-WASM (DuckDB 2.0) and reads everything from it, map outlines included, with no backend, no data files and no spatial extension. It has a live SQL box and CSV download.
+- **The page:** <https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA>. A LakehouseBox artifact ([`artifact/page/index.html`](artifact/page/index.html)): LakehouseBox attaches the public catalog and the page's SQL runs in DuckDB 2.0 in the visitor's browser. The map outlines come from the catalog too, so the page holds no data and has no backend. It has deep links to every basin, region, province and reservoir, a live SQL box and CSV download. The old address, <https://lakehousebox.github.io/embalses/>, redirects there.
 - **Data:** the public catalog `embalses`. Attach it from any DuckDB, no account needed:
 
   ```sql
@@ -15,7 +15,6 @@ A live, open dataset joining Spain's official rain gauges, river gauges and rese
   SELECT * FROM embalses."now".reservoir_status LIMIT 10;
   ```
 
-- **As a LakehouseBox artifact:** the same page also runs inside LakehouseBox, where the platform attaches the catalog and the page reaches no other host. [`tools/build_artifact.py`](tools/build_artifact.py) derives it from `site/index.html` into [`artifact/`](artifact), and CI publishes each change as the next version (`lhbox artifact publish artifact`).
 - **For AI agents:** [`docs/AGENTS.md`](docs/AGENTS.md) explains every table, how they join, the units and the caveats. LakehouseBox serves it at the catalog root.
 
 ## What's in it
@@ -33,7 +32,7 @@ Every column is documented in the catalog itself ([`docs/table_docs.json`](docs/
 ```
 official sources ──► scheduled SQL in LakehouseBox ──► Iceberg tables (obs.*)
                                                             │
-                     scheduled SQL, sql/now/ (hourly) ◄──────┘──► now.* ──► site (DuckDB-WASM in the browser)
+                     scheduled SQL, sql/now/ (hourly) ◄──────┘──► now.* ──► the page (a LakehouseBox artifact)
 ```
 
 - **Ingestion is SQL.** Each source is one query in [`sql/ingest/`](sql/ingest) that LakehouseBox runs on a schedule. It fetches the publisher's own feed, reshapes it and appends it to an Iceberg table.
@@ -41,9 +40,9 @@ official sources ──► scheduled SQL in LakehouseBox ──► Iceberg table
   - rain is interpolated onto an H3 grid (inverse distance, gauges within 40 km);
   - it's averaged over every catchment upstream of each dam;
   - and compared with live storage and the same week in past years.
-- **The site is one file.** [`site/index.html`](site/index.html) has no build step and no backend. To run it locally: `python3 -m http.server -d site 8000`.
+- **The page is one file.** [`artifact/page/index.html`](artifact/page/index.html), plain HTML and JavaScript with no build step, plus its font in `artifact/assets/`. It reads the catalog through LakehouseBox's artifact runtime (`lhbox.query`), so it runs inside LakehouseBox rather than from a local server.
 
-There is no server, worker or cron job of ours anywhere: LakehouseBox runs the SQL, GitHub Pages serves the page.
+There is no server, worker or cron job of ours anywhere: LakehouseBox runs the SQL and serves the page.
 
 ## Everything is code
 
@@ -55,8 +54,8 @@ Nothing was set up by hand in a console. The whole deployment is in this reposit
 | Catalog, connection, POST prefixes, the 14 scheduled sinks | [`lakehouse.yaml`](lakehouse.yaml), or the same in [`main.tf`](main.tf) | `lhbox apply`, or `tofu apply` |
 | The SQL each sink runs | [`sql/ingest/`](sql/ingest), [`sql/now/`](sql/now) | with its sink |
 | Documentation served by the catalog | [`docs/AGENTS.md`](docs/AGENTS.md), [`docs/table_docs.json`](docs/table_docs.json) | with the catalog |
-| The site | [`site/`](site) | GitHub Pages |
-| The same page as an artifact | [`artifact/`](artifact), built from `site/` | `lhbox artifact publish` |
+| The page | [`artifact/`](artifact) | `lhbox artifact publish` (CI, on every change) |
+| Redirect from the old address | [`site/`](site) | GitHub Pages |
 
 Tables are migrations rather than Terraform resources on purpose: a schema is changed by a reviewed, ordered script, and no `apply` can ever drop a table or its rows. It is the usual split between Flyway or dbt for schemas and Terraform for infrastructure.
 

@@ -3,26 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Embalses de España · agua embalsada, lluvia y cuencas en directo</title>
+<title>Embalses: el agua en España</title>
 <meta name="description" content="El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.">
-<link rel="canonical" href="https://lakehousebox.github.io/embalses/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5c3.2 4.3 6.5 8 6.5 12a6.5 6.5 0 0 1-13 0c0-4 3.3-7.7 6.5-12z' fill='%231463e0'/%3E%3C/svg%3E">
-<meta name="theme-color" content="#ffffff">
-<meta property="og:type" content="website">
-<meta property="og:site_name" content="Embalses de España">
-<meta property="og:locale" content="es_ES">
-<meta property="og:url" content="https://lakehousebox.github.io/embalses/">
-<meta property="og:title" content="El agua en España: embalses, lluvia y cuencas en directo">
-<meta property="og:description" content="El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.">
-<meta property="og:image" content="https://lakehousebox.github.io/embalses/card.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Mapa de la lluvia de las últimas 24 horas sobre la España peninsular, junto al título El agua en España">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="El agua en España: embalses, lluvia y cuencas en directo">
-<meta name="twitter:description" content="El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.">
-<meta name="twitter:image" content="https://lakehousebox.github.io/embalses/card.png">
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "Embalses, lluvia y cuencas de España", "description": "Reservas de los embalses de España (boletín hidrológico semanal desde 1988 y lecturas en tiempo real de los SAIH), lluvia horaria de AEMET interpolada sobre una malla H3, y la lluvia sobre la cuenca de cada embalse. Se actualiza cada hora y se publica como catálogo abierto Apache Iceberg.", "url": "https://lakehousebox.github.io/embalses/", "inLanguage": "es", "isAccessibleForFree": true, "keywords": ["embalses", "reservas de agua", "lluvia", "cuencas hidrográficas", "España", "datos abiertos", "Apache Iceberg"], "spatialCoverage": {"@type": "Place", "name": "España"}, "temporalCoverage": "1988/..", "isBasedOn": ["Ministerio para la Transición Ecológica y el Reto Demográfico (MITECO): Boletín Hidrológico e Inventario de Presas y Embalses", "AEMET OpenData", "SAIH de las confederaciones hidrográficas", "HydroSHEDS (CC BY 4.0)"], "publisher": {"@type": "Organization", "name": "LakehouseBox", "url": "https://lakehousebox.com"}, "distribution": [{"@type": "DataDownload", "name": "Catálogo Apache Iceberg (REST, acceso anónimo)", "encodingFormat": "Apache Iceberg", "contentUrl": "https://public-catalog.lakehousebox.com"}], "sameAs": "https://github.com/LakehouseBox/embalses", "image": "https://lakehousebox.github.io/embalses/card.png"}</script>
 <script defer src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
 <style>
 @font-face { font-family: 'Source Sans 3'; font-style: normal; font-weight: 400; font-display: swap; src: url(../assets/source-sans-3-400.woff2) format('woff2'); }
@@ -186,7 +168,6 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 </style>
 </head>
 <body class="wait-map wait-res wait-rain">
-<noscript><p style="padding:16px;margin:0;background:#f3f7fc">Esta página lee los datos en directo desde tu navegador y necesita JavaScript. Los datos son un catálogo abierto Apache Iceberg en LakehouseBox (<code>jatorre/embalses</code>); el código y la documentación están en <a href="https://github.com/LakehouseBox/embalses">GitHub</a>.</p></noscript>
 <header class="top"><div class="wrap">
   <a class="brand" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.2 4.3 6.5 8 6.5 12a6.5 6.5 0 0 1-13 0c0-4 3.300-7.700 6.500-12z" fill="#1463e0"/></svg>Embalses de España</a>
   <nav class="main"><a href="#panorama">Panorama</a><a href="#lluvia">Lluvia</a><a href="#embalses">Embalses</a><a href="#datos">Datos abiertos</a></nav>
