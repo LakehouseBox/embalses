@@ -1,12 +1,12 @@
 # embalses
 
-[![The page: a map of Spain coloured by how full each basin is, beside the national level and its year chart](docs/img/embalses-home.png)](https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA)
+[![The page: a map of Spain coloured by how full each basin is, beside the national level and its year chart](docs/img/embalses-home.png)](https://lakehousebox.com/a/a_xfXMuSDMl2OvrKyGans2oA/embalses-el-agua-en-espana)
 
 **Where is it raining in Spain, and is that rain reaching the reservoirs?**
 
 A live, open dataset joining Spain's official rain gauges, river gauges and reservoirs, kept up to date inside [LakehouseBox](https://lakehousebox.com). It is published as a public Apache Iceberg catalog and read straight from the browser.
 
-- **The page:** <https://lakehousebox.com/app/a/public-page?a_xfXMuSDMl2OvrKyGans2oA>. A LakehouseBox artifact ([`artifact/page/index.html`](artifact/page/index.html)): LakehouseBox attaches the public catalog and the page's SQL runs in DuckDB 2.0 in the visitor's browser. The map outlines come from the catalog too, so the page holds no data and has no backend. It has deep links to every basin, region, province and reservoir, a live SQL box and CSV download. The old address, <https://lakehousebox.github.io/embalses/>, redirects there.
+- **The page:** <https://lakehousebox.com/a/a_xfXMuSDMl2OvrKyGans2oA/embalses-el-agua-en-espana>. A LakehouseBox artifact ([`artifact/page/index.html`](artifact/page/index.html)): LakehouseBox attaches the public catalog and the page's SQL runs in DuckDB 2.0 in the visitor's browser. The map outlines come from the catalog too, so the page holds no data and has no backend. It has deep links to every basin, region, province and reservoir, a live SQL box and CSV download. The old address, <https://lakehousebox.github.io/embalses/>, redirects there.
 - **Data:** the public catalog `embalses`. Attach it from any DuckDB, no account needed:
 
   ```sql
