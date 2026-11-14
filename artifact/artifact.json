@@ -5,5 +5,7 @@
     "jatorre/embalses"
   ],
   "url": "https://lakehousebox.com/app/a/a_xfXMuSDMl2OvrKyGans2oA",
-  "public_url": "https://lakehousebox.com/a/a_xfXMuSDMl2OvrKyGans2oA/embalses-el-agua-en-espana"
+  "public_url": "https://lakehousebox.com/a/a_xfXMuSDMl2OvrKyGans2oA/embalses-el-agua-en-espana",
+  "description": "El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.",
+  "thumbnail": "card.png"
 }
