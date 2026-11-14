@@ -12,6 +12,7 @@ Every value comes from its publisher: MITECO (weekly reservoir bulletin, dam inv
   - `rivers`: HydroRIVERS segments.
   - `reservoirs`: the 375 reservoirs in MITECO's weekly bulletin.
   - `reservoir_catchments`: every catchment unit upstream of each reservoir.
+  - `reservoir_links`: how reservoirs connect, one row per direct link (water flows `from_reservoir_id` → `to_reservoir_id`). River links join each reservoir to the next one downstream; canal and transfer links join reservoirs no river connects.
   - `stations`: every AEMET and SAIH station.
   - `map_outlines`: simplified outlines of basins, comunidades, provinces and main rivers as GeoJSON text, for drawing a map without a spatial extension (for example in a browser).
 - **obs**: measurements. Append-only, partitioned by day, timestamps UTC.
@@ -26,6 +27,7 @@ Every value comes from its publisher: MITECO (weekly reservoir bulletin, dam inv
 obs.precipitation ─station_id→ ref.stations ─catchment_id→ ref.reservoir_catchments ─reservoir_id→ ref.reservoirs
 obs.reservoir_readings ─station_id→ ref.stations (station_type = 'reservoir', reservoir_id set)
 ref.reservoirs.basin_id → ref.basins ; ref.rivers.catchment_id → ref.catchments
+ref.reservoir_links.from_reservoir_id / to_reservoir_id → ref.reservoirs
 ```
 
 - `reservoir_id` is MITECO's bulletin `EMBALSE_ID`, stable since 1988 (Alcántara = 15, Gabriel y Galán = 150).
@@ -50,6 +52,7 @@ ref.reservoirs.basin_id → ref.basins ; ref.rivers.catchment_id → ref.catchme
 - **Missing networks.**
   - Júcar's real-time viewer is behind a bot check, so Júcar reservoirs come only from the weekly bulletin.
   - The Basque internal basins have no open real-time feed.
+- **Reservoir links.** River links are computed from HydroRIVERS: each dam's snapped segment, followed downstream to the next dam. Links marked `confidence = 'review'` include pumped-storage pairs and two entries for one reservoir (Santolea). A reservoir upstream drains into the one below, but its water is also used on the way (irrigation, hydropower, environmental flows), so "upstream" is not the same as "available downstream".
 - **Bulletin areas.** `bulletin_area_name` (MITECO's bulletin "ámbito") is close to, but not the same as, `basin_id`.
 
 ## Freshness
@@ -89,6 +92,20 @@ FROM embalses.ref.reservoir_catchments rc
 JOIN unit_rain u USING (catchment_id)
 JOIN embalses.ref.reservoirs r USING (reservoir_id)
 GROUP BY ALL ORDER BY upstream_rain_24h_mm DESC LIMIT 20;
+```
+
+Every reservoir upstream of Picadas (227) and how full they are together, weighted by size (`UNION` rather than `UNION ALL` stops at loops):
+
+```sql
+WITH RECURSIVE up(reservoir_id) AS (
+  SELECT 227
+  UNION
+  SELECT l.from_reservoir_id FROM embalses.ref.reservoir_links l JOIN up ON l.to_reservoir_id = up.reservoir_id
+)
+SELECT list(s.reservoir_name ORDER BY s.capacity_hm3 DESC) AS reservoirs,
+       sum(s.stored_volume_hm3) AS stored_hm3, sum(s.capacity_hm3) AS capacity_hm3,
+       round(100 * sum(s.stored_volume_hm3) / sum(s.capacity_hm3), 1) AS fill_pct
+FROM up JOIN embalses."now".reservoir_status s USING (reservoir_id);
 ```
 
 ## Attribution

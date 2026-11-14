@@ -85,6 +85,21 @@
       "upstream_reservoir_id": "Nearest other bulletin reservoir between this unit and the dam, if any: water from here is regulated by it before arriving."
     }
   },
+  "ref.reservoir_links": {
+    "doc": "How the reservoirs are connected, one row per direct link, water flowing from from_reservoir_id to to_reservoir_id. River links join each reservoir to the next one downstream on the river network, so following them upstream gives every reservoir that drains into a given one. Canal and transfer links (added from the river-basin plans) join reservoirs that no river connects. A reservoir with no row as from_reservoir_id drains to the sea or out of Spain without passing another bulletin reservoir.",
+    "columns": {
+      "from_reservoir_id": "Reservoir the water leaves (ref.reservoirs).",
+      "to_reservoir_id": "Reservoir the water reaches (ref.reservoirs).",
+      "link_type": "river (the next reservoir downstream on the river network), canal or transfer (built conduits, from the river-basin plans).",
+      "link_name": "Name of the canal or transfer; empty for river links.",
+      "length_km": "Length of the river path between the two dams, km (HydroRIVERS); for canals, the conduit length when the source gives it.",
+      "river_segments": "River links: HydroRIVERS segments walked from one dam to the next.",
+      "path": "River links: the river line from the upper dam to the lower one, LineString or MultiLineString, EPSG:4326. Null for canals whose route is not published.",
+      "confidence": "auto (computed, consistent), review (computed but doubtful: see notes) or reviewed (checked by hand).",
+      "notes": "Why a link needs review, or what the reviewer found.",
+      "source": "Key of the source: hydrorivers for river links; the plan and annex for canals and transfers."
+    }
+  },
   "ref.stations": {
     "doc": "Every measuring station in one register: AEMET weather stations (official inventory) and the SAIH real-time stations of each basin authority (MITECO's national SAIH register): reservoirs, river gauges and rain gauges. One row per physical station per network; station_id is network:native_code. SiAR agro-weather stations to be added. Sources: AEMET OpenData, MITECO ArcGIS 'SAIH'.",
     "columns": {

@@ -21,7 +21,7 @@ A live, open dataset joining Spain's official rain gauges, river gauges and rese
 
 | Namespace | What | Tables |
 |---|---|---|
-| `ref` | places | `basins`, `catchments`, `rivers`, `reservoirs`, `reservoir_catchments`, `stations`, `grid_cells`, `catchment_cells`, `map_outlines` (GeoJSON text for drawing) |
+| `ref` | places | `basins`, `catchments`, `rivers`, `reservoirs`, `reservoir_catchments`, `reservoir_links`, `stations`, `grid_cells`, `catchment_cells`, `map_outlines` (GeoJSON text for drawing) |
 | `obs` | measurements, append-only | `precipitation`, `weather`, `reservoir_readings`, `river_flow`, `reservoir_weekly` (since 1988), `daily_weather` (since Oct 2023) |
 | `now` | rebuilt hourly | `rain_grid` (H3), `upstream_rain`, `reservoir_status`, `basin_summary`, `station_status` |
 
