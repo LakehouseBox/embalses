@@ -196,7 +196,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 
 <div class="wrap"><main>
   <div class="intro">
-    <div><h1>El agua en España</h1><p class="lede">Embalses, lluvia y cómo cambian.</p></div>
+    <div><h1>El agua en España</h1><p class="lede" id="updated" data-sk="rain">Embalses, lluvia y cómo cambian.</p></div>
     <p class="state" id="subhead">Datos oficiales, actualizados cada hora.</p>
   </div>
   <nav class="crumbs" id="crumbs" aria-label="Dónde estás" hidden></nav>
@@ -645,7 +645,10 @@ function showNational(rows) { SER.es = toSeries(rows); done('wait-res'); const N
     D.grid = (await q(SQL.grid)).rows.filter(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return !island(lo, la); }); gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows.filter(g => !island(g.lon, g.lat));
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
     cards(); rainCard(); draw(); done('wait-rain');
-    console.info('[embalses] all data in ' + Math.round(performance.now()) + ' ms'); const asOf = D.grid.find(c => c.as_of)?.as_of; setStatus(asOf ? `Datos en directo · lluvia hasta las ${new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Datos en directo', 'ok');
+    const asOf = D.grid.find(c => c.as_of)?.as_of;
+    if (asOf) { const d = new Date(asOf), z = { timeZone: 'Europe/Madrid' };   // the data's own time, in peninsular time
+      $('updated').textContent = `Actualizado el ${d.toLocaleDateString('es-ES', { ...z, weekday: 'long' })} ${d.toLocaleDateString('es-ES', { ...z, day: 'numeric', month: 'long' })} a las ${d.toLocaleTimeString('es-ES', { ...z, hour: '2-digit', minute: '2-digit' })}`; }
+    console.info('[embalses] all data in ' + Math.round(performance.now()) + ' ms'); setStatus(asOf ? `Datos en directo · lluvia hasta las ${new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Datos en directo', 'ok');
   } catch (e) { console.error(e); for (const c of ['wait-map', 'wait-res', 'wait-rain']) done(c); setStatus('No se han podido cargar los datos', 'err'); if (!D.res.length) $('map-note').textContent = 'No se han podido cargar los datos en directo. Vuelve a intentarlo en unos minutos.'; }
 })();
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="http"]'); if (!a) return; e.preventDefault(); lhbox.open(a.href); });

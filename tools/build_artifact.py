@@ -81,8 +81,8 @@ swap("await navigator.clipboard.writeText(location.href);", "if (!await lhbox.co
 swap("    if (!stillFresh()) q(SQL.outlines).then(r => saveShapes(r.rows)).catch(() => {});   // refresh the stored outlines once a day\n", "")
 
 # How long the first view takes inside LakehouseBox, in the console, to compare with the site.
-swap("const asOf = D.grid.find(c => c.as_of)?.as_of; setStatus(",
-     "console.info('[embalses] all data in ' + Math.round(performance.now()) + ' ms'); const asOf = D.grid.find(c => c.as_of)?.as_of; setStatus(")
+swap("    setStatus(asOf ? `Datos en directo",
+     "    console.info('[embalses] all data in ' + Math.round(performance.now()) + ' ms'); setStatus(asOf ? `Datos en directo")
 
 # Links out: a sandboxed page cannot open them itself.
 swap('</script>\n</body>',
