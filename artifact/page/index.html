@@ -144,7 +144,19 @@ textarea.sql { margin: 0; background: #0f2233; color: #e8eff6; border: 0; border
 footer { margin-top: 40px; border-top: 1px solid var(--line); padding: 28px 0 40px; font-size: 15px; color: var(--muted); }
 footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; } footer h3 { color: var(--ink); margin-bottom: 6px; } footer p { margin: 0 0 8px; }
 .skeleton { color: var(--faint); }
-@media (prefers-reduced-motion: reduce) { .chart path.ln { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } html { scroll-behavior: auto; } }
+/* Loading: placeholders shaped like what is coming. body.wait-map until the outlines, wait-res until the national
+   numbers, wait-rain until the rain and the highlights; each is dropped as its data arrives. */
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@keyframes breathe { 50% { opacity: 0.55; } }
+.sk, .wait-res [data-sk=res], .wait-rain [data-sk=rain], .wait-map #map, .wait-res #year, .wait-rain #rainmap {
+  background: linear-gradient(90deg, var(--land) 30%, #f8fafc 50%, var(--land) 70%) 0 0 / 200% 100%;
+  animation: shimmer 1.4s linear infinite; border-radius: var(--rs); }
+.wait-res [data-sk=res], .wait-rain [data-sk=rain] { color: transparent !important; width: fit-content; min-width: 4.5em; }
+.wait-res .big[data-sk] { min-width: 3.2em; } .wait-res .chips2 { visibility: hidden; }
+.wait-res:not(.wait-map) #map { animation: breathe 1.6s ease-in-out infinite; background: none; }   /* grey map, waiting for its colours */
+.sk { display: block; height: 14px; margin: 6px 0; } .sk.t { height: 20px; width: 70%; } .sk.s { width: 45%; }
+.skrow td { padding: 14px 12px; } .skrow .sk { margin: 0; }
+@media (prefers-reduced-motion: reduce) { .sk, [data-sk], #map, #year, #rainmap { animation: none !important; } .chart path.ln { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } html { scroll-behavior: auto; } }
 @media (max-width: 980px) {
   .intro, .frame, .raingrid, .high, .open, footer .cols, .ficha .top3 { grid-template-columns: minmax(0, 1fr); }
   .state { border-left: 0; padding-left: 0; } nav.main { display: none; }
@@ -155,7 +167,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 }
 </style>
 </head>
-<body>
+<body class="wait-map wait-res wait-rain">
 <header class="top"><div class="wrap">
   <a class="brand" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c3.2 4.3 6.5 8 6.5 12a6.5 6.5 0 0 1-13 0c0-4 3.300-7.700 6.500-12z" fill="#1463e0"/></svg>Embalses de España</a>
   <nav class="main"><a href="#panorama">Panorama</a><a href="#lluvia">Lluvia</a><a href="#embalses">Embalses</a><a href="#datos">Datos abiertos</a></nav>
@@ -183,10 +195,10 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
     <div class="pane">
       <div class="labelrow"><div class="label" id="n-label">Nivel nacional de los embalses</div><button class="linkbtn quiet" id="share" title="Copia un enlace a esta vista">Copiar enlace</button></div>
       <div class="muted" id="n-sub" hidden></div>
-      <div class="headline"><div class="big skeleton" id="n-pct">—</div><div class="chips2"><span class="chip" id="n-week"></span><span class="chip" id="n-week2"></span></div></div>
+      <div class="headline"><div class="big skeleton" id="n-pct" data-sk="res">—</div><div class="chips2"><span class="chip" id="n-week"></span><span class="chip" id="n-week2"></span></div></div>
       <div class="meter"><i id="n-meter" style="width:0"></i></div>
-      <div class="pair"><div><b id="n-stored">—</b>Agua embalsada</div><div><b id="n-cap">—</b>Capacidad total</div></div>
-      <div class="pair cmp"><div>Frente a hace un año<b id="n-ly">—</b></div><div>Frente a la media de 10 años<b id="n-avg">—</b></div></div>
+      <div class="pair"><div><b id="n-stored" data-sk="res">—</b>Agua embalsada</div><div><b id="n-cap" data-sk="res">—</b>Capacidad total</div></div>
+      <div class="pair cmp"><div>Frente a hace un año<b id="n-ly" data-sk="res">—</b></div><div>Frente a la media de 10 años<b id="n-avg" data-sk="res">—</b></div></div>
       <div class="chart" id="yearbox">
         <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 id="year-title">Evolución del nivel</h3><div class="legend" id="year-legend"></div></div>
         <svg id="year" viewBox="0 0 560 250" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div>
@@ -201,24 +213,24 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
     <div class="raingrid">
       <div><canvas id="rainmap"></canvas></div>
       <div>
-        <div class="stat"><span>Media peninsular</span><b class="xl" id="rain-mean">—</b></div>
-        <div class="stat"><b id="rain-total">—</b><span>Precipitación sobre la España peninsular</span></div>
-        <div class="stat"><b class="md" id="rain-catch">—</b><span>Mayor lluvia sobre la cuenca de un embalse</span></div>
+        <div class="stat"><span>Media peninsular</span><b class="xl" id="rain-mean" data-sk="rain">—</b></div>
+        <div class="stat"><b id="rain-total" data-sk="rain">—</b><span>Precipitación sobre la España peninsular</span></div>
+        <div class="stat"><b class="md" id="rain-catch" data-sk="rain">—</b><span>Mayor lluvia sobre la cuenca de un embalse</span></div>
       </div>
-      <div><h3>Dónde más ha llovido</h3><div class="rank" id="rain-top"></div></div>
+      <div><h3>Dónde más ha llovido</h3><div class="rank" id="rain-top"><div style="display:block;padding:8px 0"><i class="sk t" style="width:180px"></i><i class="sk" style="width:110px"></i></div><div style="display:block;padding:8px 0"><i class="sk t" style="width:180px"></i><i class="sk" style="width:110px"></i></div><div style="display:block;padding:8px 0"><i class="sk t" style="width:180px"></i><i class="sk" style="width:110px"></i></div><div style="display:block;padding:8px 0"><i class="sk t" style="width:180px"></i><i class="sk" style="width:110px"></i></div></div></div>
     </div>
   </section>
 
   <section class="sec high">
-    <div><div class="sechead" style="margin-bottom:0"><h2 style="font-size:24px">Subidas destacadas</h2><span class="muted" id="ups-sub">Última semana</span></div><div class="ups" id="ups"></div></div>
-    <div class="full"><h3>Cerca del lleno</h3><div class="row"><b id="full-n">—</b><span>embalses por encima del 90 %</span></div><button class="linkbtn" id="full-btn" style="margin-top:8px">Ver embalses →</button></div>
+    <div><div class="sechead" style="margin-bottom:0"><h2 style="font-size:24px">Subidas destacadas</h2><span class="muted" id="ups-sub">Última semana</span></div><div class="ups" id="ups"><div><i class="sk t"></i><i class="sk s"></i><i class="sk t" style="width:50%;height:26px;margin-top:12px"></i></div><div><i class="sk t"></i><i class="sk s"></i><i class="sk t" style="width:50%;height:26px;margin-top:12px"></i></div><div><i class="sk t"></i><i class="sk s"></i><i class="sk t" style="width:50%;height:26px;margin-top:12px"></i></div><div><i class="sk t"></i><i class="sk s"></i><i class="sk t" style="width:50%;height:26px;margin-top:12px"></i></div></div></div>
+    <div class="full"><h3>Cerca del lleno</h3><div class="row"><b id="full-n" data-sk="rain">—</b><span>embalses por encima del 90 %</span></div><button class="linkbtn" id="full-btn" style="margin-top:8px">Ver embalses →</button></div>
   </section>
 
   <section class="sec" id="embalses">
     <div class="sechead" style="margin-bottom:12px"><h2 id="res-title">Principales embalses</h2><span class="sp"></span><span class="muted" id="count"></span></div>
     <div class="tools"><input type="search" id="q" style="width:min(100%,400px)" placeholder="Buscar embalse, río o provincia" aria-label="Buscar embalse">
       <span class="seg" role="group" aria-label="Ordenar por"><button id="t-up" aria-pressed="false">Mayores subidas</button><button id="t-fill" aria-pressed="false">Mayor nivel</button><button id="t-cap" aria-pressed="true">Mayor capacidad</button></span></div>
-    <div class="scroll"><table id="t-res"></table></div>
+    <div class="scroll"><table id="t-res"><tbody><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr></tbody></table></div>
     <button class="linkbtn" id="more" style="margin-top:12px">Ver más →</button>
   </section>
 
@@ -490,7 +502,7 @@ function rainCard() { const c = $('rainmap'), x = c.getContext('2d'), Wd = c.cli
   $('rain-mean').innerHTML = `${fmt(n ? sum / n : 0, 1)} <small>l/m²</small>`; $('rain-total').textContent = fmt(sum * 37.2 / 1000) + ' hm³';   // an H3 cell at this size covers about 37 km²
   const wet = [...D.res].filter(r => r.rain_24h_mm > 0).sort((a, b) => b.rain_24h_mm - a.rain_24h_mm)[0]; $('rain-catch').textContent = wet ? `Cuenca de ${wet.reservoir_name} · ${fmt(wet.rain_24h_mm, 1)} mm` : '—';
   const asOf = D.grid.find(c => c.as_of)?.as_of; $('rain-sub').textContent = 'Acumulada en las últimas 24 h' + (asOf ? ' · hasta las ' + new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) : '');
-  $('rain-top').innerHTML = D.gauges.slice(0, 4).map(g => `<div><div><div class="n">${esc(title(g.station_name))}</div><div class="s">${esc(g.basin_name || '')}</div></div><div class="v">${fmt(g.rain_24h_mm, 1)} l/m²</div></div>`).join(''); }
+  if (D.gauges.length) $('rain-top').innerHTML = D.gauges.slice(0, 4).map(g => `<div><div><div class="n">${esc(title(g.station_name))}</div><div class="s">${esc(g.basin_name || '')}</div></div><div class="v">${fmt(g.rain_24h_mm, 1)} l/m²</div></div>`).join(''); }
 $('rain-btn').onclick = () => { setLayer('rain'); $('panorama').scrollIntoView(); };
 const norm = s => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 function table() { const qv = norm($('q').value), rows = D.res.filter(r => inScope(r) && (!qv || norm(`${r.reservoir_name} ${r.river_name} ${r.province} ${r.basin_name}`).includes(qv)));
@@ -586,7 +598,8 @@ const SHAPES = 'embalses:outlines:v2';   // outlines never change between visits
 const savedShapes = () => { try { return JSON.parse(localStorage.getItem(SHAPES))?.rows || null; } catch (e) { return null; } };
 const stillFresh = () => { try { return Date.now() - JSON.parse(localStorage.getItem(SHAPES)).at < 864e5; } catch (e) { return false; } };
 const saveShapes = rows => { try { localStorage.setItem(SHAPES, JSON.stringify({ at: Date.now(), rows })); } catch (e) {} };
-function showOutlines(rows) { const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson))).filter(a => !island(a.cx, a.cy));
+const done = c => document.body.classList.remove(c);
+function showOutlines(rows) { done('wait-map'); const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson))).filter(a => !island(a.cx, a.cy));
   AREAS = { b: of('basin', 'b'), c: of('region', 'c'), p: of('province', 'p') };
   D.rivers = rows.filter(r => r.layer === 'river').map(r => ({ mean_flow_m3s: r.mean_flow_m3s, geometry: JSON.parse(r.geojson) })).filter(r => { const c = r.geometry.coordinates, p = r.geometry.type === 'LineString' ? c[0] : c[0][0]; return !island(p[0], p[1]); });
   CATCH = new Map(rows.filter(r => r.layer === 'catchment').map(r => [+r.outline_id, r.geojson]));
@@ -595,7 +608,7 @@ let routed = false;
 const nice = n => String(n || '').replace(/^(.*), (El|La|Los|Las)$/i, '$2 $1');   // the bulletin writes "Atazar, El"
 function showReservoirs(rows) { for (const r of rows) r.reservoir_name = nice(r.reservoir_name); D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
   if (!routed && AREAS.b.length) { routed = true; route(); } }
-function showNational(rows) { SER.es = toSeries(rows); const N = stats(SER.es); if (scope.t === 'es') { ST = N; numbers(); yearChart(); }
+function showNational(rows) { SER.es = toSeries(rows); done('wait-res'); const N = stats(SER.es); if (scope.t === 'es') { ST = N; numbers(); yearChart(); }
   const { last, avg10, lw, prev } = N, av = avg10[lw], d = last.f - av;
   $('subhead').textContent = `${d > 3 ? 'Por encima de' : d < -3 ? 'Por debajo de' : 'En línea con'} la media de 10 años, con ${last.s >= prev.s ? 'ascenso' : 'descenso'} en la última semana.`; }
 (async () => {
@@ -612,9 +625,9 @@ function showNational(rows) { SER.es = toSeries(rows); const N = stats(SER.es); 
     const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly); save({ res, weekly });
     D.grid = (await q(SQL.grid)).rows.filter(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return !island(lo, la); }); gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows.filter(g => !island(g.lon, g.lat));
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
-    cards(); rainCard(); draw();
+    cards(); rainCard(); draw(); done('wait-rain');
     console.info('[embalses] all data in ' + Math.round(performance.now()) + ' ms'); const asOf = D.grid.find(c => c.as_of)?.as_of; setStatus(asOf ? `Datos en directo · lluvia hasta las ${new Date(asOf).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}` : 'Datos en directo', 'ok');
-  } catch (e) { console.error(e); setStatus('No se han podido cargar los datos', 'err'); if (!D.res.length) $('map-note').textContent = 'No se han podido cargar los datos en directo. Vuelve a intentarlo en unos minutos.'; }
+  } catch (e) { console.error(e); for (const c of ['wait-map', 'wait-res', 'wait-rain']) done(c); setStatus('No se han podido cargar los datos', 'err'); if (!D.res.length) $('map-note').textContent = 'No se han podido cargar los datos en directo. Vuelve a intentarlo en unos minutos.'; }
 })();
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="http"]'); if (!a) return; e.preventDefault(); lhbox.open(a.href); });
 </script>
