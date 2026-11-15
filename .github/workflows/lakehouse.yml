@@ -25,6 +25,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install lhbox
         run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Let TCP find a working segment size
+        # Connections from hosted runners to LakehouseBox stall on a path-MTU black hole (lakehousebox#28, #33).
+        run: sudo sysctl -qw net.ipv4.tcp_mtu_probing=1
       - name: Plan (nothing is changed)
         run: |
           if [ -z "$LHBOX_API_KEY" ]; then echo "No LHBOX_API_KEY here (a fork, or the secret is not set): skipping the plan."; exit 0; fi
@@ -37,6 +40,9 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install lhbox
         run: curl -fsSL https://lakehousebox.com/install.sh | sh && echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Let TCP find a working segment size
+        # Connections from hosted runners to LakehouseBox stall on a path-MTU black hole (lakehousebox#28, #33).
+        run: sudo sysctl -qw net.ipv4.tcp_mtu_probing=1
       - name: Migrate and apply
         run: |
           if [ -z "$LHBOX_API_KEY" ]; then echo "::warning::LHBOX_API_KEY is not set: nothing was applied."; exit 0; fi
@@ -62,6 +68,9 @@ jobs:
           tofu fmt -check -diff
           tofu init -input=false -lockfile=readonly
           tofu validate
+      - name: Let TCP find a working segment size
+        # Connections from hosted runners to LakehouseBox stall on a path-MTU black hole (lakehousebox#28, #33).
+        run: sudo sysctl -qw net.ipv4.tcp_mtu_probing=1
       - name: Plan against the live catalog
         env:
           # Go's post-quantum key share makes a ClientHello too large for something on the path from hosted

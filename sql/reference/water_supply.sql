@@ -109,7 +109,7 @@ FROM (SELECT * FROM curated_units UNION ALL BY NAME SELECT * FROM plan_units);
 
 DELETE FROM embalses.ref.municipality_supply;
 INSERT INTO embalses.ref.municipality_supply
-SELECT m.basin_id || '-' || s.unit_code, s.municipality_code,
+SELECT s.municipality_code, m.basin_id || '-' || s.unit_code,
        TRY_CAST(nullif(s.share_pct, '') AS DOUBLE), nullif(s.intake_description, ''),
        TRY_CAST(nullif(s.additional_intakes, '') AS SMALLINT), m.source
 FROM read_csv('data/raw/plans/*/municipality_supply.csv', filename = true, all_varchar = true, header = true, union_by_name = true) s

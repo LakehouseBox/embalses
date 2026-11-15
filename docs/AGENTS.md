@@ -23,7 +23,7 @@ Every value comes from its publisher: MITECO (weekly reservoir bulletin, dam inv
   - `precipitation`: rain per explicit interval.
   - `weather`: temperature, humidity, wind, pressure.
   - Coming next: `reservoir_readings`, `river_flow`, `reservoir_weekly` (since 1988), `daily_weather` (since Oct 2023).
-- **now**: hourly summaries, rebuilt inside LakehouseBox: `rain_grid`, `upstream_rain`, `reservoir_status`, `basin_summary`, `station_status`. `reservoir_status` and `station_status` carry names, basin, longitude and latitude, so they can be listed or mapped without joining `ref.*`.
+- **now**: hourly summaries, rebuilt inside LakehouseBox: `rain_grid`, `upstream_rain`, `reservoir_status`, `basin_summary`, `station_status`, `municipality_water` (for every municipality, the reservoirs behind its tap water and how full they are together, capacity-weighted; empty level where the water is groundwater or desalinated). `reservoir_status` and `station_status` carry names, basin, longitude and latitude, so they can be listed or mapped without joining `ref.*`.
 
 ## How the tables join
 

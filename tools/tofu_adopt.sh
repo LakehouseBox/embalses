@@ -26,6 +26,6 @@ d = json.load(sys.stdin); sinks = d if isinstance(d, list) else d.get("sinks") o
 ingest = ["saih_ebro", "saih_guadalquivir", "saih_segura", "saih_minosil", "saih_cantabrico", "saih_guadiana", "miteco_reservoir_weekly", "aemet_precipitation", "aemet_weather"]
 ids = {s["name"]: s["sink_id"] for s in sinks if not s.get("deleted_at")}
 for n in ingest: print("lakehousebox_sql_sink.ingest[\"%s\"] %s" % (n, ids[n]))
-for n in ("now_rain_grid", "now_upstream_rain", "now_reservoir_status", "now_basin_summary", "now_station_status"): print("lakehousebox_sql_sink.derived[\"%s\"] %s" % (n, ids[n]))
+for n in ("now_rain_grid", "now_upstream_rain", "now_reservoir_status", "now_basin_summary", "now_station_status", "now_municipality_water"): print("lakehousebox_sql_sink.derived[\"%s\"] %s" % (n, ids[n]))
 ' | while read -r address id; do adopt "$address" "$id"; done
 tofu plan "$@"

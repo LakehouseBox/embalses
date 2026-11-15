@@ -65,3 +65,4 @@ catalogs:
       now_reservoir_status: { table: now.reservoir_status, sql: sql/now/reservoir_status.sql, every: 1h, offset: 34m, mode: replace, min_rows: 300,  format_version: 2 }
       now_basin_summary:    { table: now.basin_summary,    sql: sql/now/basin_summary.sql,    every: 1h, offset: 37m, mode: replace, min_rows: 10,   format_version: 2 }
       now_station_status:   { table: now.station_status,   sql: sql/now/station_status.sql,   every: 1h, offset: 40m, mode: replace, min_rows: 300,  format_version: 2 }
+      now_municipality_water: { table: now.municipality_water, sql: sql/now/municipality_water.sql, every: 1h, offset: 43m, mode: replace, min_rows: 8000, format_version: 2 }

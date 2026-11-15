@@ -34,11 +34,12 @@ locals {
 
   # Derived tables: scheduled SQL that reads the catalog itself; each run replaces the table.
   derived = {
-    now_rain_grid        = { table = "now.rain_grid", sql = "sql/now/rain_grid.sql", offset = "28m", min_rows = 1000 }
-    now_upstream_rain    = { table = "now.upstream_rain", sql = "sql/now/upstream_rain.sql", offset = "31m", min_rows = 300 }
-    now_reservoir_status = { table = "now.reservoir_status", sql = "sql/now/reservoir_status.sql", offset = "34m", min_rows = 300 }
-    now_basin_summary    = { table = "now.basin_summary", sql = "sql/now/basin_summary.sql", offset = "37m", min_rows = 10 }
-    now_station_status   = { table = "now.station_status", sql = "sql/now/station_status.sql", offset = "40m", min_rows = 300 }
+    now_rain_grid          = { table = "now.rain_grid", sql = "sql/now/rain_grid.sql", offset = "28m", min_rows = 1000 }
+    now_upstream_rain      = { table = "now.upstream_rain", sql = "sql/now/upstream_rain.sql", offset = "31m", min_rows = 300 }
+    now_reservoir_status   = { table = "now.reservoir_status", sql = "sql/now/reservoir_status.sql", offset = "34m", min_rows = 300 }
+    now_basin_summary      = { table = "now.basin_summary", sql = "sql/now/basin_summary.sql", offset = "37m", min_rows = 10 }
+    now_station_status     = { table = "now.station_status", sql = "sql/now/station_status.sql", offset = "40m", min_rows = 300 }
+    now_municipality_water = { table = "now.municipality_water", sql = "sql/now/municipality_water.sql", offset = "43m", min_rows = 8000 }
   }
 
   # Where scheduled SQL may send a request body: the form POSTs of three SAIH viewers.

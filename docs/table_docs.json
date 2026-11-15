@@ -360,6 +360,26 @@
       "latitude": "Latitude of the station, WGS84 degrees."
     }
   },
+  "now.municipality_water": {
+    "doc": "One row per municipality: where its tap water comes from and how full the reservoirs behind it are together. Reservoirs counted are those its supply units take water from (directly or through a network such as Canal de Isabel II or a transfer) plus every reservoir upstream of them on the river network; the level is weighted by capacity, so a large reservoir counts for more than a small one. Municipalities served only by groundwater, desalination or rivers without a bulletin reservoir have no level. Rebuilt hourly inside LakehouseBox by sql/now/municipality_water.sql from ref.municipality_supply, ref.supply_sources, ref.reservoir_links and now.reservoir_status.",
+    "columns": {
+      "municipality_code": "INE municipality code (ref.municipalities).",
+      "municipality_name": "Name as people write it.",
+      "province_name": "Province.",
+      "population": "Official population (ref.municipalities).",
+      "supply_unit_names": "Supply units serving the municipality, as the river-basin plans name them; empty when no loaded plan places it.",
+      "source_types": "Kinds of source its water comes from, through networks too: reservoir, river, aquifer, spring, desalination, transfer, reclaimed.",
+      "source_reservoir_ids": "Bulletin reservoirs the supply takes water from (ref.reservoirs), directly or through networks and transfers.",
+      "upstream_reservoir_ids": "Bulletin reservoirs upstream of those on the river network (ref.reservoir_links), whose water flows down to them.",
+      "reservoirs": "Reservoirs counted in the level: source and upstream ones with a current reading.",
+      "stored_volume_hm3": "Water stored in them now, hm³ (now.reservoir_status).",
+      "capacity_hm3": "Their total capacity, hm³.",
+      "fill_pct": "stored_volume_hm3 ÷ capacity_hm3, %: how full the water behind this tap is, a large reservoir weighing more than a small one.",
+      "fill_pct_same_week_last_year": "The same, for the same week a year ago, capacity-weighted, %.",
+      "fill_pct_10y_average": "The same week averaged over the previous 10 years, capacity-weighted, %.",
+      "as_of": "When the reservoir levels were last updated (now.reservoir_status), UTC."
+    }
+  },
   "obs.reservoir_weekly": {
     "doc": "MITECO weekly reservoir bulletin (Boletin Hidrologico), one row per reservoir and bulletin, 1988-01-05 onward. Peninsular reservoirs > 5 hm3. Source: MITECO ArcGIS FeatureServer Embalses_Total (backfill by ingest/miteco_reservoir_weekly.py). Bulletins are Tuesdays.",
     "columns": {
