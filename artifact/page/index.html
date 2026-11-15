@@ -66,6 +66,30 @@ main { padding: 30px 0 10px; }
 .tapbox li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 8px 10px; border-radius: var(--rs); cursor: pointer; }
 .tapbox li[aria-selected="true"] { background: var(--tint); }
 .tapbox li b { color: var(--brand); } .tapbox li span { font-size: 13px; color: var(--muted); white-space: nowrap; } .tapbox li.none { cursor: default; color: var(--muted); }
+/* tu grifo */
+.grifohead { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 0 40px; align-items: end; }
+.grifohead h2 { margin-top: 0; } .grifohead p { margin: 8px 0 0; max-width: 64ch; }
+.grifohead .tap { margin: 0; display: grid; gap: 8px; } .grifohead .tapbox { max-width: none; }
+.tryme { display: flex; gap: 4px 12px; flex-wrap: wrap; align-items: baseline; } .tryme .linkbtn { font-size: 14px; font-weight: 400; }
+.grifo { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
+.grifo > div { padding: 18px 20px 20px; min-width: 0; } .grifo > div + div { border-left: 1px solid var(--line); }
+.grifo .gtop { grid-column: 1 / -1; border-bottom: 1px solid var(--line); display: flex; gap: 8px 16px; align-items: baseline; flex-wrap: wrap; padding-bottom: 14px; }
+.grifo .gtop h3 { margin: 0; font-size: 24px; }
+.flow { display: grid; gap: 0; }
+.step .label { margin-bottom: 6px; }
+.arrow { color: var(--faint); font-size: 13px; padding: 4px 0 4px 14px; margin-left: 10px; border-left: 2px dashed var(--river); }
+.node { border: 1px solid var(--line); border-radius: var(--rs); padding: 10px 12px; background: var(--surface); }
+.node + .node { margin-top: 8px; } .node h4 { margin: 0; font-size: 16px; display: flex; gap: 8px; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+.node h4 a { font-size: 13px; font-weight: 400; white-space: nowrap; }
+.node.home { background: var(--tint); border-color: var(--brand); } .node.home h4 { font-size: 18px; color: var(--brand-dark); }
+.srcs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.src { font: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
+.src i { font-style: normal; font-size: 12px; color: var(--muted); }
+.src .mini { width: 34px; height: 6px; border-radius: 999px; background: #dbe7f5; position: relative; overflow: hidden; } .src .mini span { position: absolute; inset: 0 auto 0 0; background: var(--brand); }
+.src.net { background: var(--tint); border-style: dashed; }
+.gfig .big { font-size: 64px; } .gfig .pair { margin-top: 10px; }
+.gexp p { margin: 12px 0 0; } .gexp .muted.small a { color: inherit; }
 .tapcard h3 { margin: 0 0 6px; } .tapcard p { margin: 6px 0; max-width: 78ch; }
 .tapcard .kinds { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; } .tapcard .kinds span { font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--tint); }
 .tapcard ul.via { margin: 6px 0; padding-left: 18px; } .tapcard ul.via li { margin: 2px 0; }
@@ -174,6 +198,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
   .raingrid > div + div, .open > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 20px; }
   .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .grifohead, .grifo { grid-template-columns: minmax(0, 1fr); } .grifohead .tap { margin-top: 16px; } .grifo > div + div { border-left: 0; border-top: 1px solid var(--line); }
   .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
 }
 </style>
@@ -191,8 +216,6 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
     <div><h1>El agua en España</h1><p class="lede" id="updated" data-sk="rain">Embalses, lluvia y cómo cambian.</p></div>
     <p class="state" id="subhead">Datos oficiales, actualizados cada hora.</p>
   </div>
-  <div class="tap" role="search"><label for="tap-q">¿De dónde viene el agua de tu grifo?</label>
-    <div class="tapbox"><input type="search" id="tap-q" role="combobox" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Escribe tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div></div>
   <nav class="crumbs" id="crumbs" aria-label="Dónde estás" hidden></nav>
 
   <div class="frame" id="panorama">
@@ -245,6 +268,21 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <span class="seg" role="group" aria-label="Ordenar por"><button id="t-up" aria-pressed="false">Mayores subidas</button><button id="t-fill" aria-pressed="false">Mayor nivel</button><button id="t-cap" aria-pressed="true">Mayor capacidad</button></span></div>
     <div class="scroll"><table id="t-res"><tbody><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr></tbody></table></div>
     <button class="linkbtn" id="more" style="margin-top:12px">Ver más →</button>
+  </section>
+
+  <section class="sec" id="grifo">
+    <div class="grifohead">
+      <div>
+        <h2>¿De dónde viene el agua de tu grifo?</h2>
+        <p>Cada municipio bebe de un sistema de abastecimiento que fija el plan hidrológico de su cuenca. Unos toman el agua de un embalse cercano; otros de una red que la reparte desde muchos, como el Canal de Isabel II en Madrid o los Canales del Taibilla en Murcia; otros de pozos, ríos o desaladoras.</p>
+        <p class="muted">Busca tu municipio: seguimos el agua desde tu grifo hasta los embalses de los que sale, y los que tiene aguas arriba, y te contamos cómo están hoy.</p>
+      </div>
+      <div class="tap" role="search"><label for="tap-q">Tu municipio</label>
+        <div class="tapbox"><input type="search" id="tap-q" role="combobox" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Escribe tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div>
+        <div class="tryme" id="tryme"><span class="muted small">Prueba con</span><button class="linkbtn" data-code="28079">Madrid</button><button class="linkbtn" data-code="08019">Barcelona</button><button class="linkbtn" data-code="41091">Sevilla</button><button class="linkbtn" data-code="30030">Murcia</button><button class="linkbtn" data-code="35016">Las Palmas</button></div>
+      </div>
+    </div>
+    <div class="grifo" id="grifo-out" aria-live="polite" hidden></div>
   </section>
 
   <section class="sec open" id="datos">
@@ -321,14 +359,25 @@ FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_2
   ficha: id => `SELECT dam_name, dam_type, uses, catchment_area_km2, surface_area_ha, mean_annual_inflow_hm3, is_hydroelectric, energy_capacity_gwh
 FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
   munis: `SELECT municipality_code AS code, municipality_name AS name, province_name AS prov, population AS pop FROM embalses.ref.municipalities`,
-  tap: code => `SELECT w.municipality_name AS name, w.province_name AS prov, m.longitude AS lon, m.latitude AS lat, w.supply_unit_names AS units, w.source_types AS kinds,
-       w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.fill_pct, w.reservoirs
+  tap: code => `SELECT w.municipality_name AS name, w.province_name AS prov, w.population AS pop, m.longitude AS lon, m.latitude AS lat, w.supply_unit_names AS units, w.source_types AS kinds,
+       w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
+       w.fill_pct_same_week_last_year AS ly, w.fill_pct_10y_average AS avg10, strftime(w.as_of, '%Y-%m-%dT%H:%M:%SZ') AS as_of
 FROM embalses."now".municipality_water w JOIN embalses.ref.municipalities m USING (municipality_code) WHERE w.municipality_code = '${code}'`,
-  tapVia: code => `SELECT DISTINCT n.unit_name AS via, u.source_document AS doc
-FROM embalses.ref.municipality_supply ms JOIN embalses.ref.supply_units u USING (supply_unit_id)
-LEFT JOIN embalses.ref.supply_sources s ON s.supply_unit_id = ms.supply_unit_id AND (s.municipality_code IS NULL OR s.municipality_code = ms.municipality_code)
-LEFT JOIN embalses.ref.supply_units n ON n.supply_unit_id = s.network_unit_id
-WHERE ms.municipality_code = '${code}'`,
+  // the path of the water: the municipality's supply units, their sources, and through networks and transfers their sources in turn
+  tapTree: code => `WITH RECURSIVE units AS (SELECT supply_unit_id FROM embalses.ref.municipality_supply WHERE municipality_code = '${code}'),
+src(taker, source_type, source_name, reservoir_id, network_unit_id, role, depth) AS (
+  SELECT s.supply_unit_id, s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role, 0
+  FROM embalses.ref.supply_sources s JOIN units USING (supply_unit_id) WHERE s.municipality_code IS NULL OR s.municipality_code = '${code}'
+  UNION
+  SELECT s.supply_unit_id, s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role, src.depth + 1
+  FROM embalses.ref.supply_sources s JOIN src ON s.supply_unit_id = src.network_unit_id WHERE src.depth < 5)
+SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url, 0 AS depth,
+       NULL AS source_type, NULL AS source_name, NULL::INTEGER AS reservoir_id, NULL AS network_unit_id, NULL AS role
+FROM units JOIN embalses.ref.supply_units u USING (supply_unit_id)
+UNION ALL
+SELECT t.taker, u.unit_name, u.unit_type, u.source_document, u.source_url, t.depth, t.source_type, t.source_name, t.reservoir_id, t.network_unit_id, t.role
+FROM src t JOIN embalses.ref.supply_units u ON u.supply_unit_id = t.taker
+ORDER BY depth, unit, source_type, source_name`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
 FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
 };
@@ -565,16 +614,8 @@ function drawCatchment(r) { const c = $('catch'), cat = catchment(r.reservoir_id
     if (m[0] < cat.bb.w || m[0] > cat.bb.e || m[1] < cat.bb.s || m[1] > cat.bb.n || !hit.isPointInPath(cat.lonlat, m[0], m[1], 'evenodd')) continue;
     x.lineWidth = rv.mean_flow_m3s > 80 ? 2 : rv.mean_flow_m3s > 20 ? 1.4 : 0.9; x.beginPath(); for (const l of ls) l.forEach(([lo, la], i) => i ? x.lineTo(X(lo), Y(la)) : x.moveTo(X(lo), Y(la))); x.stroke(); }
   if (r.lon != null) { x.beginPath(); x.arc(X(r.lon), Y(r.lat), 4.5, 0, 7); x.fillStyle = css('--ink'); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 2; x.stroke(); } }
-const KIND = { reservoir: 'embalses', river: 'ríos', aquifer: 'aguas subterráneas', spring: 'manantiales', desalination: 'desalación', transfer: 'trasvases', reclaimed: 'agua regenerada' };
 function tapFicha() { const el = $('ficha'), t = TAP; el.hidden = false; el.classList.add('tapcard');
-  const via = [...new Set((t.via || []).filter(Boolean))], units = t.units || [];
-  el.innerHTML = `<h3>De dónde viene el agua de ${esc(t.name)}</h3>` + (!units.length ? `<p class="muted">Todavía no tenemos los datos de abastecimiento de este municipio.</p>` :
-    `<p>${units.length > 1 ? 'Lo abastecen las unidades' : 'Lo abastece la unidad'} <b>${units.map(esc).join('</b>, <b>')}</b> del plan hidrológico${via.length ? `, a través de:` : '.'}</p>`
-    + (via.length ? `<ul class="via">${via.map(v => `<li>${esc(v)}</li>`).join('')}</ul>` : '')
-    + `<div class="kinds">${(t.kinds || []).map(k => `<span>${esc(KIND[k] || k)}</span>`).join('')}</div>`
-    + (t.ids.size ? `<p class="muted small">El nivel junta los embalses de los que se toma el agua y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Cuenta más un embalse grande que uno pequeño. Los embalses aguas abajo de la toma no cuentan: su agua no puede volver. Parte del agua de aguas arriba también la usan otros (riego, energía, caudales ecológicos).</p>`
-      : `<p class="muted small">Ninguna de sus fuentes es un embalse del boletín semanal, así que no hay un nivel que mostrar.</p>`)
-    + `<p class="muted small">Fuente: ${esc([...new Set(t.docs || [])].join('; '))}.</p>`); }
+  el.innerHTML = `<h3>El agua de ${esc(t.name)}</h3><p class="muted">${t.ids.size ? 'En el mapa, los embalses de los que bebe y los que tiene aguas arriba.' : 'Su agua no sale de embalses del boletín.'} <a href="#grifo">Cómo llega hasta su grifo ↓</a></p>`; }
 async function ficha() { if (scope.t === 'm') return TAP && tapFicha(); $('ficha').classList.remove('tapcard'); const r = selRes(), el = $('ficha'); el.hidden = !r; if (!r) return;
   const live = r.data_source !== 'miteco-weekly', row = (k, v) => v == null || v === '' || v === '—' ? '' : `<div><dt>${k}</dt><dd>${v}</dd></div>`, n = (v, d, u) => v == null ? null : `${fmt(v, d)} ${u}`, id = r.reservoir_id;
   const paint = f => { const open = el.querySelector('details')?.open;
@@ -607,7 +648,7 @@ lhbox.onState(s => { PLACE = s || ''; route(); });
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').startsWith('#/')) return; e.preventDefault(); const el = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href')); (el || document.body).scrollIntoView(); });
 $('share').onclick = async () => { try { if (!await lhbox.copy(SHARE())) throw 0; $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
 async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; mtip.hidden = true;
-  if (t === 'm') { const tp = await loadTap(k); if (!tp) return setScope('es', null, push); TAP = tp; }
+  if (t === 'm') { const tp = await loadTap(k); if (!tp) return setScope('es', null, push); const fresh = TAP?.code !== tp.code || $('grifo-out').hidden; TAP = tp; if (fresh) { tapIn.value = tp.name; grifo(); if (!push) $('grifo').scrollIntoView(); } }
   if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
     const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
     scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? (regionOf(r.in.p) || !r.in.c ? { t: 'p', k: r.in.p } : { t: 'c', k: r.in.c }) : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
@@ -623,11 +664,56 @@ function noLevel() {   // a tap with no bulletin reservoir behind it
   for (const id of ['n-week', 'n-week2']) $(id).hidden = true; for (const id of ['n-stored', 'n-cap', 'n-ly', 'n-avg']) { $(id).className = ''; $(id).textContent = '—'; }
   $('n-meter').parentElement.hidden = true; $('yearbox').hidden = true; $('n-date').textContent = ''; }
 async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; if (TAP?.code === code) return TAP;
-  try { const [w] = (await q(SQL.tap(code))).rows; if (!w) return null; const via = (await q(SQL.tapVia(code))).rows;
+  try { const [[w], tree] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapTree(code)).then(r => r.rows)]); if (!w) return null;
     const src = new Set(w.src || []), up = new Set(w.up || []);
-    return { code, name: w.name, prov: w.prov, lon: w.lon, lat: w.lat, units: w.units, kinds: w.kinds, src, up, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))),
-      via: via.map(v => v.via), docs: via.map(v => v.doc).filter(Boolean) }; }
+    return { ...w, code, src, up, tree, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
   catch (e) { console.error(e); return null; } }
+
+// ───────── tu grifo: the path of the water, from the reservoirs to the tap, with how full they are ─────────
+const TYPE = { reservoir: 'embalse', river: 'río', aquifer: 'acuífero', spring: 'manantial', desalination: 'desaladora', transfer: 'trasvase', reclaimed: 'agua regenerada', network: 'red' };
+const KINDS = { reservoir: 'embalses', river: 'ríos', aquifer: 'aguas subterráneas', spring: 'manantiales', desalination: 'agua desalada', transfer: 'trasvases', reclaimed: 'agua regenerada' };
+const listEs = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+const docLink = (doc, url) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(doc || 'fuente')} ↗</a>` : esc(doc || '');
+function resChip(id) { const r = D.res.find(x => x.reservoir_id === id); if (!r) return '';
+  return `<button class="src" data-res="${id}" title="Ver el embalse">${esc(r.reservoir_name)}<span class="mini"><span style="width:${Math.max(0, Math.min(100, r.fill_pct ?? 0))}%"></span></span><i>${fmt(r.fill_pct, 0)} %</i></button>`; }
+function srcChip(x) { if (x.source_type === 'reservoir' && x.reservoir_id != null && D.res.some(r => r.reservoir_id === x.reservoir_id)) return resChip(x.reservoir_id);
+  const net = x.source_type === 'network' || (x.source_type === 'transfer' && x.network_unit_id);
+  const tag = TYPE[x.source_type] || x.source_type, named = norm(x.source_name).startsWith(norm(tag));
+  return `<span class="src${net ? ' net' : ''}">${named ? '' : `<i>${esc(tag)}</i>`}${esc(x.source_name)}${x.role === 'backup' ? ' <i>(reserva)</i>' : ''}</span>`; }
+function grifo() { const t = TAP, el = $('grifo-out'); if (!t) return; el.hidden = false;
+  const units = t.tree.filter(x => x.depth === 0 && !x.source_type), rows = t.tree.filter(x => x.source_type);
+  const takers = []; for (const x of rows) { let g = takers.find(g => g.id === x.id); if (!g) takers.push(g = { id: x.id, unit: x.unit, type: x.type, doc: x.doc, url: x.url, depth: x.depth, rows: [] });
+    if (!g.rows.some(y => y.source_type === x.source_type && y.source_name === x.source_name)) g.rows.push(x); }
+  const nets = takers.filter(g => g.type === 'network').sort((a, b) => b.depth - a.depth), own = takers.filter(g => g.type !== 'network');
+  const upIds = [...t.up].filter(id => D.res.some(r => r.reservoir_id === id)).sort((a, b) => (D.res.find(r => r.reservoir_id === b).capacity_hm3 || 0) - (D.res.find(r => r.reservoir_id === a).capacity_hm3 || 0));
+  const node = (g, cls = '') => `<div class="node ${cls}"><h4>${esc(g.unit)}${g.url ? `<a href="${esc(g.url)}" target="_blank" rel="noopener" title="${esc(g.doc || '')}">${g.type === 'network' ? 'fuente' : 'plan hidrológico'} ↗</a>` : ''}</h4>${g.rows?.length ? `<div class="srcs">${g.rows.map(srcChip).join('')}</div>` : ''}</div>`;
+  const step = (label, body, arrow) => `<div class="step"><div class="label">${label}</div>${body}</div>` + (arrow ? `<div class="arrow">${arrow}</div>` : '');
+  const flow = !units.length ? `<p class="muted">Todavía no tenemos los datos de abastecimiento de este municipio.</p>` : `<div class="flow">`
+    + (upIds.length ? step(`Aguas arriba · ${upIds.length} ${upIds.length === 1 ? 'embalse' : 'embalses'}`, `<div class="srcs">${upIds.map(resChip).join('')}</div>`, 'su agua baja por el río hasta las tomas') : '')
+    + (nets.length ? step(nets.length > 1 ? 'Redes que la traen' : 'Red que la trae', nets.map(g => node(g)).join(''), 'la reparten a') : '')
+    + step('Sistema de abastecimiento', units.map(u => node({ ...u, rows: own.find(g => g.id === u.id)?.rows || [] })).join(''), 'llega a')
+    + `<div class="node home"><h4>${esc(t.name)}<span class="muted small" style="font-weight:400">${esc(t.prov)} · ${fmt(t.pop)} hab.</span></h4></div></div>`;
+  const has = t.fill_pct != null, nSrc = [...t.src].filter(id => t.ids.has(id)).length, nUp = upIds.length;
+  const kinds = (t.kinds || []).filter(k => k !== 'network').map(k => KINDS[k] || k);
+  const d = (a, b) => a == null || b == null ? null : a - b, dLy = d(t.fill_pct, t.ly), dAvg = d(t.fill_pct, t.avg10);
+  const pts = v => `${fmt(Math.abs(v), 1)} ${Math.abs(v) >= 0.95 && Math.abs(v) < 1.05 ? 'punto' : 'puntos'}`;
+  const figs = has ? `<div class="gfig"><div class="label">Embalses detrás de tu grifo</div><div class="big">${fmt(t.fill_pct, 1)}<small> %</small></div>
+      <div class="meter" style="margin-top:12px"><i style="width:${Math.min(100, t.fill_pct)}%"></i></div>
+      <div class="pair"><div><b>${fmt(t.stored)} hm³</b>Agua embalsada</div><div><b>${fmt(t.cap)} hm³</b>Capacidad · ${t.reservoirs} embalses</div></div>
+      <div class="pair cmp"><div>Frente a hace un año<b class="${dLy > 0 ? 'upc' : dLy < 0 ? 'downc' : ''}">${dLy == null ? '—' : signed(dLy, 1) + ' <span>pts</span>'}</b></div><div>Frente a la media de 10 años<b class="${dAvg > 0 ? 'upc' : dAvg < 0 ? 'downc' : ''}">${dAvg == null ? '—' : signed(dAvg, 1) + ' <span>pts</span>'}</b></div></div></div>`
+    : '';
+  const via = nets.map(g => g.unit), plan = units.map(u => u.unit);
+  const exp = !units.length ? '' : `<p>${esc(t.name)} ${plan.length > 1 ? `se abastece de las unidades ${listEs(plan.map(p => `<b>${esc(p)}</b>`))}` : `se abastece de la unidad <b>${esc(plan[0])}</b>`} del plan hidrológico${via.length ? `, que recibe el agua de ${listEs(via.map(v => `<b>${esc(v)}</b>`))}` : ''}.${kinds.length ? ` Su agua viene de ${listEs(kinds)}.` : ''}</p>`
+    + (has ? `<p>Toma agua de ${nSrc} ${nSrc === 1 ? 'embalse' : 'embalses'} del boletín${nUp ? `, y ${nUp === 1 ? 'otro está' : `otros ${nUp} están`} aguas arriba de ${nSrc === 1 ? 'él' : 'ellos'}` : ''}. Juntos guardan hoy ${fmt(t.stored)} hm³ de ${fmt(t.cap)}: están al <b>${fmt(t.fill_pct, 1)} %</b>${dLy != null && Math.abs(dLy) >= 0.05 ? `, ${pts(dLy)} ${dLy > 0 ? 'más' : 'menos'} que hace un año` : ''}${dAvg != null && Math.abs(dAvg) >= 0.05 ? ` y ${pts(dAvg)} ${dAvg > 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años` : ''}.</p>`
+      : `<p>Ninguna de sus fuentes es un embalse del boletín semanal, así que no hay un nivel de embalses que mostrar: depende de ${kinds.length ? listEs(kinds) : 'otras fuentes'}.</p>`)
+    + (has ? `<p class="muted small">Cómo lo calculamos: juntamos los embalses de los que se toma el agua, directamente o a través de redes y trasvases, y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Un embalse grande pesa más que uno pequeño. Parte de esa agua también la usan otros (riego, energía, caudal ecológico), y un municipio puede recibir agua de varias fuentes en distinta proporción.</p>` : '')
+    + `<p class="muted small">Fuentes: ${listEs([...new Map(t.tree.filter(x => x.doc).map(x => [x.doc, docLink(x.doc, x.url)])).values()])}${has ? `; niveles de MITECO y los SAIH, ${when(t.as_of)}` : ''}.</p>`;
+  el.innerHTML = `<div class="gtop"><h3>El agua de ${esc(t.name)}</h3><span class="muted">${esc(t.prov)}</span><span class="sp"></span>${t.ids.size ? '<button class="linkbtn" id="g-map">Ver en el mapa ↑</button>' : ''}</div>`
+    + `<div>${flow}</div><div class="gexp">${figs}${exp}</div>`;
+  $('g-map')?.addEventListener('click', async () => { if (scope.t !== 'm' || scope.k !== t.code) await setScope('m', t.code); $('panorama').scrollIntoView(); });
+  el.querySelectorAll('[data-res]').forEach(b => b.onclick = async () => { await setScope('r', +b.dataset.res); $('panorama').scrollIntoView(); }); }
+async function showTap(code, scroll) { const tp = await loadTap(code); if (!tp) return; TAP = tp; tapIn.value = tp.name; grifo(); if (scroll) $('grifo').scrollIntoView();
+  if (scope.t !== 'm' || scope.k !== code) setScope('m', code); }
 
 // ───────── tap search: every municipality, typed as people write them, biggest towns first ─────────
 let MUNIS = null, tapHits = [], tapSel = 0;
@@ -642,7 +728,8 @@ const tapIn = $('tap-q'), tapList = $('tap-list');
 function tapShow() { tapList.hidden = !tapIn.value.trim(); tapIn.setAttribute('aria-expanded', !tapList.hidden);
   tapList.innerHTML = tapHits.length ? tapHits.map((m, i) => `<li role="option" id="tap-${i}" data-i="${i}" aria-selected="${i === tapSel}">${esc(m.name)}<span>${esc(m.prov)} · ${fmt(m.pop)} hab.</span></li>`).join('') : `<li class="none">${MUNIS ? 'Ningún municipio coincide' : 'Cargando municipios…'}</li>`;
   tapIn.setAttribute('aria-activedescendant', tapHits.length ? 'tap-' + tapSel : ''); }
-function tapPick(m) { tapIn.value = m.name; tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); setScope('m', m.code); $('panorama').scrollIntoView(); }
+function tapPick(m) { tapIn.value = m.name; tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); showTap(m.code); }
+$('tryme').addEventListener('click', e => { const b = e.target.closest('[data-code]'); if (b) showTap(b.dataset.code); });
 tapIn.addEventListener('focus', () => { munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); });
 tapIn.addEventListener('input', () => { tapSel = 0; tapHits = tapFind(tapIn.value); tapShow(); });
 tapIn.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); tapSel = Math.max(0, Math.min(tapHits.length - 1, tapSel + (e.key === 'ArrowDown' ? 1 : -1))); tapShow(); }
