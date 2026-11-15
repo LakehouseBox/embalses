@@ -736,8 +736,10 @@ function tapPick(m) { tapIn.value = m.name; tapList.hidden = true; tapIn.setAttr
 $('tryme').addEventListener('click', e => { const b = e.target.closest('[data-code]'); if (b) showTap(b.dataset.code); });
 tapIn.addEventListener('focus', () => { munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); });
 tapIn.addEventListener('input', () => { tapSel = 0; tapHits = tapFind(tapIn.value); tapShow(); });
+// the list of municipalities (8,132 rows) loads in the background once the page has its data, so typing answers at once
+setTimeout(() => { if (!MUNIS) munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); }, 4000);
 tapIn.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); tapSel = Math.max(0, Math.min(tapHits.length - 1, tapSel + (e.key === 'ArrowDown' ? 1 : -1))); tapShow(); }
-  else if (e.key === 'Enter' && tapHits[tapSel]) { e.preventDefault(); tapPick(tapHits[tapSel]); } else if (e.key === 'Escape') { tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); } });
+  else if (e.key === 'Enter') { e.preventDefault(); if (tapHits[tapSel]) tapPick(tapHits[tapSel]); else if (tapIn.value.trim()) munis().then(() => { tapHits = tapFind(tapIn.value); tapSel = 0; if (tapHits[0]) tapPick(tapHits[0]); else tapShow(); }).catch(e => console.error(e)); } else if (e.key === 'Escape') { tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); } });
 tapList.addEventListener('mousedown', e => { const li = e.target.closest('li[data-i]'); if (li) { e.preventDefault(); tapPick(tapHits[+li.dataset.i]); } });
 document.addEventListener('click', e => { if (!e.target.closest('.tapbox')) tapList.hidden = true; });
 
