@@ -61,24 +61,18 @@ main { padding: 30px 0 10px; }
 .tap { margin-top: 20px; display: flex; gap: 10px 16px; align-items: center; flex-wrap: wrap; }
 .tap label { font-weight: 700; font-size: 17px; }
 .tapbox { position: relative; flex: 1 1 300px; max-width: 440px; }
+.tapbox.mini { flex: 1 1 180px; max-width: 260px; margin-left: auto; } .tapbox.mini input { font-size: 15px; padding: 6px 10px 6px 32px; border-radius: 999px; } .tapbox.mini > svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2.4; stroke-linecap: round; pointer-events: none; }
+.tapbox.mini ul { min-width: 300px; left: auto; }
 .tapbox input { width: 100%; font-size: 17px; padding: 9px 14px; border-radius: var(--r); }
 .tapbox ul { position: absolute; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--float); z-index: 30; max-height: 340px; overflow-y: auto; }
 .tapbox li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 8px 10px; border-radius: var(--rs); cursor: pointer; }
 .tapbox li[aria-selected="true"] { background: var(--tint); }
 .tapbox li b { color: var(--brand); } .tapbox li span { font-size: 13px; color: var(--muted); white-space: nowrap; } .tapbox li.none { cursor: default; color: var(--muted); }
 /* tu grifo */
-.grifohead { max-width: 760px; } .grifohead h2 { margin: 0; } .grifohead > p { margin: 8px 0 0; font-size: 17px; }
-.grifohead .tap { margin: 18px 0 0; display: grid; gap: 10px; }
-.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.tapbox.big { max-width: none; } .tapbox.big input { font-size: 20px; padding: 16px 18px 16px 54px; border: 2px solid var(--brand); border-radius: 12px; box-shadow: 0 6px 22px rgb(20 99 224 / 0.16); background: var(--surface); }
-.tapbox.big input::placeholder { color: var(--faint); } .tapbox.big input:focus { outline: none; box-shadow: 0 0 0 4px rgb(20 99 224 / 0.22), 0 6px 22px rgb(20 99 224 / 0.16); }
-.tapbox.big > svg { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; fill: none; stroke: var(--brand); stroke-width: 2.4; stroke-linecap: round; pointer-events: none; }
-.tapbox.big ul { top: calc(100% + 6px); } .tapbox.big li { font-size: 17px; padding: 10px 12px; }
-.tryme { display: flex; gap: 4px 12px; flex-wrap: wrap; align-items: baseline; } .tryme .linkbtn { font-size: 14px; font-weight: 400; }
-.grifo { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
-.grifo > div { padding: 18px 20px 20px; min-width: 0; } .grifo > .gexp:not(.wide) { border-left: 1px solid var(--line); }
-.grifo .gtop { grid-column: 1 / -1; border-bottom: 1px solid var(--line); display: flex; gap: 8px 16px; align-items: baseline; flex-wrap: wrap; padding-bottom: 14px; }
-.grifo .gtop h3 { margin: 0; font-size: 24px; }
+.ficha.tapcard { padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+.tapcard > div, .tapcard > details { padding: 16px 18px 18px; min-width: 0; } .tapcard > .gexp:not(.wide) { border-left: 1px solid var(--line); }
+.tapcard .gtop { grid-column: 1 / -1; border-bottom: 1px solid var(--line); display: flex; gap: 8px 16px; align-items: baseline; flex-wrap: wrap; padding-bottom: 12px; }
+.tapcard .gtop h3 { margin: 0; font-size: 22px; }
 .flow { display: grid; gap: 0; }
 .step .label { margin-bottom: 6px; }
 .arrow { color: var(--faint); font-size: 13px; padding: 4px 0 4px 14px; margin-left: 10px; border-left: 2px dashed var(--river); }
@@ -93,8 +87,8 @@ button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
 .src .mini { width: 34px; height: 6px; border-radius: 999px; background: #dbe7f5; position: relative; overflow: hidden; } .src .mini span { position: absolute; inset: 0 auto 0 0; background: var(--brand); }
 .src.net { background: var(--tint); border-style: dashed; }
 .gfig .big { font-size: 64px; } .gfig .pair { margin-top: 10px; }
-.grifo > .gpath, .grifo > .gall, .grifo > .gexp.wide { grid-column: 1 / -1; } .grifo > .gpath { border-bottom: 1px solid var(--line); }
-.grifo > .gall { border-top: 1px solid var(--line); padding-top: 4px; } .grifo > .gall summary { padding: 8px 0; } .grifo > .gall .flow { margin-top: 10px; }
+.tapcard > .gpath, .tapcard > .gall, .tapcard > .gexp.wide { grid-column: 1 / -1; } .tapcard > .gpath { border-bottom: 1px solid var(--line); }
+.tapcard > .gall { border-top: 1px solid var(--line); padding-top: 4px; } .tapcard > .gall summary { padding: 8px 0; } .tapcard > .gall .flow { margin-top: 10px; }
 .gscroll { overflow-x: auto; margin-top: 8px; } .gsvg { display: block; max-width: none; font-family: var(--sans); }
 .gsvg .e { fill: none; stroke: var(--water); stroke-opacity: 0.32; stroke-linecap: round; } .gsvg .e.bk { stroke-dasharray: 6 6; stroke-opacity: 0.22; } .gsvg .e.rv { stroke: var(--river); stroke-opacity: 0.9; stroke-dasharray: 1 5; }
 .gsvg text { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; } .gsvg .nm { font-size: 13.5px; font-weight: 600; fill: var(--ink); } .gsvg .pc { font-size: 12px; fill: var(--muted); }
@@ -220,7 +214,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
   .raingrid > div + div, .open > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 20px; }
   .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
-  .grifo { grid-template-columns: minmax(0, 1fr); } .tapbox.big input { font-size: 17px; } .grifo > .gexp:not(.wide) { border-left: 0; border-top: 1px solid var(--line); }
+  .ficha.tapcard { grid-template-columns: minmax(0, 1fr); } .tapcard > .gexp:not(.wide) { border-left: 0; border-top: 1px solid var(--line); } .tapbox.mini { margin-left: 0; max-width: none; } .tapbox.mini ul { left: 0; min-width: 0; }
   .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
 }
 </style>
@@ -245,6 +239,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <div class="maptools">
         <span class="seg" role="group" aria-label="Dividir el mapa por" id="groupseg"><button id="g-c" aria-pressed="true">Provincias</button><button id="g-b" aria-pressed="false">Cuencas</button></span>
         <span class="seg" role="group" aria-label="Qué muestra el mapa" id="layerseg"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
+        <div class="tapbox mini" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="tap-q" role="combobox" aria-label="Busca tu municipio" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Busca tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div>
       </div>
       <div class="mapbox" id="mapbox"><canvas id="map"></canvas><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
       <p class="muted small" id="map-note" style="margin:8px 0 0">Cargando el mapa…</p>
@@ -290,18 +285,6 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <span class="seg" role="group" aria-label="Ordenar por"><button id="t-up" aria-pressed="false">Mayores subidas</button><button id="t-fill" aria-pressed="false">Mayor nivel</button><button id="t-cap" aria-pressed="true">Mayor capacidad</button></span></div>
     <div class="scroll"><table id="t-res"><tbody><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr></tbody></table></div>
     <button class="linkbtn" id="more" style="margin-top:12px">Ver más →</button>
-  </section>
-
-  <section class="sec" id="grifo">
-    <div class="grifohead">
-      <h2>¿De dónde viene el agua de tu grifo?</h2>
-      <p class="muted">Busca tu municipio: seguimos el agua desde tu grifo hasta los embalses de los que sale, y los que tiene aguas arriba, y te contamos cómo están hoy.</p>
-      <div class="tap" role="search"><label for="tap-q" class="vh">Tu municipio</label>
-        <div class="tapbox big"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="tap-q" role="combobox" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Escribe tu municipio: Majadahonda, Vigo, Écija…"><ul id="tap-list" role="listbox" hidden></ul></div>
-        <div class="tryme" id="tryme"><span class="muted small">Prueba con</span><button class="linkbtn" data-code="28079">Madrid</button><button class="linkbtn" data-code="08019">Barcelona</button><button class="linkbtn" data-code="41091">Sevilla</button><button class="linkbtn" data-code="30030">Murcia</button><button class="linkbtn" data-code="35016">Las Palmas</button></div>
-      </div>
-    </div>
-    <div class="grifo" id="grifo-out" aria-live="polite" hidden></div>
   </section>
 
   <section class="sec open" id="datos">
@@ -667,8 +650,7 @@ function drawCatchment(r) { const c = $('catch'), cat = catchment(r.reservoir_id
     if (m[0] < cat.bb.w || m[0] > cat.bb.e || m[1] < cat.bb.s || m[1] > cat.bb.n || !hit.isPointInPath(cat.lonlat, m[0], m[1], 'evenodd')) continue;
     x.lineWidth = rv.mean_flow_m3s > 80 ? 2 : rv.mean_flow_m3s > 20 ? 1.4 : 0.9; x.beginPath(); for (const l of ls) l.forEach(([lo, la], i) => i ? x.lineTo(X(lo), Y(la)) : x.moveTo(X(lo), Y(la))); x.stroke(); }
   if (r.lon != null) { x.beginPath(); x.arc(X(r.lon), Y(r.lat), 4.5, 0, 7); x.fillStyle = css('--ink'); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 2; x.stroke(); } }
-function tapFicha() { const el = $('ficha'), t = TAP; el.hidden = false; el.classList.add('tapcard');
-  el.innerHTML = `<h3>El agua de ${esc(t.name)}</h3><p class="muted">${t.ids.size ? 'En el mapa, los embalses de los que bebe y los que tiene aguas arriba.' : 'Su agua no sale de embalses del boletín.'} <a href="#grifo">Cómo llega hasta su grifo ↓</a></p>`; }
+function tapFicha() { grifo(); }
 async function ficha() { if (scope.t === 'm') return TAP && tapFicha(); $('ficha').classList.remove('tapcard'); const r = selRes(), el = $('ficha'); el.hidden = !r; if (!r) return;
   const live = r.data_source !== 'miteco-weekly', row = (k, v) => v == null || v === '' || v === '—' ? '' : `<div><dt>${k}</dt><dd>${v}</dd></div>`, n = (v, d, u) => v == null ? null : `${fmt(v, d)} ${u}`, id = r.reservoir_id;
   const paint = f => { const open = el.querySelector('details')?.open;
@@ -701,7 +683,7 @@ lhbox.onState(s => { PLACE = s || ''; route(); });
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').startsWith('#/')) return; e.preventDefault(); const el = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href')); (el || document.body).scrollIntoView(); });
 $('share').onclick = async () => { try { if (!await lhbox.copy(SHARE())) throw 0; $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
 async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; MHOVER = null; mtip.hidden = true;
-  if (t === 'm') { const tp = await loadTap(k); if (!tp) return setScope('es', null, push); const fresh = TAP?.code !== tp.code || $('grifo-out').hidden; TAP = tp; if (fresh) { tapIn.value = tp.name; grifo(); if (!push) $('grifo').scrollIntoView(); } }
+  if (t === 'm') { const tp = await loadTap(k); if (!tp) return setScope('es', null, push); TAP = tp; }
   if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
     const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
     scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? (regionOf(r.in.p) || !r.in.c ? { t: 'p', k: r.in.p } : { t: 'c', k: r.in.c }) : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
@@ -763,7 +745,10 @@ function pathGraph(t) {
       if (!backup) n.backup = false; edge(n.k, to); } }
   for (const e of E) { const n = N.get(e.a); if (n.kind === 'type') e.backup = n.backup; }
   for (const id of t.up) if (RES(id) && !N.has('r:' + id)) node('r:' + id, { kind: 'res', ids: [id], up: true });
-  for (const l of t.links || []) if (N.get('r:' + l.f)?.up && N.has('r:' + l.t)) edge('r:' + l.f, 'r:' + l.t, { river: true });
+  const down = new Map(); for (const l of t.links || []) down.set(l.f, [...(down.get(l.f) || []), l.t]);
+  for (const n of [...N.values()].filter(n => n.up)) { const id = n.ids[0], seen = new Set([id]); let at = [id];
+    while (at.length) { const nx = []; for (const a of at) for (const b of down.get(a) || []) { if (seen.has(b)) continue; seen.add(b);
+      if (N.has('r:' + b) && !N.get('r:' + b).up) edge(n.k, 'r:' + b, { river: true }); else nx.push(b); } at = nx; } }
   // the biggest reservoirs by name, the rest together in one circle
   const merge = (up, keep) => { const ks = [...N.values()].filter(n => n.kind === 'res' && !!n.up === up).sort((a, b) => capOf(b.ids[0]) - capOf(a.ids[0])).slice(keep).map(n => n.k);
     if (ks.length < 2) return; const k = up ? 'agg:up' : 'agg'; node(k, { kind: 'res', up, ids: ks.flatMap(x => N.get(x).ids) });
@@ -782,7 +767,7 @@ function pathGraph(t) {
 function pathSvg(t, W) {
   const { N, E, flow, R } = pathGraph(t); if (N.size < 2) return '';
   const maxCap = Math.max(1, ...[...N.values()].map(n => n.cap)), maxFlow = Math.max(1, ...flow.values());
-  const lanesAt = r => [...N.values()].filter(n => n.rank === r).length > 6, BW = 168, L = 84 + (lanesAt(R) ? 62 : 0), colW = Math.max(196, Math.min(300, (W - L - BW / 2 - 8) / Math.max(1, R))), Wt = L + colW * R + BW / 2 + 8;
+  const lanesAt = r => [...N.values()].filter(n => n.rank === r).length > 6, BW = 168, L = 84 + (lanesAt(R) ? 62 : 0), colW = Math.max(170, Math.min(260, (W - L - BW / 2 - 8) / Math.max(1, R))), Wt = L + colW * R + BW / 2 + 8;
   for (const n of N.values()) { n.r = n.kind === 'res' ? 6 + 18 * Math.sqrt(n.cap / maxCap) : 0;
     n.h = n.kind === 'res' ? 2 * n.r + 34 : n.kind === 'type' ? 58 : n.kind === 'tap' ? 60 : n.url && n.label.length > 24 ? 60 : 50; n.x = L + colW * (R - n.rank) + (n.rank === 0 ? 0 : 0); }
   const cols = Array.from({ length: R + 1 }, (_, r) => [...N.values()].filter(n => n.rank === r)), gap = 12;
@@ -823,7 +808,7 @@ function pathSvg(t, W) {
 function tankHtml(t) { const rs = [...t.ids].map(RES).filter(r => r && r.capacity_hm3 > 0 && r.fill_pct != null).sort((a, b) => b.capacity_hm3 - a.capacity_hm3); if (!rs.length) return '';
   return `<div class="tank" role="img" aria-label="Cada embalse, tan ancho como su capacidad y lleno hasta su nivel">${rs.map(r => `<div class="seg" style="flex:${r.capacity_hm3} 1 0" title="${esc(r.reservoir_name)}: ${fmt(r.fill_pct, 0)} % de ${fmt(r.capacity_hm3)} hm³"${t.up.has(r.reservoir_id) && !t.src.has(r.reservoir_id) ? ' data-up' : ''}><i style="height:${Math.max(0, Math.min(100, r.fill_pct))}%"></i><span>${esc(r.reservoir_name)}</span></div>`).join('')}<b class="lvl" style="bottom:${Math.max(0, Math.min(100, t.fill_pct))}%"><span>${fmt(t.fill_pct, 1)} % entre todos</span></b></div>
     <p class="muted small" style="margin:6px 0 0">Cada bloque es un embalse, tan ancho como su capacidad y lleno hasta su nivel. La línea marca el nivel de todos juntos.</p>`; }
-function grifo() { const t = TAP, el = $('grifo-out'); if (!t) return; el.hidden = false;
+function grifo() { const t = TAP, el = $('ficha'); if (!t || scope.t !== 'm') return; el.hidden = false; el.classList.add('tapcard');
   const units = t.tree.filter(x => x.depth === 0 && !x.source_type), rows = t.tree.filter(x => x.source_type);
   const takers = []; for (const x of rows) { let g = takers.find(g => g.id === x.id); if (!g) takers.push(g = { id: x.id, unit: x.unit, type: x.type, doc: x.doc, url: x.url, depth: x.depth, rows: [] });
     if (!g.rows.some(y => y.source_type === x.source_type && y.source_name === x.source_name)) g.rows.push(x); }
@@ -840,28 +825,22 @@ function grifo() { const t = TAP, el = $('grifo-out'); if (!t) return; el.hidden
   const kinds = (t.kinds || []).filter(k => k !== 'network').map(k => KINDS[k] || k);
   const d = (a, b) => a == null || b == null ? null : a - b, dLy = d(t.fill_pct, t.ly), dAvg = d(t.fill_pct, t.avg10);
   const pts = v => `${fmt(Math.abs(v), 1)} ${Math.abs(v) >= 0.95 && Math.abs(v) < 1.05 ? 'punto' : 'puntos'}`;
-  const figs = has ? `<div class="gfig"><div class="label">Embalses detrás de tu grifo</div><div class="big">${fmt(t.fill_pct, 1)}<small> %</small></div>
-      ${tankHtml(t)}
-      <div class="pair"><div><b>${fmt(t.stored)} hm³</b>Agua embalsada</div><div><b>${fmt(t.cap)} hm³</b>Capacidad · ${t.reservoirs} embalses</div></div>
-      <div class="pair cmp"><div>Frente a hace un año<b class="${dLy > 0 ? 'upc' : dLy < 0 ? 'downc' : ''}">${dLy == null ? '—' : signed(dLy, 1) + ' <span>pts</span>'}</b></div><div>Frente a la media de 10 años<b class="${dAvg > 0 ? 'upc' : dAvg < 0 ? 'downc' : ''}">${dAvg == null ? '—' : signed(dAvg, 1) + ' <span>pts</span>'}</b></div></div></div>`
-    : '';
+  const figs = has ? `<div class="label">Cada embalse detrás de tu grifo</div>${tankHtml(t)}` : '';
   const via = nets.map(g => g.unit), plan = units.map(u => u.unit);
   const exp = !units.length ? '' : `<p>${esc(t.name)} ${plan.length > 1 ? `se abastece de las unidades ${listEs(plan.map(p => `<b>${esc(p)}</b>`))}` : `se abastece de la unidad <b>${esc(plan[0])}</b>`} del plan hidrológico${via.length ? `, que recibe el agua de ${listEs(via.map(v => `<b>${esc(v)}</b>`))}` : ''}.${kinds.length ? ` Su agua viene de ${listEs(kinds)}.` : ''}</p>`
     + (has ? `<p>Toma agua de ${nSrc} ${nSrc === 1 ? 'embalse' : 'embalses'} del boletín${nUp ? `, y ${nUp === 1 ? 'otro está' : `otros ${nUp} están`} aguas arriba de ${nSrc === 1 ? 'él' : 'ellos'}` : ''}. Juntos guardan hoy ${fmt(t.stored)} hm³ de ${fmt(t.cap)}: están al <b>${fmt(t.fill_pct, 1)} %</b>${dLy != null && Math.abs(dLy) >= 0.05 ? `, ${pts(dLy)} ${dLy > 0 ? 'más' : 'menos'} que hace un año` : ''}${dAvg != null && Math.abs(dAvg) >= 0.05 ? ` y ${pts(dAvg)} ${dAvg > 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años` : ''}.</p>`
       : `<p>Ninguna de sus fuentes es un embalse del boletín semanal, así que no hay un nivel de embalses que mostrar: depende de ${kinds.length ? listEs(kinds) : 'otras fuentes'}.</p>`)
     + (has ? `<p class="muted small">Cómo lo calculamos: juntamos los embalses de los que se toma el agua, directamente o a través de redes y trasvases, y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Un embalse grande pesa más que uno pequeño. Parte de esa agua también la usan otros (riego, energía, caudal ecológico), y un municipio puede recibir agua de varias fuentes en distinta proporción.</p>` : '')
     + `<p class="muted small">Fuentes: ${listEs([...new Map(t.tree.filter(x => x.doc).map(x => [x.doc, docLink(x.doc, x.url)])).values()])}${has ? `; niveles de MITECO y los SAIH, ${when(t.as_of)}` : ''}.</p>`;
-  el.innerHTML = `<div class="gtop"><h3>El agua de ${esc(t.name)}</h3><span class="muted">${esc(t.prov)}</span><span class="sp"></span>${t.ids.size ? '<button class="linkbtn" id="g-map">Ver en el mapa ↑</button>' : ''}</div>`
+  el.innerHTML = `<div class="gtop"><h3>De dónde viene el agua de ${esc(t.name)}</h3><span class="muted">${esc(t.prov)} · ${fmt(t.pop)} hab.</span></div>`
     + (units.length ? `<div class="gpath"><div class="label">El camino del agua</div><div class="gscroll" id="g-svg"></div><p class="muted small" style="margin:6px 0 0">El agua va de izquierda a derecha. Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel; cada tubería, tan gruesa como el agua que hay detrás.${t.up.size ? ' La línea de puntos es el río que baja de un embalse aguas arriba.' : ''}${rows.some(x => x.role === 'backup') ? ' Las discontinuas son fuentes de reserva.' : ''} Pasa el ratón por encima para ver los nombres.</p></div>` : '')
     + (has ? `<div class="gleft">${figs}</div><div class="gexp">${exp}</div>` : `<div class="gexp wide">${exp}</div>`)
     + (units.length ? `<details class="gall"><summary>Todas las fuentes, una a una</summary>${flow}</details>` : '');
   const box = $('g-svg'); if (box) { box.innerHTML = pathSvg(t, box.clientWidth || 900); const sv = box.querySelector('svg');
     if (sv && sv.width.baseVal.value > box.clientWidth + 4) box.insertAdjacentHTML('beforebegin', '<p class="muted small" style="margin:4px 0 0">Desliza para ver todo el camino →</p>'); }
-  $('g-map')?.addEventListener('click', async () => { if (scope.t !== 'm' || scope.k !== t.code) await setScope('m', t.code); $('panorama').scrollIntoView(); });
-  el.querySelectorAll('[data-res]').forEach(b => b.onclick = async () => { await setScope('r', +b.dataset.res); $('panorama').scrollIntoView(); }); }
-let gResize; addEventListener('resize', () => { clearTimeout(gResize); gResize = setTimeout(() => { if (TAP && !$('grifo-out').hidden) grifo(); }, 200); });
-async function showTap(code, scroll) { const tp = await loadTap(code); if (!tp) return; TAP = tp; tapIn.value = tp.name; grifo(); if (scroll) $('grifo').scrollIntoView();
-  if (scope.t !== 'm' || scope.k !== code) setScope('m', code); }
+  // a reservoir opens on the map above; scroll only if the map is out of sight
+  el.querySelectorAll('[data-res]').forEach(b => b.onclick = async () => { await setScope('r', +b.dataset.res); if ($('panorama').getBoundingClientRect().top < 0) $('panorama').scrollIntoView({ behavior: 'smooth' }); }); }
+let gResize; addEventListener('resize', () => { clearTimeout(gResize); gResize = setTimeout(() => { if (TAP && scope.t === 'm') grifo(); }, 200); });
 
 // ───────── tap search: every municipality, typed as people write them, biggest towns first ─────────
 let MUNIS = null, tapHits = [], tapSel = 0;
@@ -876,8 +855,7 @@ const tapIn = $('tap-q'), tapList = $('tap-list');
 function tapShow() { tapList.hidden = !tapIn.value.trim(); tapIn.setAttribute('aria-expanded', !tapList.hidden);
   tapList.innerHTML = tapHits.length ? tapHits.map((m, i) => `<li role="option" id="tap-${i}" data-i="${i}" aria-selected="${i === tapSel}">${esc(m.name)}<span>${esc(m.prov)} · ${fmt(m.pop)} hab.</span></li>`).join('') : `<li class="none">${MUNIS ? 'Ningún municipio coincide' : 'Cargando municipios…'}</li>`;
   tapIn.setAttribute('aria-activedescendant', tapHits.length ? 'tap-' + tapSel : ''); }
-function tapPick(m) { tapIn.value = m.name; tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); showTap(m.code); }
-$('tryme').addEventListener('click', e => { const b = e.target.closest('[data-code]'); if (b) showTap(b.dataset.code); });
+function tapPick(m) { tapIn.value = ''; tapIn.blur(); tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); setScope('m', m.code); }
 tapIn.addEventListener('focus', () => { munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); });
 tapIn.addEventListener('input', () => { tapSel = 0; tapHits = tapFind(tapIn.value); tapShow(); });
 // the list of municipalities (8,132 rows) loads in the background once the page has its data, so typing answers at once
