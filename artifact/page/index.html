@@ -67,9 +67,13 @@ main { padding: 30px 0 10px; }
 .tapbox li[aria-selected="true"] { background: var(--tint); }
 .tapbox li b { color: var(--brand); } .tapbox li span { font-size: 13px; color: var(--muted); white-space: nowrap; } .tapbox li.none { cursor: default; color: var(--muted); }
 /* tu grifo */
-.grifohead { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 0 40px; align-items: end; }
-.grifohead h2 { margin-top: 0; } .grifohead p { margin: 8px 0 0; max-width: 64ch; }
-.grifohead .tap { margin: 0; display: grid; gap: 8px; } .grifohead .tapbox { max-width: none; }
+.grifohead { max-width: 760px; } .grifohead h2 { margin: 0; } .grifohead > p { margin: 8px 0 0; font-size: 17px; }
+.grifohead .tap { margin: 18px 0 0; display: grid; gap: 10px; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tapbox.big { max-width: none; } .tapbox.big input { font-size: 20px; padding: 16px 18px 16px 54px; border: 2px solid var(--brand); border-radius: 12px; box-shadow: 0 6px 22px rgb(20 99 224 / 0.16); background: var(--surface); }
+.tapbox.big input::placeholder { color: var(--faint); } .tapbox.big input:focus { outline: none; box-shadow: 0 0 0 4px rgb(20 99 224 / 0.22), 0 6px 22px rgb(20 99 224 / 0.16); }
+.tapbox.big > svg { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; fill: none; stroke: var(--brand); stroke-width: 2.4; stroke-linecap: round; pointer-events: none; }
+.tapbox.big ul { top: calc(100% + 6px); } .tapbox.big li { font-size: 17px; padding: 10px 12px; }
 .tryme { display: flex; gap: 4px 12px; flex-wrap: wrap; align-items: baseline; } .tryme .linkbtn { font-size: 14px; font-weight: 400; }
 .grifo { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
 .grifo > div { padding: 18px 20px 20px; min-width: 0; } .grifo > .gexp:not(.wide) { border-left: 1px solid var(--line); }
@@ -216,7 +220,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
   .raingrid > div + div, .open > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 20px; }
   .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
-  .grifohead, .grifo { grid-template-columns: minmax(0, 1fr); } .grifohead .tap { margin-top: 16px; } .grifo > .gexp:not(.wide) { border-left: 0; border-top: 1px solid var(--line); }
+  .grifo { grid-template-columns: minmax(0, 1fr); } .tapbox.big input { font-size: 17px; } .grifo > .gexp:not(.wide) { border-left: 0; border-top: 1px solid var(--line); }
   .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
 }
 </style>
@@ -290,13 +294,10 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 
   <section class="sec" id="grifo">
     <div class="grifohead">
-      <div>
-        <h2>¿De dónde viene el agua de tu grifo?</h2>
-        <p>Cada municipio bebe de un sistema de abastecimiento que fija el plan hidrológico de su cuenca. Unos toman el agua de un embalse cercano; otros de una red que la reparte desde muchos, como el Canal de Isabel II en Madrid o los Canales del Taibilla en Murcia; otros de pozos, ríos o desaladoras.</p>
-        <p class="muted">Busca tu municipio: seguimos el agua desde tu grifo hasta los embalses de los que sale, y los que tiene aguas arriba, y te contamos cómo están hoy.</p>
-      </div>
-      <div class="tap" role="search"><label for="tap-q">Tu municipio</label>
-        <div class="tapbox"><input type="search" id="tap-q" role="combobox" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Escribe tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div>
+      <h2>¿De dónde viene el agua de tu grifo?</h2>
+      <p class="muted">Busca tu municipio: seguimos el agua desde tu grifo hasta los embalses de los que sale, y los que tiene aguas arriba, y te contamos cómo están hoy.</p>
+      <div class="tap" role="search"><label for="tap-q" class="vh">Tu municipio</label>
+        <div class="tapbox big"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="tap-q" role="combobox" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Escribe tu municipio: Majadahonda, Vigo, Écija…"><ul id="tap-list" role="listbox" hidden></ul></div>
         <div class="tryme" id="tryme"><span class="muted small">Prueba con</span><button class="linkbtn" data-code="28079">Madrid</button><button class="linkbtn" data-code="08019">Barcelona</button><button class="linkbtn" data-code="41091">Sevilla</button><button class="linkbtn" data-code="30030">Murcia</button><button class="linkbtn" data-code="35016">Las Palmas</button></div>
       </div>
     </div>
