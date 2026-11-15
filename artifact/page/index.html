@@ -191,6 +191,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 .wait-res:not(.wait-map) #map { animation: breathe 1.6s ease-in-out infinite; background: none; }   /* grey map, waiting for its colours */
 .sk { display: block; height: 14px; margin: 6px 0; } .sk.t { height: 20px; width: 70%; } .sk.s { width: 45%; }
 .skrow td { padding: 14px 12px; } .skrow .sk { margin: 0; }
+@media (max-width: 600px) { .status > span { display: none; } .tools .seg { max-width: 100%; overflow-x: auto; } }
 @media (prefers-reduced-motion: reduce) { .sk, [data-sk], #map, #year, #rainmap { animation: none !important; } .chart path.ln { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } html { scroll-behavior: auto; } }
 @media (max-width: 980px) {
   .intro, .frame, .raingrid, .high, .open, footer .cols, .ficha .top3 { grid-template-columns: minmax(0, 1fr); }
@@ -363,21 +364,17 @@ FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
        w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
        w.fill_pct_same_week_last_year AS ly, w.fill_pct_10y_average AS avg10, strftime(w.as_of, '%Y-%m-%dT%H:%M:%SZ') AS as_of
 FROM embalses."now".municipality_water w JOIN embalses.ref.municipalities m USING (municipality_code) WHERE w.municipality_code = '${code}'`,
-  // the path of the water: the municipality's supply units, their sources, and through networks and transfers their sources in turn
-  tapTree: code => `WITH RECURSIVE units AS (SELECT supply_unit_id FROM embalses.ref.municipality_supply WHERE municipality_code = '${code}'),
-src(taker, source_type, source_name, reservoir_id, network_unit_id, role, depth) AS (
-  SELECT s.supply_unit_id, s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role, 0
-  FROM embalses.ref.supply_sources s JOIN units USING (supply_unit_id) WHERE s.municipality_code IS NULL OR s.municipality_code = '${code}'
-  UNION
-  SELECT s.supply_unit_id, s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role, src.depth + 1
-  FROM embalses.ref.supply_sources s JOIN src ON s.supply_unit_id = src.network_unit_id WHERE src.depth < 5)
-SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url, 0 AS depth,
-       NULL AS source_type, NULL AS source_name, NULL::INTEGER AS reservoir_id, NULL AS network_unit_id, NULL AS role
-FROM units JOIN embalses.ref.supply_units u USING (supply_unit_id)
-UNION ALL
-SELECT t.taker, u.unit_name, u.unit_type, u.source_document, u.source_url, t.depth, t.source_type, t.source_name, t.reservoir_id, t.network_unit_id, t.role
-FROM src t JOIN embalses.ref.supply_units u ON u.supply_unit_id = t.taker
-ORDER BY depth, unit, source_type, source_name`,
+  // the path of the water, one step at a time (a recursive query is too slow in the browser): the municipality's supply units
+  // and their sources, then the sources of each network or transfer they draw on
+  tapUnits: code => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
+       s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
+FROM embalses.ref.municipality_supply ms JOIN embalses.ref.supply_units u USING (supply_unit_id)
+LEFT JOIN embalses.ref.supply_sources s ON s.supply_unit_id = ms.supply_unit_id AND (s.municipality_code IS NULL OR s.municipality_code = ms.municipality_code)
+WHERE ms.municipality_code = '${code}'`,
+  tapNets: ids => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
+       s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
+FROM embalses.ref.supply_units u LEFT JOIN embalses.ref.supply_sources s USING (supply_unit_id)
+WHERE u.supply_unit_id IN (${ids.map(id => `'${String(id).replace(/'/g, "''")}'`).join(', ')}) AND s.municipality_code IS NULL`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
 FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
 };
@@ -664,7 +661,14 @@ function noLevel() {   // a tap with no bulletin reservoir behind it
   for (const id of ['n-week', 'n-week2']) $(id).hidden = true; for (const id of ['n-stored', 'n-cap', 'n-ly', 'n-avg']) { $(id).className = ''; $(id).textContent = '—'; }
   $('n-meter').parentElement.hidden = true; $('yearbox').hidden = true; $('n-date').textContent = ''; }
 async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; if (TAP?.code === code) return TAP;
-  try { const [[w], tree] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapTree(code)).then(r => r.rows)]); if (!w) return null;
+  try { const [[w], first] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapUnits(code)).then(r => r.rows)]); if (!w) return null;
+    // tree: one row per unit (no source_type), then one per source, with the depth of the unit that takes it
+    const tree = [], seen = new Set(), add = (rows, depth) => { for (const x of rows) { if (!seen.has(x.id)) { seen.add(x.id); if (depth === 0) tree.push({ ...x, depth, source_type: null }); }
+      if (x.source_type) tree.push({ ...x, depth }); } };
+    add(first, 0); const done = new Set(first.map(x => x.id));
+    for (let depth = 1, next = first; depth <= 5; depth++) {
+      const ids = [...new Set(next.map(x => x.network_unit_id).filter(id => id && !done.has(id)))]; if (!ids.length) break;
+      ids.forEach(id => done.add(id)); next = (await q(SQL.tapNets(ids))).rows; add(next, depth); }
     const src = new Set(w.src || []), up = new Set(w.up || []);
     return { ...w, code, src, up, tree, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
   catch (e) { console.error(e); return null; } }
