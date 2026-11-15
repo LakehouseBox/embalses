@@ -18,6 +18,7 @@ Every value comes from its publisher: MITECO (weekly reservoir bulletin, dam inv
   - `supply_units`: urban supply units as the river-basin plans define them, plus the bulk networks they draw on (Canal de Isabel II and its treatment plants, the Taibilla, the Tajo-Segura and Negratín-Almanzora transfers).
   - `municipality_supply`: which supply unit serves each municipality, with the plan's own description of the intake.
   - `supply_sources`: where each unit (or one municipality in it) takes its water: reservoirs (with `reservoir_id` when in the bulletin), rivers, aquifers, springs, desalination, transfers, networks.
+  - `municipality_outlines`: simplified outline of every municipality as GeoJSON text, partitioned by province, for drawing one province at a time in a browser.
   - `map_outlines`: simplified outlines of basins, comunidades, provinces and main rivers as GeoJSON text, for drawing a map without a spatial extension (for example in a browser).
 - **obs**: measurements. Append-only, partitioned by day, timestamps UTC.
   - `precipitation`: rain per explicit interval.

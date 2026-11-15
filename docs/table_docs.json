@@ -422,5 +422,15 @@
       "geojson": "GeoJSON geometry as text (Polygon, MultiPolygon, LineString or MultiLineString), WGS84 longitude and latitude, simplified for display.",
       "source": "Where the outline comes from."
     }
+  },
+  "ref.municipality_outlines": {
+    "doc": "Simplified outline of every municipality, for drawing a map (for example in a browser, without a spatial extension). GeoJSON text, WGS84, simplified to about 200 m. Partitioned by province_code, so reading one province reads one file. For analysis use ref.municipalities.boundary, the full geometry. Static: loaded by sql/reference/municipality_outlines.sql from ref.municipalities.",
+    "columns": {
+      "municipality_code": "INE municipality code (ref.municipalities).",
+      "province_code": "INE province code, the first two digits of municipality_code; the partition.",
+      "municipality_name": "Name as people write it (ref.municipalities.municipality_name).",
+      "geojson": "GeoJSON geometry as text (Polygon or MultiPolygon), WGS84 longitude and latitude, simplified for display (tolerance 0.002°, coordinates to 0.0001°). Neighbouring outlines are simplified one by one, so they may not meet exactly.",
+      "source": "Where the outline comes from."
+    }
   }
 }
