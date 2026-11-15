@@ -377,7 +377,8 @@
       "fill_pct": "stored_volume_hm3 ÷ capacity_hm3, %: how full the water behind this tap is, a large reservoir weighing more than a small one.",
       "fill_pct_same_week_last_year": "The same, for the same week a year ago, capacity-weighted, %.",
       "fill_pct_10y_average": "The same week averaged over the previous 10 years, capacity-weighted, %.",
-      "as_of": "When the reservoir levels were last updated (now.reservoir_status), UTC."
+      "as_of": "When the reservoir levels were last updated (now.reservoir_status), UTC.",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "obs.reservoir_weekly": {
