@@ -58,6 +58,56 @@ main { padding: 30px 0 10px; }
 .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
 .lede { margin: 4px 0 0; font-size: 21px; color: var(--muted); }
 .state { margin: 0; font-size: 19px; color: var(--muted); border-left: 1px solid var(--line); padding-left: 28px; max-width: 34ch; }
+.tap { margin-top: 20px; display: flex; gap: 10px 16px; align-items: center; flex-wrap: wrap; }
+.tap label { font-weight: 700; font-size: 17px; }
+.tapbox { position: relative; flex: 1 1 300px; max-width: 440px; }
+.tapbox.mini { flex: 1 1 180px; max-width: 260px; margin-left: auto; } .tapbox.mini input { font-size: 15px; padding: 6px 10px 6px 32px; border-radius: 999px; } .tapbox.mini > svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 16px; height: 16px; fill: none; stroke: var(--muted); stroke-width: 2.4; stroke-linecap: round; pointer-events: none; }
+.tapbox.mini ul { min-width: 300px; left: auto; }
+.tapbox input { width: 100%; font-size: 17px; padding: 9px 14px; border-radius: var(--r); }
+.tapbox ul { position: absolute; left: 0; right: 0; top: calc(100% + 4px); margin: 0; padding: 4px; list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--float); z-index: 30; max-height: 340px; overflow-y: auto; }
+.tapbox li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 8px 10px; border-radius: var(--rs); cursor: pointer; }
+.tapbox li[aria-selected="true"] { background: var(--tint); }
+.tapbox li b { color: var(--brand); } .tapbox li span { font-size: 13px; color: var(--muted); white-space: nowrap; } .tapbox li.none { cursor: default; color: var(--muted); }
+/* tu grifo */
+.ficha.tapcard { padding: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); }
+.tapcard > div, .tapcard > details { padding: 16px 18px 18px; min-width: 0; } .tapcard > .gexp:not(.wide) { border-left: 1px solid var(--line); }
+.tapcard .gtop { grid-column: 1 / -1; border-bottom: 1px solid var(--line); display: flex; gap: 8px 16px; align-items: baseline; flex-wrap: wrap; padding-bottom: 12px; }
+.tapcard .gtop h3 { margin: 0; font-size: 22px; }
+.flow { display: grid; gap: 0; }
+.step .label { margin-bottom: 6px; }
+.arrow { color: var(--faint); font-size: 13px; padding: 4px 0 4px 14px; margin-left: 10px; border-left: 2px dashed var(--river); }
+.node { border: 1px solid var(--line); border-radius: var(--rs); padding: 10px 12px; background: var(--surface); }
+.node + .node { margin-top: 8px; } .node h4 { margin: 0; font-size: 16px; display: flex; gap: 8px; justify-content: space-between; align-items: baseline; flex-wrap: wrap; }
+.node h4 a { font-size: 13px; font-weight: 400; white-space: nowrap; }
+.node.home { background: var(--tint); border-color: var(--brand); } .node.home h4 { font-size: 18px; color: var(--brand-dark); }
+.srcs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.src { font: inherit; font-size: 14px; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
+.src i { font-style: normal; font-size: 12px; color: var(--muted); }
+.src .mini { width: 34px; height: 6px; border-radius: 999px; background: #dbe7f5; position: relative; overflow: hidden; } .src .mini span { position: absolute; inset: 0 auto 0 0; background: var(--brand); }
+.src.net { background: var(--tint); border-style: dashed; }
+.gfig .big { font-size: 64px; } .gfig .pair { margin-top: 10px; }
+.tapcard > .gpath, .tapcard > .gall, .tapcard > .gexp.wide { grid-column: 1 / -1; } .tapcard > .gpath { border-bottom: 1px solid var(--line); }
+.tapcard > .gall { border-top: 1px solid var(--line); padding-top: 4px; } .tapcard > .gall summary { padding: 8px 0; } .tapcard > .gall .flow { margin-top: 10px; }
+.gscroll { overflow-x: auto; margin-top: 8px; } .gsvg { display: block; max-width: none; font-family: var(--sans); }
+.gsvg .e { fill: none; stroke: var(--water); stroke-opacity: 0.32; stroke-linecap: round; } .gsvg .e.bk { stroke-dasharray: 6 6; stroke-opacity: 0.22; } .gsvg .e.rv { stroke: var(--river); stroke-opacity: 0.9; stroke-dasharray: 1 5; }
+.gsvg text { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; } .gsvg .nm { font-size: 13.5px; font-weight: 600; fill: var(--ink); } .gsvg .pc { font-size: 12px; fill: var(--muted); }
+.gsvg .rn text, .gsvg .tn text { text-anchor: middle; } .gsvg .rn { cursor: pointer; } .gsvg .rn:not([data-res]) { cursor: default; }
+.gsvg .rn .bg { fill: #dbe7f5; } .gsvg .rn .fl { fill: var(--brand); } .gsvg .rn .ol { fill: none; stroke: var(--brand-dark); stroke-opacity: 0.35; } .gsvg .rn.up .fl { fill: var(--river); }
+.gsvg .rn[data-res]:hover .ol { stroke-opacity: 1; stroke-width: 2; }
+.gsvg .tn rect { fill: var(--tint); stroke: var(--border); } .gsvg .tn path { fill: none; stroke: var(--brand-dark); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; } .gsvg .tn.bk rect { stroke-dasharray: 3 3; }
+.gsvg .bn rect { fill: var(--surface); stroke: var(--border); } .gsvg a.bn:hover rect { stroke: var(--brand); } .gsvg .lk { font-size: 12px; fill: var(--brand); }
+.gsvg .hn rect { fill: var(--tint); stroke: var(--brand); stroke-width: 1.5; } .gsvg .hn .nm { fill: var(--brand-dark); font-size: 15px; font-weight: 700; } .gsvg .hn path { fill: var(--brand); }
+.tank { position: relative; display: flex; gap: 2px; height: 86px; margin-top: 14px; }
+.tank .seg { position: relative; min-width: 3px; background: #dbe7f5; border-radius: 3px; overflow: hidden; container-type: inline-size; }
+.tank .seg i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--brand); } .tank .seg[data-up] i { background: var(--river); }
+.tank .seg span { position: absolute; left: 6px; right: 4px; top: 4px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+@container (max-width: 54px) { .tank .seg span { display: none; } }
+.tank .lvl { position: absolute; left: -4px; right: -4px; border-top: 2px dashed var(--ink); pointer-events: none; } .tank .lvl span { position: absolute; right: 4px; top: 2px; font-size: 12px; font-weight: 700; background: var(--surface); padding: 0 4px; border-radius: 3px; }
+.gexp p { margin: 12px 0 0; } .gexp .muted.small a { color: inherit; }
+.tapcard h3 { margin: 0 0 6px; } .tapcard p { margin: 6px 0; max-width: 78ch; }
+.tapcard .kinds { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; } .tapcard .kinds span { font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--tint); }
+.tapcard ul.via { margin: 6px 0; padding-left: 18px; } .tapcard ul.via li { margin: 2px 0; }
 .crumbs { margin-top: 18px; font-size: 15px; color: var(--muted); display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .crumbs button { font: inherit; color: var(--muted); background: none; border: 0; padding: 0; cursor: pointer; } .crumbs button:hover { color: var(--brand); text-decoration: underline; }
 .crumbs b { color: var(--ink); }
@@ -156,6 +206,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 .wait-res:not(.wait-map) #map { animation: breathe 1.6s ease-in-out infinite; background: none; }   /* grey map, waiting for its colours */
 .sk { display: block; height: 14px; margin: 6px 0; } .sk.t { height: 20px; width: 70%; } .sk.s { width: 45%; }
 .skrow td { padding: 14px 12px; } .skrow .sk { margin: 0; }
+@media (max-width: 600px) { .mapbox .mapkey { position: static; margin-top: 6px; } .status > span { display: none; } .tools .seg { max-width: 100%; overflow-x: auto; } }
 @media (prefers-reduced-motion: reduce) { .sk, [data-sk], #map, #year, #rainmap { animation: none !important; } .chart path.ln { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } html { scroll-behavior: auto; } }
 @media (max-width: 980px) {
   .intro, .frame, .raingrid, .high, .open, footer .cols, .ficha .top3 { grid-template-columns: minmax(0, 1fr); }
@@ -163,6 +214,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
   .raingrid > div + div, .open > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 20px; }
   .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
+  .ficha.tapcard { grid-template-columns: minmax(0, 1fr); } .tapcard > .gexp:not(.wide) { border-left: 0; border-top: 1px solid var(--line); } .tapbox.mini { margin-left: 0; max-width: none; } .tapbox.mini ul { left: 0; min-width: 0; }
   .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
 }
 </style>
@@ -185,8 +237,9 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   <div class="frame" id="panorama">
     <div class="pane mapcard" id="mapcard">
       <div class="maptools">
-        <span class="seg" role="group" aria-label="Dividir el mapa por" id="groupseg"><button id="g-b" aria-pressed="true">Cuencas</button><button id="g-c" aria-pressed="false">Comunidades</button></span>
+        <span class="seg" role="group" aria-label="Dividir el mapa por" id="groupseg"><button id="g-c" aria-pressed="true">Provincias</button><button id="g-b" aria-pressed="false">Cuencas</button></span>
         <span class="seg" role="group" aria-label="Qué muestra el mapa" id="layerseg"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
+        <div class="tapbox mini" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="tap-q" role="combobox" aria-label="Busca tu municipio" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Busca tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div>
       </div>
       <div class="mapbox" id="mapbox"><canvas id="map"></canvas><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
       <p class="muted small" id="map-note" style="margin:8px 0 0">Cargando el mapa…</p>
@@ -307,13 +360,32 @@ FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_2
   outlines: `SELECT layer, outline_id, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
   ficha: id => `SELECT dam_name, dam_type, uses, catchment_area_km2, surface_area_ha, mean_annual_inflow_hm3, is_hydroelectric, energy_capacity_gwh
 FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
+  munis: `SELECT municipality_code AS code, municipality_name AS name, province_name AS prov, population AS pop FROM embalses.ref.municipalities`,
+  tap: code => `SELECT w.municipality_name AS name, w.province_name AS prov, w.population AS pop, m.longitude AS lon, m.latitude AS lat, w.supply_unit_names AS units, w.source_types AS kinds,
+       w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
+       w.fill_pct_same_week_last_year AS ly, w.fill_pct_10y_average AS avg10, strftime(w.as_of, '%Y-%m-%dT%H:%M:%SZ') AS as_of
+FROM embalses."now".municipality_water w JOIN embalses.ref.municipalities m USING (municipality_code) WHERE w.municipality_code = '${code}'`,
+  // the path of the water, one step at a time (a recursive query is too slow in the browser): the municipality's supply units
+  // and their sources, then the sources of each network or transfer they draw on
+  tapUnits: code => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
+       s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
+FROM embalses.ref.municipality_supply ms JOIN embalses.ref.supply_units u USING (supply_unit_id)
+LEFT JOIN embalses.ref.supply_sources s ON s.supply_unit_id = ms.supply_unit_id AND (s.municipality_code IS NULL OR s.municipality_code = ms.municipality_code)
+WHERE ms.municipality_code = '${code}'`,
+  muniShapes: pc => `SELECT municipality_code AS code, municipality_name AS name, geojson FROM embalses.ref.municipality_outlines WHERE province_code = '${pc}'`,
+  muniLevels: pc => `SELECT municipality_code AS code, fill_pct, reservoirs, population AS pop, source_types AS kinds FROM embalses."now".municipality_water WHERE municipality_code LIKE '${pc}%'`,
+  tapLinks: ids => `SELECT from_reservoir_id AS f, to_reservoir_id AS t FROM embalses.ref.reservoir_links WHERE link_type = 'river' AND from_reservoir_id IN (${ids.map(Number).join(', ')})`,
+  tapNets: ids => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
+       s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
+FROM embalses.ref.supply_units u LEFT JOIN embalses.ref.supply_sources s USING (supply_unit_id)
+WHERE u.supply_unit_id IN (${ids.map(id => `'${String(id).replace(/'/g, "''")}'`).join(', ')}) AND s.municipality_code IS NULL`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
 FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
 };
 
 // ───────── state ─────────
 const D = { res: [], grid: [], gauges: [], rivers: [] };
-let AREAS = { b: [], c: [], p: [] }, scope = { t: 'es', k: null }, group = 'b', layer = 'res', win = '24h', sortBy = 'cap', shown = 8;
+let AREAS = { b: [], c: [], p: [] }, scope = { t: 'es', k: null }, group = 'c', layer = 'res', win = '24h', sortBy = 'cap', shown = 8;
 const hit = document.createElement('canvas').getContext('2d');
 const island = (lon, lat) => lon > 1 && lat < 40.2;   // Balearic Islands: no reservoirs in the bulletin, so the map leaves them out
 function area(type, name, geometry) { let x0 = 99, x1 = -99, y0 = 99, y1 = -99, best = null; const path = new Path2D();
@@ -338,24 +410,47 @@ function assign() {   // each reservoir into its basin, comunidad and province (
 }
 // scope: España, a basin (b), a comunidad (c), a province (p) or one reservoir (r, shown inside its parent area)
 const selRes = () => scope.t === 'r' ? D.res.find(r => r.reservoir_id === scope.k) : null;
+// m: a municipality's tap water: the reservoirs it takes water from and those upstream of them (now.municipality_water)
+let TAP = null;   // { code, name, prov, lon, lat, units, kinds, src: Set, up: Set, ids: Set, via, doc }
 const AS = () => scope.t === 'r' ? scope.parent : scope;   // the area the map and the table show
-const inScope = r => AS().t === 'es' || (r.in && r.in[AS().t] === AS().k);
-const selArea = () => AS().t === 'es' ? null : AREAS[AS().t].find(a => a.name === AS().k);
-const children = name => AREAS.p.filter(p => p.parent === name && p.res.length);
+const inScope = r => AS().t === 'es' || (AS().t === 'm' ? !!TAP?.ids.has(r.reservoir_id) : r.in && r.in[AS().t] === AS().k);
+const selArea = () => AS().t === 'es' || AS().t === 'm' ? null : AREAS[AS().t].find(a => a.name === AS().k);
+const children = name => AREAS.p.filter(p => p.parent === name && (p.res.length || PCODE[p.name]));
+// INE province code of each province outline, to open its municipalities (ref.municipality_outlines is partitioned by it)
+const PCODE = { 'Araba/Álava': '01', Albacete: '02', Alicante: '03', 'Almería': '04', 'Ávila': '05', Badajoz: '06', Mallorca: '07', Barcelona: '08', Burgos: '09', Caceres: '10', 'Cádiz': '11', 'Castellón': '12',
+  'Ciudad Real': '13', 'Córdoba': '14', 'A Coruña': '15', Cuenca: '16', Girona: '17', Granada: '18', Guadalajara: '19', Gipuzkoa: '20', Huelva: '21', Huesca: '22', 'Jaén': '23', 'León': '24', Lleida: '25', 'La Rioja': '26',
+  Lugo: '27', Madrid: '28', 'Málaga': '29', Murcia: '30', Navarra: '31', Ourense: '32', Asturias: '33', Palencia: '34', Pontevedra: '36', Salamanca: '37', Cantabria: '39', Segovia: '40', Sevilla: '41', Soria: '42',
+  Tarragona: '43', Teruel: '44', Toledo: '45', Valencia: '46', Valladolid: '47', Bizkaia: '48', Zamora: '49', Zaragoza: '50' };
+const provName = pc => Object.keys(PCODE).find(n => PCODE[n] === pc);
+const pickable = a => a.res.length || (a.type === 'p' && PCODE[a.name]);
+// a municipality sits in its province; a one-province comunidad (Madrid, Murcia…) is shown as the comunidad
+function muniParent(code) { const name = provName(String(code).slice(0, 2)), a = name && AREAS.p.find(x => x.name === name); if (!a) return { t: 'es', k: null };
+  return regionOf(name) ? { t: 'p', k: name } : a.parent ? { t: 'c', k: a.parent } : { t: 'p', k: name }; }
 const overview = () => scope.t === 'es' || (scope.t === 'c' && children(scope.k).length > 1);   // coloured zones to pick from, not reservoirs
 const regionOf = prov => { const c = AREAS.p.find(a => a.name === prov)?.parent; return c && children(c).length > 1 ? c : null; };   // null when the comunidad is that one province
-const parentOf = sc => sc.t === 'r' ? sc.parent : sc.t === 'p' && group === 'c' && regionOf(sc.k) ? { t: 'c', k: regionOf(sc.k) } : { t: 'es', k: null };
-const scopeName = sc => sc.t === 'es' ? 'España' : sc.t === 'r' ? (D.res.find(r => r.reservoir_id === sc.k)?.reservoir_name || '') : sc.k;
+const parentOf = sc => sc.t === 'r' ? sc.parent : sc.t === 'm' ? muniParent(sc.k) : sc.t === 'p' && group === 'c' && regionOf(sc.k) ? { t: 'c', k: regionOf(sc.k) } : { t: 'es', k: null };
+const scopeName = sc => sc.t === 'es' ? 'España' : sc.t === 'm' ? (TAP?.code === sc.k ? TAP.name : sc.k) : sc.t === 'r' ? (D.res.find(r => r.reservoir_id === sc.k)?.reservoir_name || '') : sc.k;
 
 // ───────── weekly series: national at start, a selected area on demand ─────────
 const SER = {}; let ST = null;
+// ───────── the municipalities of a province, coloured by how full the reservoirs behind their taps are ─────────
+const MPROV = {}; let muniShown = [], MHOVER = null;
+function muniProv() { if (layer !== 'res') return null; if (scope.t === 'm') return String(scope.k).slice(0, 2);
+  const sc = AS(); if (sc.t === 'p') return PCODE[sc.k] || null;
+  if (sc.t === 'c' && !overview()) { const ps = AREAS.p.filter(p => p.parent === sc.k); return ps.length === 1 ? PCODE[ps[0].name] || null : null; } return null; }
+function loadMuniProv(pc) { if (!/^\d{2}$/.test(pc)) return Promise.resolve(null); if (MPROV[pc]) return Promise.resolve(MPROV[pc]);
+  MPROV[pc] = Promise.all([q(SQL.muniShapes(pc)), q(SQL.muniLevels(pc))]).then(([sh, lv]) => { const L = new Map(lv.rows.map(r => [r.code, r]));
+    return MPROV[pc] = sh.rows.map(r => Object.assign(area('m', r.name, JSON.parse(r.geojson)), { code: r.code, w: L.get(r.code) || null })); })
+    .catch(e => { console.error(e); delete MPROV[pc]; return null; });
+  return MPROV[pc]; }
 const wk = d => Math.min(51, Math.floor((d - Date.UTC(d.getUTCFullYear(), 0, 1)) / 864e5 / 7));
 function stats(S) { const last = S[S.length - 1], prev = S[S.length - 2], Y = last.d.getUTCFullYear(), byYear = {};
   for (const w of S) (byYear[w.d.getUTCFullYear()] ??= [])[wk(w.d)] = w.f;
   const avg10 = Array.from({ length: 52 }, (_, i) => { const v = []; for (let y = Y - 10; y < Y; y++) if (byYear[y]?.[i] != null) v.push(byYear[y][i]); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; });
   return { last, prev, Y, byYear, avg10, lw: wk(last.d) }; }
-async function series() { const a = selArea(), one = scope.t === 'r', key = one ? 'r:' + scope.k : a ? a.type + ':' + a.name : 'es';
-  if (!SER[key]) { const ids = one ? [+scope.k] : a ? a.res.map(r => r.reservoir_id) : null; if (!one && a && !ids.length) return SER.es;
+async function series() { const a = selArea(), one = scope.t === 'r', tap = scope.t === 'm', key = one ? 'r:' + scope.k : tap ? 'm:' + scope.k : a ? a.type + ':' + a.name : 'es';
+  if (tap && !TAP?.ids.size) return null;   // groundwater, desalination or rivers only: no reservoir level to show
+  if (!SER[key]) { const ids = one ? [+scope.k] : tap ? [...TAP.ids] : a ? a.res.map(r => r.reservoir_id) : null; if (!one && a && !ids.length) return SER.es;
     const { rows } = await q(SQL.weekly(ids ? `AND reservoir_id IN (${ids.join(',')})` : ''));
     SER[key] = toSeries(rows).filter(w => w.f != null); }
   return SER[key]; }
@@ -364,13 +459,16 @@ function countTo(el, v) { const from = shownPct ?? v * 0.6, run = ++pctRun, t0 =
   if (CALM) return put(v);
   const step = now => { if (run !== pctRun) return; const t = Math.min(1, (now - t0) / 700); put(from + (v - from) * ease(t)); if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
 function numbers() { const { last, prev, Y, byYear, avg10, lw } = ST, ly = byYear[Y - 1]?.[lw], av = avg10[lw], dw = last.f - prev.f;
-  const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? scopeName(scope) : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
-  $('n-sub').hidden = !r; if (r) $('n-sub').textContent = [title(r.river_name), r.province].filter(Boolean).join(' · ');
+  const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'm' ? `Tu agua · ${scopeName(scope)}` : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? scopeName(scope) : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
+  $('n-sub').hidden = !r && scope.t !== 'm'; if (r) $('n-sub').textContent = [title(r.river_name), r.province].filter(Boolean).join(' · ');
+  if (scope.t === 'm') $('n-sub').textContent = `${TAP.ids.size} ${TAP.ids.size === 1 ? 'embalse' : 'embalses'} detrás de tu grifo, contando los de aguas arriba`;
+  for (const id of ['n-week', 'n-week2', 'yearbox']) $(id).hidden = false; $('n-meter').parentElement.hidden = false;
   $('n-pct').className = 'big'; countTo($('n-pct'), last.f); $('n-meter').style.width = Math.min(100, last.f) + '%';
   $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').innerHTML = `${signed(dw, 1)} p.p. <span>esta semana</span>`; const dv = last.s - prev.s; $('n-week2').className = 'chip' + (dv < 0 ? ' down' : ''); $('n-week2').innerHTML = `${signed(dv, Math.abs(dv) < 10 ? 1 : 0)} hm³ <span>esta semana</span>`;
   $('n-stored').textContent = fmt(last.s) + ' hm³'; $('n-cap').textContent = fmt(last.c) + ' hm³';
   const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${signed(d, 1)} p.p. <span>(${fmt(v, 1)} %)</span>`; };
-  cmp('n-ly', ly); cmp('n-avg', av); $('n-date').textContent = `Boletín oficial · ${dfmt(last.d)} · MITECO`;
+  cmp('n-ly', ly); cmp('n-avg', av); $('n-date').textContent = `Boletín oficial · ${dfmt(last.d)} · MITECO`
+    + (scope.t === 'm' && TAP?.fill_pct != null && Math.abs(TAP.fill_pct - last.f) >= 0.5 ? ` · con las lecturas en directo de hoy, ${fmt(TAP.fill_pct, 1)} %` : '');
   }
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW = 560, VH = 250, m = { l: 40, r: 16, t: 22, b: 24 }, cur = byYear[Y] || [], ly = byYear[Y - 1] || [];
@@ -400,7 +498,10 @@ const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v
 let CATCH = new Map();   // reservoir_id → its catchment outline (text until first used, then an area)
 const catchment = id => { let c = CATCH.get(id); if (typeof c === 'string') CATCH.set(id, c = area('k', '', JSON.parse(c))); return c || null; };
 let ANIM = 1, HOVER = null, animRun = 0;   // ANIM: 0→1 as the marks and labels of a view come in
-function target() { const r = selRes(); if (r && r.lon != null) { const c = catchment(r.reservoir_id);
+function target() { if (scope.t === 'm' && TAP) { const pts = [[TAP.lon, TAP.lat], ...D.res.filter(r => TAP.ids.has(r.reservoir_id) && r.lon != null).map(r => [r.lon, r.lat])].filter(p => p[0] != null);
+    if (!pts.length) return ES; const w = Math.min(...pts.map(p => p[0])), e = Math.max(...pts.map(p => p[0])), s = Math.min(...pts.map(p => p[1])), n = Math.max(...pts.map(p => p[1])), px = Math.max(0.45, (e - w) * 0.18), py = Math.max(0.3, (n - s) * 0.16);
+    return { w: w - px, e: e + px * 1.6, s: s - py * 2.2, n: n + py }; }   // more room right and below: the map key sits bottom right
+  const r = selRes(); if (r && r.lon != null) { const c = catchment(r.reservoir_id);
     if (c && c.bb.e - c.bb.w < 3.2) { const hx = Math.max(0.55, (c.bb.e - c.bb.w) * 0.6), hy = Math.max(0.36, (c.bb.n - c.bb.s) * 0.6), mx = (c.bb.e + c.bb.w) / 2, my = (c.bb.n + c.bb.s) / 2; return { w: Math.min(mx - hx, r.lon - 0.2), e: Math.max(mx + hx, r.lon + 0.2), s: Math.min(my - hy, r.lat - 0.15), n: Math.max(my + hy, r.lat + 0.15) }; }
     return { w: r.lon - 1.0, e: r.lon + 1.0, s: r.lat - 0.62, n: r.lat + 0.62 }; }
   const a = selArea(); if (!a) return ES; const px = Math.max(0.25, (a.bb.e - a.bb.w) * 0.07), py = Math.max(0.2, (a.bb.n - a.bb.s) * 0.07); return { w: a.bb.w - px, e: a.bb.e + px, s: a.bb.s - py, n: a.bb.n + py }; }
@@ -412,13 +513,15 @@ function animate(from, to, ms = 750) {   // glide the view from one box to anoth
     if (t < 1) requestAnimationFrame(step); else { ANIM = 1; fit(to); draw(); } };
   requestAnimationFrame(step); }
 function fit(bb = target()) { BB = bb;
-  const box = $('mapbox'), fs = $('mapcard').classList.contains('fs'), Wd = box.clientWidth, Hh = fs ? Math.max(300, Math.floor(innerHeight - box.getBoundingClientRect().top - 44)) : Math.round(Math.min(Wd * 0.8, 640)), dpr = devicePixelRatio || 1;
+  const box = $('mapbox'), fs = $('mapcard').classList.contains('fs'), Wd = box.clientWidth, Hh = fs ? Math.max(300, Math.floor(innerHeight - box.getBoundingClientRect().top - 44)) : Math.round(Math.min(Wd * (Wd < 600 ? 1.15 : 0.8), 640)), dpr = devicePixelRatio || 1;
   cv.width = Wd * dpr; cv.height = Hh * dpr; cv.style.height = Hh + 'px'; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   const gw = (BB.e - BB.w) * KX, gh = BB.n - BB.s, k = Math.min((Wd - 16) / gw, (Hh - 16) / gh), ox = (Wd - gw * k) / 2, oy = (Hh - gh * k) / 2;
   P = { k, ox, oy, W: Wd, H: Hh, x: lon => ox + (lon - BB.w) * KX * k, y: lat => oy + (BB.n - lat) * k };
   const path = a => { const p = new Path2D(); for (const poly of polys(a.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? p.lineTo(P.x(x), P.y(y)) : p.moveTo(P.x(x), P.y(y))); p.closePath(); } return { a, p }; };
   const kids = scope.t === 'c' && overview();   // inside a comunidad: its provinces, over the other comunidades
-  shownAreas = (kids ? children(scope.k) : AREAS[AS().t === 'es' ? group : AS().t]).map(path); backdrop = kids ? AREAS.c.filter(c => c.name !== scope.k).map(path) : []; }
+  shownAreas = (kids ? children(scope.k) : AREAS[AS().t === 'es' ? group : AS().t === 'm' ? 'p' : AS().t]).map(path); backdrop = kids ? AREAS.c.filter(c => c.name !== scope.k).map(path) : [];
+  const pc = muniProv(), ms = pc && MPROV[pc]; muniShown = Array.isArray(ms) ? ms.map(path) : [];
+  if (pc && !ms) loadMuniProv(pc).then(r => { if (r && muniProv() === pc) { fit(BB); draw(); } }); }
 let backdrop = [];
 function text(t, x, y, size, weight, color) { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
 function gauge(r, rad) { rad *= 0.45 + 0.55 * ANIM; const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
@@ -430,6 +533,7 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   for (const { p } of backdrop) { ctx.fillStyle = css('--land'); ctx.fill(p, 'evenodd'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke(p); }
   const free = b => { if (taken.some(t => b[0] < t[2] && b[2] > t[0] && b[1] < t[3] && b[3] > t[1])) return false; taken.push(b); return true; };
   for (const { a, p } of shownAreas) { const sel = !es && a.name === sk; ctx.fillStyle = layer === 'res' && (es || sel) && a.fill != null ? css('--a' + (stepOf(a.fill, BAND) + 1)) : css('--land'); ctx.globalAlpha = sel && layer === 'res' ? 0.55 : 1; ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; }
+  for (const { a, p } of muniShown) { const f = a.w?.fill_pct; ctx.fillStyle = f != null ? css('--a' + (stepOf(f, BAND) + 1)) : '#e6eaee'; ctx.fill(p, 'evenodd'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.7; ctx.stroke(p); }
   if (layer === 'rain') { const A = [0.35, 0.55, 0.75, 0.9, 1, 1];
     for (const c of D.grid) { const mm = c['rain_' + win]; if (mm == null || mm < 0.2) continue; let b = bounds.get(c.h3_cell); if (!b) bounds.set(c.h3_cell, b = h3.cellToBoundary(c.h3_cell));
       const s = stepOf(mm, STEPS); ctx.beginPath(); b.forEach(([la, lo], i) => i ? ctx.lineTo(P.x(lo), P.y(la)) : ctx.moveTo(P.x(lo), P.y(la))); ctx.closePath(); ctx.globalAlpha = A[s]; ctx.fillStyle = css('--f' + (s + 1)); ctx.fill(); } ctx.globalAlpha = 1; }
@@ -437,12 +541,22 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
     for (const r of D.rivers) { const qf = r.mean_flow_m3s || 0; ctx.lineWidth = (qf > 300 ? 2 : qf > 80 ? 1.4 : qf > 20 ? 1 : 0.6) * zf; ctx.beginPath();
       for (const l of (r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates)) l.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.stroke(); } }
   for (const { a, p } of shownAreas) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === sk ? 1.8 : 0.7; ctx.stroke(p); }
+  for (const { a, p } of muniShown) { const me = scope.t === 'm' && a.code === scope.k; if (a !== MHOVER && !me) continue;
+    if (me) { ctx.globalAlpha = 0.3; ctx.fillStyle = css('--brand'); ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; } ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = me ? 2.5 : 2; ctx.stroke(p); }
   if (HOVER) { const h = shownAreas.find(x => x.a === HOVER); if (h) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill(h.p, 'evenodd'); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 2; ctx.stroke(h.p); } }
+  if (scope.t === 'm' && TAP && TAP.lon != null) {   // the tap, and a dashed line from each reservoir it takes water from
+    const hx = P.x(TAP.lon), hy = P.y(TAP.lat); ctx.globalAlpha = ANIM; ctx.setLineDash([6, 5]); ctx.strokeStyle = css('--brand'); ctx.lineWidth = 2;
+    for (const r of D.res) if (TAP.src.has(r.reservoir_id) && r.lon != null) { ctx.beginPath(); ctx.moveTo(P.x(r.lon), P.y(r.lat)); ctx.lineTo(hx, hy); ctx.stroke(); }
+    ctx.setLineDash([]); ctx.globalAlpha = 1; }
   const cat = scope.t === 'r' && catchment(scope.k);
   if (cat) { ctx.beginPath(); for (const poly of polys(cat.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.closePath(); }
     ctx.globalAlpha = 0.14 * ANIM; ctx.fillStyle = css('--brand'); ctx.fill('evenodd'); ctx.globalAlpha = ANIM; ctx.setLineDash([5, 4]); ctx.strokeStyle = css('--brand'); ctx.lineWidth = 1.5; ctx.stroke(); ctx.setLineDash([]); }
   ctx.globalAlpha = ANIM;
   const rs = D.res.filter(r => r.lon != null && inScope(r)).sort((a, b) => b.capacity_hm3 - a.capacity_hm3);
+  if (scope.t === 'm' && TAP?.lon != null) { const hx = P.x(TAP.lon), hy = P.y(TAP.lat), w = TAP.name.length * 4.5 + 14; free([hx - w, hy - 34, hx + w, hy + 10]); }
+  if (muniShown.length && scope.t !== 'm') for (const { a } of muniShown.filter(m => m.a.w?.pop).sort((x, y) => y.a.w.pop - x.a.w.pop).slice(0, 8)) {
+    const x = P.x(a.cx), y = P.y(a.cy); ctx.font = '700 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(a.name).width, 40) + 8;
+    if (free([x - w / 2, y - 14, x + w / 2, y + 16])) { text(a.name, x, y - 1, 13, 700, css('--brand-dark')); text(a.w.fill_pct != null ? `${fmt(a.w.fill_pct, 0)} %` : 'sin embalses', x, y + 13, 12, 600, muted); } }
   if (layer === 'res' && es) { for (const { a } of shownAreas) { if (a.fill == null) continue; const x = P.x(a.cx), y = P.y(a.cy), small = (a.bb.e - a.bb.w) * KX * P.k < 95;
       text(SHORT[a.name] || a.name, x, y - 4, small ? 12 : 14, 600, ink); text(`${fmt(a.fill, 0)} %`, x, y + (small ? 11 : 16), small ? 14 : 19, 700, ink); } }
   else if (layer === 'res') { for (const r of rs) gauge(r, Math.min(34, Math.max(4, Math.sqrt(r.capacity_hm3) * 0.26 * P.k / 60)));
@@ -460,24 +574,33 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
     const k = 'rain_' + win + '_mm'; for (const g of D.gauges.filter(g => g[k] > 0 && g.lon > BB.w && g.lon < BB.e && g.lat > BB.s && g.lat < BB.n).sort((a, b) => b[k] - a[k]).slice(0, 12)) { const x = P.x(g.lon), y = P.y(g.lat);
       ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fillStyle = ink; ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke(); const n = title(g.station_name); ctx.font = '600 13px "Source Sans 3"'; const w = Math.max(ctx.measureText(n).width, 60) + 8;
       if (free([x - w / 2, y + 7, x + w / 2, y + 39])) { text(n, x, y + 20, 13, 600, ink); text(`${fmt(g[k], 1)} mm`, x, y + 35, 13, 700, css('--brand')); } } }
+  if (scope.t === 'm' && TAP && TAP.lon != null) { const hx = P.x(TAP.lon), hy = P.y(TAP.lat);
+    ctx.beginPath(); ctx.arc(hx, hy, 9, 0, 7); ctx.fillStyle = css('--brand-dark'); ctx.fill(); ctx.strokeStyle = '#fff'; ctx.lineWidth = 3; ctx.stroke();
+    text(TAP.name, hx, hy - 16, 15, 700, css('--brand-dark')); }
   ctx.globalAlpha = 1;
   $('mapkey').innerHTML = layer === 'rain' ? `<div>Lluvia en ${win.replace('h', ' h')} (mm)</div><div class="ramp">${STEPS.map((s, i) => `<span style="background:var(--f${i + 1})"></span>`).join('')}</div><div class="ticks num">${STEPS.map(s => `<span>${fmt(s, s < 1 ? 1 : 0)}</span>`).join('')}</div>`
-    : layer === 'var' ? `<div><span class="upc">▲</span> gana agua · <span class="downc">▼</span> pierde agua</div>` : `<div>% de la capacidad</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> por debajo de lo normal · <span style="color:var(--water)">●</span> normal o por encima</div>`);
-  $('map-note').textContent = top ? 'Pulsa una zona del mapa para ver sus embalses.' : es ? 'Pulsa una provincia para ver sus embalses.' : scope.t === 'r' && cat ? 'La zona punteada es la cuenca que vierte al embalse: la lluvia que cae ahí acaba llegando a él.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su detalle.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
+    : layer === 'var' ? `<div><span class="upc">▲</span> gana agua · <span class="downc">▼</span> pierde agua</div>` : `<div>% de la capacidad</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> por debajo de lo normal · <span style="color:var(--water)">●</span> normal o por encima</div>`) + (muniShown.length ? `<div><span style="display:inline-block;width:12px;height:9px;background:#e6eaee;border:1px solid var(--border);vertical-align:middle"></span> municipio sin embalses del boletín</div>` : '');
+  $('map-note').textContent = muniShown.length && scope.t !== 'm' && scope.t !== 'r' ? 'Cada municipio tiene el color del nivel de los embalses de los que bebe su grifo; en gris, los que beben agua subterránea, desalada o de río. Pulsa el tuyo para ver de dónde viene su agua.' : scope.t === 'm' ? (TAP?.ids.size ? 'Los embalses de los que bebe tu grifo, y los que están aguas arriba de ellos. La línea discontinua une cada embalse de origen con tu municipio; no es el trazado real de la conducción.' : 'Tu grifo no depende de embalses del boletín: su agua es subterránea, desalada o de ríos sin embalse.') : top ? (group === 'c' ? 'Pulsa una comunidad, luego una provincia y luego tu municipio: verás de dónde viene el agua de tu grifo.' : 'Pulsa una cuenca para ver sus embalses.') : es ? 'Pulsa una provincia para ver sus municipios y sus embalses.' : scope.t === 'r' && cat ? 'La zona punteada es la cuenca que vierte al embalse: la lluvia que cae ahí acaba llegando a él.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su detalle.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
+const muniAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of muniShown) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of shownAreas) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const mtip = $('map-tip');
 cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) { m = p.r; break; } }
-  const a = areaAt(mx, my), can = !m && a && a.name !== AS().k && a.res.length ? a : null; if (m) cv.style.cursor = 'pointer'; if (!m) cv.style.cursor = can ? 'pointer' : ''; if (can !== HOVER) { HOVER = can; if (ANIM === 1) draw(); }
+  const mu = !m ? muniAt(mx, my) : null, a = mu ? null : areaAt(mx, my), can = !m && a && a.name !== AS().k && pickable(a) ? a : null; cv.style.cursor = m || mu || can ? 'pointer' : '';
+  if (can !== HOVER || mu !== MHOVER) { HOVER = can; MHOVER = mu; if (ANIM === 1) draw(); }
   if (m) { const v = trend(m); mtip.innerHTML = `<b>${esc(m.reservoir_name)}</b> <span class="muted">· ${esc(m.basin_name || '')}</span><br><span class="num">${fmt(m.fill_pct, 1)} % · ${fmt(m.stored_hm3)} de ${fmt(m.capacity_hm3)} hm³</span><br><span class="muted num">media 10 años ${fmt(m.fill_10y, 1)} % · hace un año ${fmt(m.fill_last_year, 1)} %</span>${v != null && Math.abs(v) >= 0.5 ? `<br><span class="${v > 0 ? 'upc' : 'downc'} num">${signed(v, 1)} hm³</span> <span class="muted">${m.change_since_bulletin_hm3 != null ? 'desde el último boletín' : 'en la última semana'}</span>` : ''}`; }
+  else if (mu) { const w = mu.w, kinds = (w?.kinds || []).filter(k => k !== 'network').map(k => KINDS[k] || k);
+    mtip.innerHTML = `<b>${esc(mu.name)}</b>${w?.pop ? ` <span class="muted">· ${fmt(w.pop)} hab.</span>` : ''}<br>` + (w?.fill_pct != null ? `<span class="num"><b>${fmt(w.fill_pct, 1)} %</b></span> <span class="muted">· ${w.reservoirs} ${w.reservoirs === 1 ? 'embalse' : 'embalses'} detrás de su grifo</span>`
+      : kinds.length ? `<span class="muted">Sin embalses del boletín: ${esc(listEs(kinds))}</span>` : '<span class="muted">Sin datos de abastecimiento todavía</span>') + '<br><span class="muted">Pulsa para ver de dónde viene su agua</span>'; }
   else if (layer === 'rain') { const lon = BB.w + (mx - P.ox) / (KX * P.k), lat = BB.n - (my - P.oy) / P.k, c = gridIndex.get(h3.latLngToCell(lat, lon, 6)), mm = c && c['rain_' + win]; if (!(mm >= 0.2)) { mtip.hidden = true; return; } mtip.innerHTML = `<b class="num">${fmt(mm, 1)} mm</b> <span class="muted">en ${win.replace('h', ' h')}</span>`; }
   else if (a && a.fill != null) mtip.innerHTML = `<b>${esc(a.name)}</b><br><span class="num">${fmt(a.fill, 1)} % · ${fmt(a.stored)} de ${fmt(a.cap)} hm³</span><br><span class="muted num">media 10 años ${fmt(a.avg, 1)} % · ${a.res.length} embalses</span>`;
   else { mtip.hidden = true; return; }
   mtip.hidden = false; mtip.style.left = Math.max(4, Math.min(mx + 14, P.W - mtip.offsetWidth - 6)) + 'px'; mtip.style.top = Math.min(my + 14, P.H - mtip.offsetHeight - 6) + 'px'; });
-cv.addEventListener('mouseleave', () => { mtip.hidden = true; if (HOVER) { HOVER = null; draw(); } });
+cv.addEventListener('mouseleave', () => { mtip.hidden = true; if (HOVER || MHOVER) { HOVER = null; MHOVER = null; draw(); } });
 cv.addEventListener('click', e => { const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) return setScope('r', p.r.reservoir_id); }
-  const a = areaAt(mx, my); if (a && a.res.length && a.name !== AS().k) setScope(a.type, a.name); });
+  const mu = muniAt(mx, my); if (mu) return setScope('m', mu.code);
+  const a = areaAt(mx, my); if (a && pickable(a) && a.name !== AS().k) setScope(a.type, a.name); });
 const press = (ids, on) => { for (const i of ids) $(i).setAttribute('aria-pressed', i === on); };
 function setLayer(l, note = true) { layer = l; if (note) remember(false); press(['l-res', 'l-var', 'l-rain'], 'l-' + l); $('winseg').hidden = l !== 'rain'; animate(BB, BB); }
 for (const l of ['res', 'var', 'rain']) $('l-' + l).onclick = () => setLayer(l);
@@ -507,7 +630,7 @@ $('rain-btn').onclick = () => { setLayer('rain'); $('panorama').scrollIntoView()
 const norm = s => String(s || '').normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 function table() { const qv = norm($('q').value), rows = D.res.filter(r => inScope(r) && (!qv || norm(`${r.reservoir_name} ${r.river_name} ${r.province} ${r.basin_name}`).includes(qv)));
   rows.sort(sortBy === 'cap' ? (a, b) => b.capacity_hm3 - a.capacity_hm3 : sortBy === 'fill' ? (a, b) => (b.fill_pct ?? -1) - (a.fill_pct ?? -1) : (a, b) => (trend(b) ?? -1e9) - (trend(a) ?? -1e9));
-  $('count').textContent = `${rows.length} embalses`; $('more').hidden = rows.length <= shown; $('res-title').textContent = AS().t === 'es' ? 'Principales embalses' : `Embalses de ${AS().k}`;
+  $('count').textContent = `${rows.length} embalses`; $('more').hidden = rows.length <= shown; $('res-title').textContent = AS().t === 'es' ? 'Principales embalses' : AS().t === 'm' ? `Embalses que abastecen a ${scopeName(AS())}` : `Embalses de ${AS().k}`;
   $('t-res').innerHTML = `<thead><tr><th>Embalse</th><th>Cuenca</th><th class="r">Embalsado</th><th class="r">Capacidad</th><th>Nivel</th><th class="r">Cambio</th><th>Dato</th></tr></thead><tbody>` + rows.slice(0, shown).map(r => { const v = trend(r);
     return `<tr data-id="${r.reservoir_id}" class="${scope.t === 'r' && r.reservoir_id === scope.k ? 'on' : ''}"><td><div class="name">${esc(r.reservoir_name)}</div><div class="sub">${esc([title(r.river_name), r.province].filter(Boolean).join(' · '))}</div></td><td>${esc(r.basin_name || '')}</td><td class="r num">${fmt(r.stored_hm3)} hm³</td><td class="r num">${fmt(r.capacity_hm3)} hm³</td>
       <td><div class="fillcell"><div class="bar"><span style="width:${Math.min(100, r.fill_pct || 0)}%"></span>${r.fill_10y != null ? `<b style="left:${Math.min(100, r.fill_10y)}%" title="Media de 10 años"></b>` : ''}</div><span class="num">${fmt(r.fill_pct, 0)} %</span></div></td>
@@ -527,7 +650,8 @@ function drawCatchment(r) { const c = $('catch'), cat = catchment(r.reservoir_id
     if (m[0] < cat.bb.w || m[0] > cat.bb.e || m[1] < cat.bb.s || m[1] > cat.bb.n || !hit.isPointInPath(cat.lonlat, m[0], m[1], 'evenodd')) continue;
     x.lineWidth = rv.mean_flow_m3s > 80 ? 2 : rv.mean_flow_m3s > 20 ? 1.4 : 0.9; x.beginPath(); for (const l of ls) l.forEach(([lo, la], i) => i ? x.lineTo(X(lo), Y(la)) : x.moveTo(X(lo), Y(la))); x.stroke(); }
   if (r.lon != null) { x.beginPath(); x.arc(X(r.lon), Y(r.lat), 4.5, 0, 7); x.fillStyle = css('--ink'); x.fill(); x.strokeStyle = '#fff'; x.lineWidth = 2; x.stroke(); } }
-async function ficha() { const r = selRes(), el = $('ficha'); el.hidden = !r; if (!r) return;
+function tapFicha() { grifo(); }
+async function ficha() { if (scope.t === 'm') return TAP && tapFicha(); $('ficha').classList.remove('tapcard'); const r = selRes(), el = $('ficha'); el.hidden = !r; if (!r) return;
   const live = r.data_source !== 'miteco-weekly', row = (k, v) => v == null || v === '' || v === '—' ? '' : `<div><dt>${k}</dt><dd>${v}</dd></div>`, n = (v, d, u) => v == null ? null : `${fmt(v, d)} ${u}`, id = r.reservoir_id;
   const paint = f => { const open = el.querySelector('details')?.open;
     el.innerHTML = `<div class="top3"><canvas id="catch" role="img" aria-label="Contorno de la cuenca que vierte al embalse, con sus ríos"></canvas><div><h3>${esc(r.reservoir_name)} y su cuenca</h3><div class="figs">
@@ -542,37 +666,211 @@ async function ficha() { const r = selRes(), el = $('ficha'); el.hidden = !r; if
   try { const f = (await q(SQL.ficha(id))).rows[0]; if (f && scope.t === 'r' && scope.k === id) paint(f); } catch (e) { console.error(e); } }
 // ───────── links: every view has its own address (#/cuenca/tajo, #/provincia/guadalajara, #/embalse/15-alcantara) ─────────
 const slug = v => norm(v).replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-const WORD = { b: 'cuenca', c: 'comunidad', p: 'provincia', r: 'embalse' }, CAPA = { res: '', var: 'variaciones', rain: 'lluvia' };
-const address = () => '#/' + (scope.t === 'es' ? '' : WORD[scope.t] + '/' + (scope.t === 'r' ? scope.k + '-' + slug(scopeName(scope)) : slug(scope.k))) + (CAPA[layer] ? '?capa=' + CAPA[layer] : '');
+const WORD = { b: 'cuenca', c: 'comunidad', p: 'provincia', r: 'embalse', m: 'municipio' }, CAPA = { res: '', var: 'variaciones', rain: 'lluvia' };
+const address = () => '#/' + (scope.t === 'es' ? '' : WORD[scope.t] + '/' + (scope.t === 'r' || scope.t === 'm' ? scope.k + '-' + slug(scopeName(scope)) : slug(scope.k))) + (CAPA[layer] ? '?capa=' + CAPA[layer] : '');
 // lhbox.state is filled in when the runtime is ready (lhbox:init), not when the module loads
 let PLACE = ''; lhbox.ready().then(() => { if (!PLACE) PLACE = lhbox.state || ''; }, () => {});
 const SHARE = () => lhbox.link;   // the address of this view, on the public page or the account page
 function remember(push) { const a = address(); if (PLACE !== a && !(a === '#/' && !PLACE.startsWith('#/'))) { PLACE = a; lhbox.setState(a, { push }); }
   document.title = (scope.t === 'es' ? '' : scopeName(scope) + ' · ') + 'Embalses de España'; }
-function route() { if (PLACE && !PLACE.startsWith('#/')) return;   // #panorama and the like are not views
-  const m = (PLACE || '#/').match(/^#\/(?:(cuenca|comunidad|provincia|embalse)\/([^?]+))?(?:\?capa=(\w+))?$/); if (!m) return;
+function route() { if (!PLACE) PLACE = lhbox.state || '';   // a cached start can route before lhbox.ready() has filled PLACE in
+  if (PLACE && !PLACE.startsWith('#/')) return;   // #panorama and the like are not views
+  const m = (PLACE || '#/').match(/^#\/(?:(cuenca|comunidad|provincia|embalse|municipio)\/([^?]+))?(?:\?capa=(\w+))?$/); if (!m) return;
   const l = Object.keys(CAPA).find(k => CAPA[k] === (m[3] || '')) || 'res', t = Object.keys(WORD).find(k => WORD[k] === m[1]);
-  const k = !t ? null : t === 'r' ? D.res.find(r => r.reservoir_id === parseInt(m[2]))?.reservoir_id : AREAS[t].find(a => slug(a.name) === m[2] && a.res.length)?.name;
+  const k = !t ? null : t === 'm' ? (m[2].match(/^\d{5}/) || [])[0] : t === 'r' ? D.res.find(r => r.reservoir_id === parseInt(m[2]))?.reservoir_id : AREAS[t].find(a => slug(a.name) === m[2] && pickable(a))?.name;
   if (l !== layer) setLayer(l, false); if ((k ?? null) !== scope.k || (k == null ? 'es' : t) !== scope.t) setScope(k == null ? 'es' : t, k ?? null, false); }
 lhbox.onState(s => { PLACE = s || ''; route(); });
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').startsWith('#/')) return; e.preventDefault(); const el = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href')); (el || document.body).scrollIntoView(); });
 $('share').onclick = async () => { try { if (!await lhbox.copy(SHARE())) throw 0; $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
-async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; mtip.hidden = true;
+async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; MHOVER = null; mtip.hidden = true;
+  if (t === 'm') { const tp = await loadTap(k); if (!tp) return setScope('es', null, push); TAP = tp; }
   if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
     const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
     scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? (regionOf(r.in.p) || !r.in.c ? { t: 'p', k: r.in.p } : { t: 'c', k: r.in.c }) : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
   else scope = { t, k };
-  if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); } else if (t === 'p') { group = 'c'; press(['g-b', 'g-c'], 'g-c'); }
+  if (t === 'b' || t === 'c') { group = t; press(['g-b', 'g-c'], 'g-' + t); } else if (t === 'p' || t === 'm') { group = 'c'; press(['g-b', 'g-c'], 'g-c'); }
   crumbs(); $('groupseg').hidden = t !== 'es';
   const an = AREA_NOTES[AS().k]; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
   remember(push); animate(from, target()); shown = 8; table(); ficha();
-  try { const S = await series(); if (scope.t === t && scope.k === k) { ST = stats(S); numbers(); yearChart(); } } catch (e) { console.error(e); } }
+  try { const S = await series(); if (scope.t === t && scope.k === k) { if (S) { ST = stats(S); numbers(); yearChart(); } else noLevel(); } } catch (e) { console.error(e); } }
+function noLevel() {   // a tap with no bulletin reservoir behind it
+  $('n-label').textContent = `Tu agua · ${scopeName(scope)}`; $('n-sub').hidden = false; $('n-sub').textContent = 'Sin embalses del boletín detrás de este grifo';
+  $('n-pct').className = 'big'; $('n-pct').textContent = '—'; shownPct = null; $('n-meter').style.width = '0';
+  for (const id of ['n-week', 'n-week2']) $(id).hidden = true; for (const id of ['n-stored', 'n-cap', 'n-ly', 'n-avg']) { $(id).className = ''; $(id).textContent = '—'; }
+  $('n-meter').parentElement.hidden = true; $('yearbox').hidden = true; $('n-date').textContent = ''; }
+async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; if (TAP?.code === code) return TAP;
+  try { const [[w], first] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapUnits(code)).then(r => r.rows)]); if (!w) return null;
+    // tree: one row per unit (no source_type), then one per source, with the depth of the unit that takes it
+    const tree = [], seen = new Set(), add = (rows, depth) => { for (const x of rows) { if (!seen.has(x.id)) { seen.add(x.id); if (depth === 0) tree.push({ ...x, depth, source_type: null }); }
+      if (x.source_type) tree.push({ ...x, depth }); } };
+    add(first, 0); const done = new Set(first.map(x => x.id));
+    for (let depth = 1, next = first; depth <= 5; depth++) {
+      const ids = [...new Set(next.map(x => x.network_unit_id).filter(id => id && !done.has(id)))]; if (!ids.length) break;
+      ids.forEach(id => done.add(id)); next = (await q(SQL.tapNets(ids))).rows; add(next, depth); }
+    const src = new Set(w.src || []), up = new Set(w.up || []);
+    const links = up.size ? (await q(SQL.tapLinks([...up]))).rows : [];
+    return { ...w, code, src, up, tree, links, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
+  catch (e) { console.error(e); return null; } }
+
+// ───────── tu grifo: the path of the water, from the reservoirs to the tap, with how full they are ─────────
+const TYPE = { reservoir: 'embalse', river: 'río', aquifer: 'acuífero', spring: 'manantial', desalination: 'desaladora', transfer: 'trasvase', reclaimed: 'agua regenerada', network: 'red' };
+const KINDS = { reservoir: 'embalses', river: 'ríos', aquifer: 'aguas subterráneas', spring: 'manantiales', desalination: 'agua desalada', transfer: 'trasvases', reclaimed: 'agua regenerada' };
+const listEs = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+const docLink = (doc, url) => url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(doc || 'fuente')} ↗</a>` : esc(doc || '');
+function resChip(id) { const r = D.res.find(x => x.reservoir_id === id); if (!r) return '';
+  return `<button class="src" data-res="${id}" title="Ver el embalse">${esc(r.reservoir_name)}<span class="mini"><span style="width:${Math.max(0, Math.min(100, r.fill_pct ?? 0))}%"></span></span><i>${fmt(r.fill_pct, 0)} %</i></button>`; }
+function srcChip(x) { if (x.source_type === 'reservoir' && x.reservoir_id != null && D.res.some(r => r.reservoir_id === x.reservoir_id)) return resChip(x.reservoir_id);
+  const net = x.source_type === 'network' || (x.source_type === 'transfer' && x.network_unit_id);
+  const tag = TYPE[x.source_type] || x.source_type, named = norm(x.source_name).startsWith(norm(tag));
+  return `<span class="src${net ? ' net' : ''}">${named ? '' : `<i>${esc(tag)}</i>`}${esc(x.source_name)}${x.role === 'backup' ? ' <i>(reserva)</i>' : ''}</span>`; }
+// ── the path of the water as a diagram: sources on the left, the tap on the right; each reservoir a circle as big as its
+// capacity and filled to its level, each pipe as thick as the water behind it ──
+const RES = id => D.res.find(r => r.reservoir_id === id), capOf = id => RES(id)?.capacity_hm3 || 0;
+const ICON = { river: 'M2 7c2-2 4-2 6 0s4 2 6 0M2 12c2-2 4-2 6 0s4 2 6 0', aquifer: 'M2 5h14M2 9h14M2 13h14', spring: 'M9 2c3 4 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5 5-9z',
+  desalination: 'M9 2c3 4 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5 5-9zM6 11.5h6', reclaimed: 'M4 8a5 5 0 0 1 9-3M14 10a5 5 0 0 1-9 3M13 2v3h-3M5 16v-3h3', transfer: 'M2 9h12M10 5l4 4-4 4', reservoir: 'M2 13h14M4 13V6h10v7' };
+const MANY = { river: 'ríos', aquifer: 'acuíferos', spring: 'manantiales', desalination: 'desaladoras', transfer: 'trasvases', reclaimed: 'agua regenerada', reservoir: 'otros embalses' };
+const ONE = { river: 'río', aquifer: 'acuífero', spring: 'manantial', desalination: 'desaladora', transfer: 'trasvase', reclaimed: 'agua regenerada', reservoir: 'embalse' };
+function pathGraph(t) {
+  const N = new Map(); let E = [];
+  const node = (k, o) => { if (!N.has(k)) N.set(k, { k, ...o }); return N.get(k); };
+  const edge = (a, b, o = {}) => { if (a !== b && !E.some(e => e.a === a && e.b === b)) E.push({ a, b, ...o }); };
+  node('tap', { kind: 'tap' });
+  const units = t.tree.filter(x => x.depth === 0 && !x.source_type), isUnit = new Set(units.map(u => u.id));
+  for (const u of units) { node('u:' + u.id, { kind: 'box', label: u.unit, url: u.url, doc: u.doc, what: 'Plan hidrológico' }); edge('u:' + u.id, 'tap'); }
+  const taker = x => isUnit.has(x.id) ? 'u:' + x.id : node('n:' + x.id, { kind: 'box', label: x.unit, url: x.url, doc: x.doc, what: 'Fuente' }).k;
+  for (const x of t.tree.filter(x => x.source_type)) { const to = taker(x), backup = x.role === 'backup';
+    if (x.network_unit_id) { const k = isUnit.has(x.network_unit_id) ? 'u:' + x.network_unit_id : 'n:' + x.network_unit_id; node(k, { kind: 'box', label: x.source_name, what: 'Fuente' }); edge(k, to, { backup }); }
+    else if (x.source_type === 'reservoir' && RES(x.reservoir_id)) { node('r:' + x.reservoir_id, { kind: 'res', ids: [x.reservoir_id] }); edge('r:' + x.reservoir_id, to, { backup }); }
+    else { const n = node('t:' + x.source_type + ':' + to, { kind: 'type', type: x.source_type, names: [], backup: true }); if (x.source_name && !n.names.includes(x.source_name)) n.names.push(x.source_name);
+      if (!backup) n.backup = false; edge(n.k, to); } }
+  for (const e of E) { const n = N.get(e.a); if (n.kind === 'type') e.backup = n.backup; }
+  for (const id of t.up) if (RES(id) && !N.has('r:' + id)) node('r:' + id, { kind: 'res', ids: [id], up: true });
+  const down = new Map(); for (const l of t.links || []) down.set(l.f, [...(down.get(l.f) || []), l.t]);
+  for (const n of [...N.values()].filter(n => n.up)) { const id = n.ids[0], seen = new Set([id]); let at = [id];
+    while (at.length) { const nx = []; for (const a of at) for (const b of down.get(a) || []) { if (seen.has(b)) continue; seen.add(b);
+      if (N.has('r:' + b) && !N.get('r:' + b).up) edge(n.k, 'r:' + b, { river: true }); else nx.push(b); } at = nx; } }
+  // the biggest reservoirs by name, the rest together in one circle
+  const merge = (up, keep) => { const ks = [...N.values()].filter(n => n.kind === 'res' && !!n.up === up).sort((a, b) => capOf(b.ids[0]) - capOf(a.ids[0])).slice(keep).map(n => n.k);
+    if (ks.length < 2) return; const k = up ? 'agg:up' : 'agg'; node(k, { kind: 'res', up, ids: ks.flatMap(x => N.get(x).ids) });
+    for (const e of E) { if (ks.includes(e.a)) e.a = k; if (ks.includes(e.b)) e.b = k; } ks.forEach(x => N.delete(x));
+    const seen = new Set(); E = E.filter(e => e.a !== e.b && !seen.has(e.a + '>' + e.b) && seen.add(e.a + '>' + e.b)); };
+  merge(false, 5); merge(true, 3);
+  // columns: the tap at 0, each node one column left of the furthest node it feeds
+  const rank = new Map([['tap', 0]]);
+  for (let i = 0; i < 30; i++) for (const e of E) if (rank.has(e.b)) rank.set(e.a, Math.max(rank.get(e.a) ?? 0, rank.get(e.b) + 1));
+  for (const k of [...N.keys()]) if (!rank.has(k)) N.delete(k);
+  E = E.filter(e => N.has(e.a) && N.has(e.b));
+  for (const n of N.values()) { n.rank = rank.get(n.k); n.cap = n.kind === 'res' ? n.ids.reduce((s, id) => s + capOf(id), 0) : 0; }
+  const flow = new Map(), byRank = [...N.values()].sort((a, b) => b.rank - a.rank);
+  for (const n of byRank) flow.set(n.k, n.cap + E.filter(e => e.b === n.k).reduce((s, e) => s + (flow.get(e.a) || 0), 0));
+  return { N, E, flow, R: Math.max(...rank.values()) }; }
+function pathSvg(t, W) {
+  const { N, E, flow, R } = pathGraph(t); if (N.size < 2) return '';
+  const maxCap = Math.max(1, ...[...N.values()].map(n => n.cap)), maxFlow = Math.max(1, ...flow.values());
+  const lanesAt = r => [...N.values()].filter(n => n.rank === r).length > 6, BW = 168, L = 84 + (lanesAt(R) ? 62 : 0), colW = Math.max(170, Math.min(260, (W - L - BW / 2 - 8) / Math.max(1, R))), Wt = L + colW * R + BW / 2 + 8;
+  for (const n of N.values()) { n.r = n.kind === 'res' ? 6 + 18 * Math.sqrt(n.cap / maxCap) : 0;
+    n.h = n.kind === 'res' ? 2 * n.r + 34 : n.kind === 'type' ? 58 : n.kind === 'tap' ? 60 : n.url && n.label.length > 24 ? 60 : 50; n.x = L + colW * (R - n.rank) + (n.rank === 0 ? 0 : 0); }
+  const cols = Array.from({ length: R + 1 }, (_, r) => [...N.values()].filter(n => n.rank === r)), gap = 12;
+  // a long column is staggered in two lanes, so it takes about half the height
+  const step = c => c.length > 6 ? 0.56 : 1, colH = c => c.reduce((s, n) => s + (n.h + gap) * step(c), -gap * step(c)) + (c.length > 6 ? c.at(-1).h * 0.44 : 0);
+  const H = Math.max(...cols.map(colH)) + 24;
+  for (const c of cols) { for (const n of c) { const to = E.filter(e => e.a === n.k).map(e => N.get(e.b).y).filter(y => y != null); n.o = to.length ? to.reduce((a, b) => a + b, 0) / to.length : 0; }
+    const grp = n => n.kind === 'type' ? 2 : n.k.startsWith('agg') ? 1 : 0; c.sort((a, b) => Math.round(a.o / 12) - Math.round(b.o / 12) || grp(a) - grp(b) || b.cap - a.cap); let y = (H - colH(c)) / 2;
+    c.forEach((n, i) => { n.y = y + (n.kind === 'res' ? n.r : n.kind === 'type' ? 12 : n.h / 2); if (step(c) < 1) n.x += i % 2 ? 62 : -62; y += (n.h + gap) * step(c); }); }
+  const tapN = N.get('tap'); tapN.x = Wt - BW / 2 - 4;
+  const half = n => n.kind === 'res' ? n.r : n.kind === 'type' ? 12 : BW / 2;
+  // pipes, arriving spread over the height of what they feed
+  const pipes = E.map(e => { const a = N.get(e.a), b = N.get(e.b), ins = E.filter(x => x.b === e.b).sort((p, q) => N.get(p.a).y - N.get(q.a).y), i = ins.indexOf(e);
+    const span = Math.min(b.h - 14, ins.length * 7), yb = b.y + (ins.length > 1 ? -span / 2 + span * i / (ins.length - 1) : 0);
+    const x1 = a.x + half(a), x2 = b.x - half(b), dx = (x2 - x1) / 2, w = 1.5 + 11 * Math.sqrt((flow.get(e.a) || 0) / maxFlow);
+    return `<path class="e${e.river ? ' rv' : e.backup ? ' bk' : ''}" d="M${x1},${a.y}C${x1 + dx},${a.y} ${x2 - dx},${yb} ${x2},${yb}" stroke-width="${w.toFixed(1)}"/>`; }).join('');
+  const lines = (txt, max = 24) => { const out = ['']; for (const w of String(txt).split(' ')) { if ((out.at(-1) + ' ' + w).trim().length > max && out.at(-1)) out.push(w); else out[out.length - 1] = (out.at(-1) + ' ' + w).trim(); }
+    return out.length > 2 ? [out[0], out.slice(1).join(' ').slice(0, max - 1) + '…'] : out; };
+  let clip = 0;
+  const nodes = [...N.values()].map(n => {
+    if (n.kind === 'res') { const rs = n.ids.map(RES).filter(Boolean), cap = rs.reduce((s, r) => s + r.capacity_hm3, 0), sto = rs.reduce((s, r) => s + (r.stored_hm3 ?? r.capacity_hm3 * (r.fill_pct ?? 0) / 100), 0);
+      const f = cap ? Math.max(0, Math.min(1, sto / cap)) : 0, one = rs.length === 1, id = 'gc' + (clip++), name = one ? rs[0].reservoir_name : `+${rs.length} embalses`;
+      const tip = one ? `${rs[0].reservoir_name}: ${fmt(100 * f, 0)} % de ${fmt(cap)} hm³${n.up ? ' · aguas arriba' : ''}` : `${rs.map(r => `${r.reservoir_name} ${fmt(r.fill_pct, 0)} %`).join(', ')}`;
+      return `<g class="rn${n.up ? ' up' : ''}"${one ? ` data-res="${rs[0].reservoir_id}"` : ''}><title>${esc(tip)}</title><clipPath id="${id}"><rect x="${n.x - n.r}" y="${n.y + n.r - 2 * n.r * f}" width="${2 * n.r}" height="${2 * n.r * f}"/></clipPath>
+        <circle class="bg" cx="${n.x}" cy="${n.y}" r="${n.r}"/><circle class="fl" cx="${n.x}" cy="${n.y}" r="${n.r}" clip-path="url(#${id})"/><circle class="ol" cx="${n.x}" cy="${n.y}" r="${n.r}"/>
+        <text class="nm" x="${n.x}" y="${n.y + n.r + 15}">${esc(name.length > 22 ? name.slice(0, 21) + '…' : name)}</text><text class="pc" x="${n.x}" y="${n.y + n.r + 29}">${fmt(100 * f, 0)} %${n.up ? ' · aguas arriba' : ''}</text></g>`; }
+    if (n.kind === 'type') { const label = n.names.length === 1 ? `${ONE[n.type] || n.type} ${n.names[0].replace(new RegExp('^' + (ONE[n.type] || '') + '\\s+', 'i'), '')}` : `${MANY[n.type] || n.type} (${n.names.length || 1})`;
+      return `<g class="tn${n.backup ? ' bk' : ''}"><title>${esc((n.names.length ? n.names.join(', ') : ONE[n.type]) + (n.backup ? ' · de reserva' : ''))}</title><rect x="${n.x - 12}" y="${n.y - 12}" width="24" height="24" rx="6"/><path d="${ICON[n.type] || ICON.reservoir}" transform="translate(${n.x - 9},${n.y - 9})"/>
+        <text class="nm" x="${n.x}" y="${n.y + 27}">${esc(label.length > 24 ? label.slice(0, 23) + '…' : label)}</text><text class="pc" x="${n.x}" y="${n.y + 41}">${n.backup ? 'de reserva' : n.type === 'desalination' ? 'agua del mar' : n.type === 'aquifer' ? 'agua subterránea' : ''}</text></g>`; }
+    if (n.kind === 'tap') { const ls = lines(t.name, 13);
+      return `<g class="hn"><rect x="${n.x - BW / 2}" y="${n.y - n.h / 2}" width="${BW}" height="${n.h}" rx="8"/><path d="M0 6h9v-3h5v3h4a4 4 0 0 1 4 4v3h-4v-3H0z" transform="translate(${n.x - BW / 2 + 12},${n.y - 9})"/>
+        ${ls.map((l, i) => `<text class="nm" x="${n.x - BW / 2 + 42}" y="${n.y - 4 - 8 * (ls.length - 1) + 16 * i}">${esc(l)}</text>`).join('')}<text class="pc" x="${n.x - BW / 2 + 42}" y="${n.y + 14 + 8 * (ls.length - 1)}">${fmt(t.pop)} hab.</text></g>`; }
+    const ls = lines(n.label), body = `<rect x="${n.x - BW / 2}" y="${n.y - n.h / 2}" width="${BW}" height="${n.h}" rx="6"/>${ls.map((l, i) => `<text class="nm" x="${n.x - BW / 2 + 10}" y="${n.y + 5 - 8 * (ls.length - 1) + 16 * i - (n.url ? 6 : 0)}">${esc(l)}</text>`).join('')}`
+      + (n.url ? `<text class="lk" x="${n.x - BW / 2 + 10}" y="${n.y + n.h / 2 - 7}">${n.what} ↗</text>` : '');
+    return n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="bn"><title>${esc(n.doc || n.label)}</title>${body}</a>` : `<g class="bn"><title>${esc(n.label)}</title>${body}</g>`; }).join('');
+  return `<svg class="gsvg" viewBox="0 0 ${Wt.toFixed(0)} ${H.toFixed(0)}" width="${Wt.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="El camino del agua hasta ${esc(t.name)}">${pipes}${nodes}</svg>`; }
+// how full the water behind the tap is, as one tank: one block per reservoir, as wide as its capacity, filled to its level
+function tankHtml(t) { const rs = [...t.ids].map(RES).filter(r => r && r.capacity_hm3 > 0 && r.fill_pct != null).sort((a, b) => b.capacity_hm3 - a.capacity_hm3); if (!rs.length) return '';
+  return `<div class="tank" role="img" aria-label="Cada embalse, tan ancho como su capacidad y lleno hasta su nivel">${rs.map(r => `<div class="seg" style="flex:${r.capacity_hm3} 1 0" title="${esc(r.reservoir_name)}: ${fmt(r.fill_pct, 0)} % de ${fmt(r.capacity_hm3)} hm³"${t.up.has(r.reservoir_id) && !t.src.has(r.reservoir_id) ? ' data-up' : ''}><i style="height:${Math.max(0, Math.min(100, r.fill_pct))}%"></i><span>${esc(r.reservoir_name)}</span></div>`).join('')}<b class="lvl" style="bottom:${Math.max(0, Math.min(100, t.fill_pct))}%"><span>${fmt(t.fill_pct, 1)} % entre todos</span></b></div>
+    <p class="muted small" style="margin:6px 0 0">Cada bloque es un embalse, tan ancho como su capacidad y lleno hasta su nivel. La línea marca el nivel de todos juntos.</p>`; }
+function grifo() { const t = TAP, el = $('ficha'); if (!t || scope.t !== 'm') return; el.hidden = false; el.classList.add('tapcard');
+  const units = t.tree.filter(x => x.depth === 0 && !x.source_type), rows = t.tree.filter(x => x.source_type);
+  const takers = []; for (const x of rows) { let g = takers.find(g => g.id === x.id); if (!g) takers.push(g = { id: x.id, unit: x.unit, type: x.type, doc: x.doc, url: x.url, depth: x.depth, rows: [] });
+    if (!g.rows.some(y => y.source_type === x.source_type && y.source_name === x.source_name)) g.rows.push(x); }
+  const nets = takers.filter(g => g.type === 'network').sort((a, b) => b.depth - a.depth), own = takers.filter(g => g.type !== 'network');
+  const upIds = [...t.up].filter(id => D.res.some(r => r.reservoir_id === id)).sort((a, b) => (D.res.find(r => r.reservoir_id === b).capacity_hm3 || 0) - (D.res.find(r => r.reservoir_id === a).capacity_hm3 || 0));
+  const node = (g, cls = '') => `<div class="node ${cls}"><h4>${esc(g.unit)}${g.url ? `<a href="${esc(g.url)}" target="_blank" rel="noopener" title="${esc(g.doc || '')}">${g.type === 'network' ? 'fuente' : 'plan hidrológico'} ↗</a>` : ''}</h4>${g.rows?.length ? `<div class="srcs">${g.rows.map(srcChip).join('')}</div>` : ''}</div>`;
+  const step = (label, body, arrow) => `<div class="step"><div class="label">${label}</div>${body}</div>` + (arrow ? `<div class="arrow">${arrow}</div>` : '');
+  const flow = !units.length ? `<p class="muted">Todavía no tenemos los datos de abastecimiento de este municipio.</p>` : `<div class="flow">`
+    + (upIds.length ? step(`Aguas arriba · ${upIds.length} ${upIds.length === 1 ? 'embalse' : 'embalses'}`, `<div class="srcs">${upIds.map(resChip).join('')}</div>`, 'su agua baja por el río hasta las tomas') : '')
+    + (nets.length ? step(nets.length > 1 ? 'Redes que la traen' : 'Red que la trae', nets.map(g => node(g)).join(''), 'la reparten a') : '')
+    + step('Sistema de abastecimiento', units.map(u => node({ ...u, rows: own.find(g => g.id === u.id)?.rows || [] })).join(''), 'llega a')
+    + `<div class="node home"><h4>${esc(t.name)}<span class="muted small" style="font-weight:400">${esc(t.prov)} · ${fmt(t.pop)} hab.</span></h4></div></div>`;
+  const has = t.fill_pct != null, nSrc = [...t.src].filter(id => t.ids.has(id)).length, nUp = upIds.length;
+  const kinds = (t.kinds || []).filter(k => k !== 'network').map(k => KINDS[k] || k);
+  const d = (a, b) => a == null || b == null ? null : a - b, dLy = d(t.fill_pct, t.ly), dAvg = d(t.fill_pct, t.avg10);
+  const pts = v => `${fmt(Math.abs(v), 1)} ${Math.abs(v) >= 0.95 && Math.abs(v) < 1.05 ? 'punto' : 'puntos'}`;
+  const figs = has ? `<div class="label">Cada embalse detrás de tu grifo</div>${tankHtml(t)}` : '';
+  const via = nets.map(g => g.unit), plan = units.map(u => u.unit);
+  const exp = !units.length ? '' : `<p>${esc(t.name)} ${plan.length > 1 ? `se abastece de las unidades ${listEs(plan.map(p => `<b>${esc(p)}</b>`))}` : `se abastece de la unidad <b>${esc(plan[0])}</b>`} del plan hidrológico${via.length ? `, que recibe el agua de ${listEs(via.map(v => `<b>${esc(v)}</b>`))}` : ''}.${kinds.length ? ` Su agua viene de ${listEs(kinds)}.` : ''}</p>`
+    + (has ? `<p>Toma agua de ${nSrc} ${nSrc === 1 ? 'embalse' : 'embalses'} del boletín${nUp ? `, y ${nUp === 1 ? 'otro está' : `otros ${nUp} están`} aguas arriba de ${nSrc === 1 ? 'él' : 'ellos'}` : ''}. Juntos guardan hoy ${fmt(t.stored)} hm³ de ${fmt(t.cap)}: están al <b>${fmt(t.fill_pct, 1)} %</b>${dLy != null && Math.abs(dLy) >= 0.05 ? `, ${pts(dLy)} ${dLy > 0 ? 'más' : 'menos'} que hace un año` : ''}${dAvg != null && Math.abs(dAvg) >= 0.05 ? ` y ${pts(dAvg)} ${dAvg > 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años` : ''}.</p>`
+      : `<p>Ninguna de sus fuentes es un embalse del boletín semanal, así que no hay un nivel de embalses que mostrar: depende de ${kinds.length ? listEs(kinds) : 'otras fuentes'}.</p>`)
+    + (has ? `<p class="muted small">Cómo lo calculamos: juntamos los embalses de los que se toma el agua, directamente o a través de redes y trasvases, y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Un embalse grande pesa más que uno pequeño. Parte de esa agua también la usan otros (riego, energía, caudal ecológico), y un municipio puede recibir agua de varias fuentes en distinta proporción.</p>` : '')
+    + `<p class="muted small">Fuentes: ${listEs([...new Map(t.tree.filter(x => x.doc).map(x => [x.doc, docLink(x.doc, x.url)])).values()])}${has ? `; niveles de MITECO y los SAIH, ${when(t.as_of)}` : ''}.</p>`;
+  el.innerHTML = `<div class="gtop"><h3>De dónde viene el agua de ${esc(t.name)}</h3><span class="muted">${esc(t.prov)} · ${fmt(t.pop)} hab.</span></div>`
+    + (units.length ? `<div class="gpath"><div class="label">El camino del agua</div><div class="gscroll" id="g-svg"></div><p class="muted small" style="margin:6px 0 0">El agua va de izquierda a derecha. Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel; cada tubería, tan gruesa como el agua que hay detrás.${t.up.size ? ' La línea de puntos es el río que baja de un embalse aguas arriba.' : ''}${rows.some(x => x.role === 'backup') ? ' Las discontinuas son fuentes de reserva.' : ''} Pasa el ratón por encima para ver los nombres.</p></div>` : '')
+    + (has ? `<div class="gleft">${figs}</div><div class="gexp">${exp}</div>` : `<div class="gexp wide">${exp}</div>`)
+    + (units.length ? `<details class="gall"><summary>Todas las fuentes, una a una</summary>${flow}</details>` : '');
+  const box = $('g-svg'); if (box) { box.innerHTML = pathSvg(t, box.clientWidth || 900); const sv = box.querySelector('svg');
+    if (sv && sv.width.baseVal.value > box.clientWidth + 4) box.insertAdjacentHTML('beforebegin', '<p class="muted small" style="margin:4px 0 0">Desliza para ver todo el camino →</p>'); }
+  // a reservoir opens on the map above; scroll only if the map is out of sight
+  el.querySelectorAll('[data-res]').forEach(b => b.onclick = async () => { await setScope('r', +b.dataset.res); if ($('panorama').getBoundingClientRect().top < 0) $('panorama').scrollIntoView({ behavior: 'smooth' }); }); }
+let gResize; addEventListener('resize', () => { clearTimeout(gResize); gResize = setTimeout(() => { if (TAP && scope.t === 'm') grifo(); }, 200); });
+
+// ───────── tap search: every municipality, typed as people write them, biggest towns first ─────────
+let MUNIS = null, tapHits = [], tapSel = 0;
+const ART = /^(el|la|los|las|l|les|els|a|o|as|os|lo|sa|es|ses) /;
+const mkey = s => norm(s).replace(/[^a-z0-9ñ]+/g, ' ').trim();
+async function munis() { if (!MUNIS) MUNIS = (await q(SQL.munis)).rows.map(m => { const k = mkey(m.name);
+    return { ...m, k, w: k.split(' '), starts: m.name.split('/').map(mkey).flatMap(p => ART.test(p) ? [p, p.replace(ART, '')] : [p]) }; }); return MUNIS; }
+function tapFind(qv) { const t = mkey(qv); if (!t || !MUNIS) return []; const toks = t.split(' '), out = [];
+  for (const m of MUNIS) { const s = m.starts.some(p => p.startsWith(t)) ? 0 : toks.every(x => m.w.some(w => w.startsWith(x))) ? 1 : t.length >= 3 && m.k.includes(t) ? 2 : -1; if (s >= 0) out.push([s, m]); }
+  return out.sort((a, b) => a[0] - b[0] || (b[1].pop || 0) - (a[1].pop || 0)).slice(0, 8).map(x => x[1]); }
+const tapIn = $('tap-q'), tapList = $('tap-list');
+function tapShow() { tapList.hidden = !tapIn.value.trim(); tapIn.setAttribute('aria-expanded', !tapList.hidden);
+  tapList.innerHTML = tapHits.length ? tapHits.map((m, i) => `<li role="option" id="tap-${i}" data-i="${i}" aria-selected="${i === tapSel}">${esc(m.name)}<span>${esc(m.prov)} · ${fmt(m.pop)} hab.</span></li>`).join('') : `<li class="none">${MUNIS ? 'Ningún municipio coincide' : 'Cargando municipios…'}</li>`;
+  tapIn.setAttribute('aria-activedescendant', tapHits.length ? 'tap-' + tapSel : ''); }
+function tapPick(m) { tapIn.value = ''; tapIn.blur(); tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); setScope('m', m.code); }
+tapIn.addEventListener('focus', () => { munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); });
+tapIn.addEventListener('input', () => { tapSel = 0; tapHits = tapFind(tapIn.value); tapShow(); });
+// the list of municipalities (8,132 rows) loads in the background once the page has its data, so typing answers at once
+setTimeout(() => { if (!MUNIS) munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); }, 4000);
+tapIn.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); tapSel = Math.max(0, Math.min(tapHits.length - 1, tapSel + (e.key === 'ArrowDown' ? 1 : -1))); tapShow(); }
+  else if (e.key === 'Enter') { e.preventDefault(); if (tapHits[tapSel]) tapPick(tapHits[tapSel]); else if (tapIn.value.trim()) munis().then(() => { tapHits = tapFind(tapIn.value); tapSel = 0; if (tapHits[0]) tapPick(tapHits[0]); else tapShow(); }).catch(e => console.error(e)); } else if (e.key === 'Escape') { tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); } });
+tapList.addEventListener('mousedown', e => { const li = e.target.closest('li[data-i]'); if (li) { e.preventDefault(); tapPick(tapHits[+li.dataset.i]); } });
+document.addEventListener('click', e => { if (!e.target.closest('.tapbox')) tapList.hidden = true; });
 
 // ───────── open data console ─────────
 const EXAMPLES = [
   ['Los 10 embalses más llenos', `SELECT reservoir_name, basin_name, fill_pct, stored_volume_hm3, capacity_hm3\nFROM embalses."now".reservoir_status\nWHERE capacity_hm3 >= 50\nORDER BY fill_pct DESC LIMIT 10;`],
   ['España, esta semana en cada año', `SELECT year(bulletin_date) AS anio, round(100 * sum(stored_volume_hm3) / sum(capacity_hm3), 1) AS pct\nFROM embalses.obs.reservoir_weekly\nWHERE strftime(bulletin_date, '%V') = strftime(current_date, '%V')\nGROUP BY 1 ORDER BY 1 DESC LIMIT 30;`],
   ['Dónde ha llovido más en 24 h', `SELECT station_name, basin_name, rain_24h_mm\nFROM embalses."now".station_status\nORDER BY rain_24h_mm DESC NULLS LAST LIMIT 15;`],
+  ['De dónde viene el agua de cada municipio', `SELECT municipality_name, province_name, population, fill_pct, reservoirs, source_types\nFROM embalses."now".municipality_water\nORDER BY population DESC LIMIT 20;`],
   ['Lluvia sobre la cuenca de cada embalse', `SELECT r.reservoir_name, u.areal_rain_mm, u.rain_volume_hm3, u.upstream_area_km2\nFROM embalses."now".upstream_rain u JOIN embalses.ref.reservoirs r USING (reservoir_id)\nWHERE u.time_window = '24h'\nORDER BY u.rain_volume_hm3 DESC LIMIT 15;`],
 ];
 let lastResult = null;
