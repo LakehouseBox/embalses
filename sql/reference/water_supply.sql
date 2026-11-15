@@ -8,9 +8,9 @@
 -- When a curated folder describes how an urban unit is served (rows for that unit), they replace the plan's generic
 -- network rows for it ("Red del CYII" -> the treatment plants that serve it).
 -- Run from the repository root:  lhbox duckdb --catalog embalses -- -f sql/reference/water_supply.sql
--- Reloading: DELETE + INSERT leaves a deletion file (puffin) that the in-browser runtime of an account page could not read
--- (HTTP 404, 2026-11-15). Until that is fixed, reload into empty tables (lhbox table delete, lhbox table create
--- --format-version 3 from the schema, then this file, then lhbox table document from docs/table_docs.json).
+-- Reloading: before 2026-11-16 02:30 UTC, DELETE + INSERT left a deletion file (puffin) that the in-browser runtime of an
+-- account page could not read (HTTP 404); the tables were then reloaded into empty tables. LakehouseBox fix #3219 reached
+-- production that night, so a plain DELETE + INSERT is fine after it.
 
 -- ── inputs ────────────────────────────────────────────────────────────────────────────────────────────────
 CREATE OR REPLACE TEMP TABLE meta AS
