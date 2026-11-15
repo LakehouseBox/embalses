@@ -14,6 +14,10 @@ Every value comes from its publisher: MITECO (weekly reservoir bulletin, dam inv
   - `reservoir_catchments`: every catchment unit upstream of each reservoir.
   - `reservoir_links`: how reservoirs connect, one row per direct link (water flows `from_reservoir_id` → `to_reservoir_id`). River links join each reservoir to the next one downstream; canal and transfer links join reservoirs no river connects.
   - `stations`: every AEMET and SAIH station.
+  - `municipalities`: every municipality in Spain (INE code, names, province, region, population, boundary).
+  - `supply_units`: urban supply units as the river-basin plans define them, plus the bulk networks they draw on (Canal de Isabel II and its treatment plants, the Taibilla, the Tajo-Segura and Negratín-Almanzora transfers).
+  - `municipality_supply`: which supply unit serves each municipality, with the plan's own description of the intake.
+  - `supply_sources`: where each unit (or one municipality in it) takes its water: reservoirs (with `reservoir_id` when in the bulletin), rivers, aquifers, springs, desalination, transfers, networks.
   - `map_outlines`: simplified outlines of basins, comunidades, provinces and main rivers as GeoJSON text, for drawing a map without a spatial extension (for example in a browser).
 - **obs**: measurements. Append-only, partitioned by day, timestamps UTC.
   - `precipitation`: rain per explicit interval.
@@ -28,6 +32,8 @@ obs.precipitation ─station_id→ ref.stations ─catchment_id→ ref.reservoir
 obs.reservoir_readings ─station_id→ ref.stations (station_type = 'reservoir', reservoir_id set)
 ref.reservoirs.basin_id → ref.basins ; ref.rivers.catchment_id → ref.catchments
 ref.reservoir_links.from_reservoir_id / to_reservoir_id → ref.reservoirs
+ref.municipalities ─municipality_code→ ref.municipality_supply ─supply_unit_id→ ref.supply_sources ─reservoir_id→ ref.reservoirs
+ref.supply_sources.network_unit_id → ref.supply_sources (the network's own sources; follow it to reach its reservoirs)
 ```
 
 - `reservoir_id` is MITECO's bulletin `EMBALSE_ID`, stable since 1988 (Alcántara = 15, Gabriel y Galán = 150).
@@ -53,6 +59,7 @@ ref.reservoir_links.from_reservoir_id / to_reservoir_id → ref.reservoirs
   - Júcar's real-time viewer is behind a bot check, so Júcar reservoirs come only from the weekly bulletin.
   - The Basque internal basins have no open real-time feed.
 - **Reservoir links.** River links are computed from HydroRIVERS: each dam's snapped segment, followed downstream to the next dam. Links marked `confidence = 'review'` include pumped-storage pairs and two entries for one reservoir (Santolea). A reservoir upstream drains into the one below, but its water is also used on the way (irrigation, hydropower, environmental flows), so "upstream" is not the same as "available downstream".
+- **Water supply.** Built from the 2022–2027 river-basin plans (25 districts), each read with its own tool (`tools/extract_supply_*.py`, common format in `tools/supply_plans_format.md`), plus hand-written network descriptions in `sql/reference/curated/` that cite their documents. The plans differ in detail: some name every intake with its share, others give a source type or the network only. The Ebro uses CHE's register of drinking-water intakes (one unit per municipality); Miño-Sil uses the 2022 consultation draft for the municipality list. A municipality can sit in more than one unit (split towns, or towns supplied from two basins); `share_pct` says how much when the source gives it. A source with `municipality_code` applies to that municipality only. `confidence = 'auto'` rows were read by rule; check `notes` before quoting a single row. Upstream reservoirs are not listed as sources: follow `ref.reservoir_links` from the source reservoir.
 - **Bulletin areas.** `bulletin_area_name` (MITECO's bulletin "ámbito") is close to, but not the same as, `basin_id`.
 
 ## Freshness
@@ -108,6 +115,31 @@ SELECT list(s.reservoir_name ORDER BY s.capacity_hm3 DESC) AS reservoirs,
 FROM up JOIN embalses."now".reservoir_status s USING (reservoir_id);
 ```
 
+Where a municipality's tap water comes from, through networks, and the reservoirs upstream of each source; with how full they are together (Majadahonda, 28080):
+
+```sql
+WITH RECURSIVE
+units AS (SELECT supply_unit_id FROM embalses.ref.municipality_supply WHERE municipality_code = '28080'),
+src(supply_unit_id, source_type, source_name, reservoir_id, network_unit_id, depth) AS (
+  SELECT s.supply_unit_id, s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, 0
+  FROM embalses.ref.supply_sources s JOIN units USING (supply_unit_id)
+  WHERE s.municipality_code IS NULL OR s.municipality_code = '28080'
+  UNION
+  SELECT s.supply_unit_id, s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, src.depth + 1
+  FROM embalses.ref.supply_sources s JOIN src ON s.supply_unit_id = src.network_unit_id
+  WHERE src.depth < 5
+),
+res(reservoir_id) AS (
+  SELECT reservoir_id FROM src WHERE reservoir_id IS NOT NULL
+  UNION
+  SELECT l.from_reservoir_id FROM embalses.ref.reservoir_links l JOIN res ON l.to_reservoir_id = res.reservoir_id
+)
+SELECT list(s.reservoir_name ORDER BY s.capacity_hm3 DESC) AS reservoirs,
+       sum(s.stored_volume_hm3) AS stored_hm3, sum(s.capacity_hm3) AS capacity_hm3,
+       round(100 * sum(s.stored_volume_hm3) / sum(s.capacity_hm3), 1) AS fill_pct
+FROM res JOIN embalses."now".reservoir_status s USING (reservoir_id);
+```
+
 ## Attribution
 
 Show these wherever the data is displayed:
@@ -116,3 +148,5 @@ Show these wherever the data is displayed:
 - AEMET OpenData
 - SAIH of the river-basin authorities (CH Tajo, Ebro, Duero, Guadiana, Guadalquivir, Segura, Miño-Sil, Cantábrico; Junta de Andalucía; ACA)
 - HydroSHEDS (Lehner & Grill 2013), CC BY 4.0
+- INE (Relación de municipios, Cifras oficiales de población); IGN (Líneas límite municipales), CC BY 4.0
+- The river-basin plans 2022–2027 of each district and, for networks, the operators' own documents (cited per row in `ref.supply_units`)

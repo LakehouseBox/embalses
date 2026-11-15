@@ -1,0 +1,70 @@
+supply_unit_id,municipality_code,source_rank,source_type,source_name,role,network_unit_id,water_body_code,share_pct,notes
+ES030-CYII,,1,reservoir,El Atazar,main,,,,
+ES030-CYII,,2,reservoir,El Vado,main,,,,
+ES030-CYII,,3,reservoir,El Villar,main,,,,
+ES030-CYII,,4,reservoir,La Aceña,main,,,,
+ES030-CYII,,5,reservoir,La Jarosa,main,,,,
+ES030-CYII,,6,reservoir,Manzanares El Real,main,,,,also called Santillana
+ES030-CYII,,7,reservoir,Navacerrada,main,,,,
+ES030-CYII,,8,reservoir,Navalmedio,main,,,,
+ES030-CYII,,9,reservoir,Pedrezuela,main,,,,also called El Vellón
+ES030-CYII,,10,reservoir,Pinilla,main,,,,
+ES030-CYII,,11,reservoir,Puentes Viejas,main,,,,
+ES030-CYII,,12,reservoir,Riosequillo,main,,,,
+ES030-CYII,,13,reservoir,Valmayor,main,,,,
+ES030-CYII,,14,reservoir,San Juan,main,,,,pumped to Valmayor since 1995; Pelayos plant
+ES030-CYII,,15,reservoir,Picadas,main,,,,Majadahonda and Griñón plants
+ES030-CYII,,16,reservoir,Los Morales,main,,,,Rozas de Puerto Real plant
+ES030-CYII,,17,river,río Sorbe,main,,,,azud de El Pozo de los Ramos
+ES030-CYII,,18,river,río Guadarrama,main,,,,azud de Las Nieves (transfer to Valmayor)
+ES030-CYII,,19,river,río Guadalix,main,,,,azud de El Mesto
+ES030-CYII,,20,river,río Jarama,main,,,,azud de Valdentales
+ES030-CYII,,21,river,río Tajo,backup,,,,ETAP del Tajo: alternative source
+ES030-CYII,,22,aquifer,Cretácico carbonatado,backup,,,,"well fields, used mainly in droughts"
+ES030-CYII,,23,aquifer,Terciario detrítico,backup,,,,"well fields, used mainly in droughts"
+ES030-CYII-COLMENAR,,1,reservoir,El Atazar,main,,,,
+ES030-CYII-COLMENAR,,2,reservoir,El Villar,main,,,,
+ES030-CYII-COLMENAR,,3,reservoir,El Vado,main,,,,
+ES030-CYII-COLMENAR,,4,river,río Sorbe,main,,,,azud Pozo de los Ramos
+ES030-CYII-COLMENAR,,5,reservoir,Pedrezuela,main,,,,
+ES030-CYII-EL-BODONAL,,1,reservoir,El Villar,main,,,,
+ES030-CYII-EL-BODONAL,,2,reservoir,El Atazar,main,,,,
+ES030-CYII-EL-BODONAL,,3,reservoir,El Vado,main,,,,
+ES030-CYII-EL-BODONAL,,4,river,río Sorbe,main,,,,Pozo de los Ramos
+ES030-CYII-EL-BODONAL,,5,aquifer,Torrelaguna,main,,,,well field
+ES030-CYII-TORRELAGUNA,,1,reservoir,El Vado,main,,,,
+ES030-CYII-TORRELAGUNA,,2,river,río Sorbe,main,,,,azud Pozo de los Ramos
+ES030-CYII-TORRELAGUNA,,3,reservoir,El Villar,main,,,,
+ES030-CYII-SANTILLANA,,1,reservoir,Manzanares El Real,main,,,,also called Santillana
+ES030-CYII-VALMAYOR,,1,reservoir,Valmayor,main,,,,
+ES030-CYII-VALMAYOR,,2,river,río Guadarrama,main,,,,via Las Nieves transfer into Valmayor
+ES030-CYII-VALMAYOR,,3,reservoir,San Juan,main,,,,pumped to Valmayor (Alberche water)
+ES030-CYII-MAJADAHONDA,,1,reservoir,Picadas,main,,,,Canal de Picadas
+ES030-CYII-MAJADAHONDA,,2,aquifer,Guadarrama,main,,,,well field
+ES030-CYII-GRINON,,1,reservoir,Picadas,main,,,,
+ES030-CYII-GRINON,,2,aquifer,Batres,main,,,,well field
+ES030-CYII-GRINON,,3,aquifer,Guadarrama,main,,,,well field
+ES030-CYII-PINILLA,,1,reservoir,Pinilla,main,,,,
+ES030-CYII-LA-ACENA,,1,reservoir,La Aceña,main,,,,
+ES030-CYII-LA-JAROSA,,1,reservoir,La Jarosa,main,,,,
+ES030-CYII-LA-JAROSA,,2,reservoir,La Aceña,main,,,,
+ES030-CYII-NAVACERRADA,,1,reservoir,Navacerrada,main,,,,
+ES030-CYII-NAVACERRADA,,2,reservoir,Navalmedio,main,,,,
+ES030-CYII-PELAYOS,,1,reservoir,San Juan,main,,,,
+ES030-CYII-ROZAS-PUERTO-REAL,,1,reservoir,Los Morales,main,,,,
+ES030-CYII-TAJO,,1,river,río Tajo,main,,,,
+ES030-SAT01A09,,1,network,ETAP del Tajo (Canal de Isabel II),main,ES030-CYII-TAJO,,,the plan's ETAP de Colmenar de Oreja; taken to be Canal's ETAP del Tajo (to confirm)
+ES030-SAT04A03,,1,network,ETAP de Pinilla (Canal de Isabel II),main,ES030-CYII-PINILLA,,,the plan: Red del CYII - Embalse de Pinilla
+ES030-SAT04A04,,1,network,ETAP de Torrelaguna (Canal de Isabel II),main,ES030-CYII-TORRELAGUNA,,,the plan: Canal del Jarama y canal de El Villar
+ES030-SAT04A08,,1,network,ETAP de Navacerrada (Canal de Isabel II),main,ES030-CYII-NAVACERRADA,,,unit named after the plant's tank
+ES030-SAT04A08,,2,network,Canal de Isabel II,backup,ES030-CYII,,,
+ES030-SAT04A09,,1,network,ETAP de La Jarosa (Canal de Isabel II),main,ES030-CYII-LA-JAROSA,,,unit named after the plant's tank
+ES030-SAT04A09,,2,network,Canal de Isabel II,backup,ES030-CYII,,,
+ES030-SAT04A13,,1,network,ETAP de Majadahonda (Canal de Isabel II),main,ES030-CYII-MAJADAHONDA,,,the plan: Depósitos de Majadahonda (served by this plant)
+ES030-SAT04A13,,2,network,Canal de Isabel II,main,ES030-CYII,,,the plan: also Reunión tank and Canal Oeste
+ES030-SAT04A15,,1,network,ETAP de Griñón (Canal de Isabel II),main,ES030-CYII-GRINON,,,the plan: Getafe tank and Batres wells (served by this plant)
+ES030-SAT04A15,,2,network,ETAP de Majadahonda (Canal de Isabel II),main,ES030-CYII-MAJADAHONDA,,,the plan: Retamares tank (served by this plant)
+ES030-SAT04A16,,1,network,ETAP de Griñón (Canal de Isabel II),main,ES030-CYII-GRINON,,,the plan: Getafe tank
+ES030-SAT04A16,,2,network,ETAP del Tajo (Canal de Isabel II),main,ES030-CYII-TAJO,,,the plan's ETAP Colmenar de Oreja; taken to be Canal's ETAP del Tajo (to confirm)
+ES030-SAT05A05,,1,network,ETAP de Rozas de Puerto Real (Canal de Isabel II),main,ES030-CYII-ROZAS-PUERTO-REAL,,,
+ES030-SAT05A05,,2,network,ETAP de Pelayos (Canal de Isabel II),main,ES030-CYII-PELAYOS,,,

@@ -1,0 +1,16 @@
+supply_unit_id,basin_id,unit_code,unit_name,unit_type,source_document,source_url
+ES030-CYII,ES030,CYII,Canal de Isabel II,network,"Canal de Isabel II, Captación",https://www.canaldeisabelsegunda.es/captacion
+ES030-CYII-COLMENAR,ES030,CYII-COLMENAR,ETAP de Colmenar (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Colmenar",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-EL-BODONAL,ES030,CYII-EL-BODONAL,ETAP de El Bodonal (Canal de Isabel II),network,"Canal de Isabel II, ETAP El Bodonal",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-TORRELAGUNA,ES030,CYII-TORRELAGUNA,ETAP de Torrelaguna (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Torrelaguna",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-SANTILLANA,ES030,CYII-SANTILLANA,ETAP de Santillana (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Santillana",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-VALMAYOR,ES030,CYII-VALMAYOR,ETAP de Valmayor (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Valmayor; Captación (Valmayor)",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-MAJADAHONDA,ES030,CYII-MAJADAHONDA,ETAP de Majadahonda (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Majadahonda",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-GRINON,ES030,CYII-GRINON,ETAP de Griñón (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Griñón",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-PINILLA,ES030,CYII-PINILLA,ETAP de Pinilla (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Pinilla",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-LA-ACENA,ES030,CYII-LA-ACENA,ETAP de La Aceña (Canal de Isabel II),network,"Canal de Isabel II, ETAP de La Aceña",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-LA-JAROSA,ES030,CYII-LA-JAROSA,ETAP de La Jarosa (Canal de Isabel II),network,"Canal de Isabel II, ETAP La Jarosa",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-NAVACERRADA,ES030,CYII-NAVACERRADA,ETAP de Navacerrada (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Navacerrada",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-PELAYOS,ES030,CYII-PELAYOS,ETAP de Pelayos (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Pelayos",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-ROZAS-PUERTO-REAL,ES030,CYII-ROZAS-PUERTO-REAL,ETAP de Rozas de Puerto Real (Canal de Isabel II),network,"Canal de Isabel II, ETAP de Rozas de Puerto Real",https://www.canaldeisabelsegunda.es/tratamiento
+ES030-CYII-TAJO,ES030,CYII-TAJO,ETAP del Tajo (Canal de Isabel II),network,"Canal de Isabel II, ETAP del Tajo",https://www.canaldeisabelsegunda.es/tratamiento

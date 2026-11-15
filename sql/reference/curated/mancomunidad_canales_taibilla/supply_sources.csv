@@ -1,0 +1,8 @@
+supply_unit_id,municipality_code,source_rank,source_type,source_name,role,network_unit_id,water_body_code,share_pct,notes
+ES070-MCT,,1,river,río Taibilla,main,,,,
+ES070-MCT,,2,transfer,Trasvase Tajo-Segura,main,ES030-ATS,,,
+ES070-MCT,,3,desalination,IDAM Alicante I y II,main,,,,
+ES070-MCT,,4,desalination,IDAM San Pedro I y II,main,,,,
+ES070-MCT,,5,desalination,IDAM Torrevieja,main,,,,
+ES070-MCT,,6,desalination,IDAM Valdelentisco,main,,,,
+ES070-MCT,,7,desalination,IDAM Águilas,main,,,,

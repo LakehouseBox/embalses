@@ -1,0 +1,8 @@
+{
+  "network": "canal_isabel_ii",
+  "basin_id": "ES030",
+  "source": "canal-isabel-ii",
+  "source_document": "Canal de Isabel II: Captación (13 embalses, 6 azudes, acuíferos) and the treatment-plant sheets (ETAP), procedencia del agua",
+  "source_url": "https://www.canaldeisabelsegunda.es/captacion ; https://www.canaldeisabelsegunda.es/tratamiento",
+  "notes": "Canal de Isabel II is described at two levels: the whole system (ES030-CYII) and each treatment plant (ES030-CYII-<PLANT>) with the sources its sheet lists. Urban units of the Tajo plan link to a plant when the plan names that part of the network (tanks, canals, plant), otherwise to the whole system."
+}
