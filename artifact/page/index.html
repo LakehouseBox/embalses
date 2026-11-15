@@ -72,7 +72,7 @@ main { padding: 30px 0 10px; }
 .grifohead .tap { margin: 0; display: grid; gap: 8px; } .grifohead .tapbox { max-width: none; }
 .tryme { display: flex; gap: 4px 12px; flex-wrap: wrap; align-items: baseline; } .tryme .linkbtn { font-size: 14px; font-weight: 400; }
 .grifo { margin-top: 24px; border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
-.grifo > div { padding: 18px 20px 20px; min-width: 0; } .grifo > div + div { border-left: 1px solid var(--line); }
+.grifo > div { padding: 18px 20px 20px; min-width: 0; } .grifo > .gexp:not(.wide) { border-left: 1px solid var(--line); }
 .grifo .gtop { grid-column: 1 / -1; border-bottom: 1px solid var(--line); display: flex; gap: 8px 16px; align-items: baseline; flex-wrap: wrap; padding-bottom: 14px; }
 .grifo .gtop h3 { margin: 0; font-size: 24px; }
 .flow { display: grid; gap: 0; }
@@ -89,6 +89,23 @@ button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
 .src .mini { width: 34px; height: 6px; border-radius: 999px; background: #dbe7f5; position: relative; overflow: hidden; } .src .mini span { position: absolute; inset: 0 auto 0 0; background: var(--brand); }
 .src.net { background: var(--tint); border-style: dashed; }
 .gfig .big { font-size: 64px; } .gfig .pair { margin-top: 10px; }
+.grifo > .gpath, .grifo > .gall, .grifo > .gexp.wide { grid-column: 1 / -1; } .grifo > .gpath { border-bottom: 1px solid var(--line); }
+.grifo > .gall { border-top: 1px solid var(--line); padding-top: 4px; } .grifo > .gall summary { padding: 8px 0; } .grifo > .gall .flow { margin-top: 10px; }
+.gscroll { overflow-x: auto; margin-top: 8px; } .gsvg { display: block; max-width: none; font-family: var(--sans); }
+.gsvg .e { fill: none; stroke: var(--water); stroke-opacity: 0.32; stroke-linecap: round; } .gsvg .e.bk { stroke-dasharray: 6 6; stroke-opacity: 0.22; } .gsvg .e.rv { stroke: var(--river); stroke-opacity: 0.9; stroke-dasharray: 1 5; }
+.gsvg text { paint-order: stroke; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; } .gsvg .nm { font-size: 13.5px; font-weight: 600; fill: var(--ink); } .gsvg .pc { font-size: 12px; fill: var(--muted); }
+.gsvg .rn text, .gsvg .tn text { text-anchor: middle; } .gsvg .rn { cursor: pointer; } .gsvg .rn:not([data-res]) { cursor: default; }
+.gsvg .rn .bg { fill: #dbe7f5; } .gsvg .rn .fl { fill: var(--brand); } .gsvg .rn .ol { fill: none; stroke: var(--brand-dark); stroke-opacity: 0.35; } .gsvg .rn.up .fl { fill: var(--river); }
+.gsvg .rn[data-res]:hover .ol { stroke-opacity: 1; stroke-width: 2; }
+.gsvg .tn rect { fill: var(--tint); stroke: var(--border); } .gsvg .tn path { fill: none; stroke: var(--brand-dark); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; } .gsvg .tn.bk rect { stroke-dasharray: 3 3; }
+.gsvg .bn rect { fill: var(--surface); stroke: var(--border); } .gsvg a.bn:hover rect { stroke: var(--brand); } .gsvg .lk { font-size: 12px; fill: var(--brand); }
+.gsvg .hn rect { fill: var(--tint); stroke: var(--brand); stroke-width: 1.5; } .gsvg .hn .nm { fill: var(--brand-dark); font-size: 15px; font-weight: 700; } .gsvg .hn path { fill: var(--brand); }
+.tank { position: relative; display: flex; gap: 2px; height: 86px; margin-top: 14px; }
+.tank .seg { position: relative; min-width: 3px; background: #dbe7f5; border-radius: 3px; overflow: hidden; container-type: inline-size; }
+.tank .seg i { position: absolute; left: 0; right: 0; bottom: 0; background: var(--brand); } .tank .seg[data-up] i { background: var(--river); }
+.tank .seg span { position: absolute; left: 6px; right: 4px; top: 4px; font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); text-shadow: 0 0 3px #fff, 0 0 3px #fff; }
+@container (max-width: 54px) { .tank .seg span { display: none; } }
+.tank .lvl { position: absolute; left: -4px; right: -4px; border-top: 2px dashed var(--ink); pointer-events: none; } .tank .lvl span { position: absolute; right: 4px; top: 2px; font-size: 12px; font-weight: 700; background: var(--surface); padding: 0 4px; border-radius: 3px; }
 .gexp p { margin: 12px 0 0; } .gexp .muted.small a { color: inherit; }
 .tapcard h3 { margin: 0 0 6px; } .tapcard p { margin: 6px 0; max-width: 78ch; }
 .tapcard .kinds { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; } .tapcard .kinds span { font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--tint); }
@@ -199,7 +216,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   .pane + .pane { border-left: 0; border-top: 1px solid var(--line); }
   .raingrid > div + div, .open > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 20px; }
   .full { border-left: 0; padding-left: 0; margin-top: 22px; } .ups { grid-template-columns: 1fr 1fr; row-gap: 18px; } .ups > div:nth-child(3) { border-left: 0; padding-left: 0; }
-  .grifohead, .grifo { grid-template-columns: minmax(0, 1fr); } .grifohead .tap { margin-top: 16px; } .grifo > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .grifohead, .grifo { grid-template-columns: minmax(0, 1fr); } .grifohead .tap { margin-top: 16px; } .grifo > .gexp:not(.wide) { border-left: 0; border-top: 1px solid var(--line); }
   .figs { grid-template-columns: 1fr; gap: 12px; } .figs > div { border-left: 0; padding-left: 0; } .big { font-size: 56px; }
 }
 </style>
@@ -371,6 +388,7 @@ FROM embalses."now".municipality_water w JOIN embalses.ref.municipalities m USIN
 FROM embalses.ref.municipality_supply ms JOIN embalses.ref.supply_units u USING (supply_unit_id)
 LEFT JOIN embalses.ref.supply_sources s ON s.supply_unit_id = ms.supply_unit_id AND (s.municipality_code IS NULL OR s.municipality_code = ms.municipality_code)
 WHERE ms.municipality_code = '${code}'`,
+  tapLinks: ids => `SELECT from_reservoir_id AS f, to_reservoir_id AS t FROM embalses.ref.reservoir_links WHERE link_type = 'river' AND from_reservoir_id IN (${ids.map(Number).join(', ')})`,
   tapNets: ids => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
        s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
 FROM embalses.ref.supply_units u LEFT JOIN embalses.ref.supply_sources s USING (supply_unit_id)
@@ -670,7 +688,8 @@ async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; i
       const ids = [...new Set(next.map(x => x.network_unit_id).filter(id => id && !done.has(id)))]; if (!ids.length) break;
       ids.forEach(id => done.add(id)); next = (await q(SQL.tapNets(ids))).rows; add(next, depth); }
     const src = new Set(w.src || []), up = new Set(w.up || []);
-    return { ...w, code, src, up, tree, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
+    const links = up.size ? (await q(SQL.tapLinks([...up]))).rows : [];
+    return { ...w, code, src, up, tree, links, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
   catch (e) { console.error(e); return null; } }
 
 // ───────── tu grifo: the path of the water, from the reservoirs to the tap, with how full they are ─────────
@@ -684,6 +703,88 @@ function srcChip(x) { if (x.source_type === 'reservoir' && x.reservoir_id != nul
   const net = x.source_type === 'network' || (x.source_type === 'transfer' && x.network_unit_id);
   const tag = TYPE[x.source_type] || x.source_type, named = norm(x.source_name).startsWith(norm(tag));
   return `<span class="src${net ? ' net' : ''}">${named ? '' : `<i>${esc(tag)}</i>`}${esc(x.source_name)}${x.role === 'backup' ? ' <i>(reserva)</i>' : ''}</span>`; }
+// ── the path of the water as a diagram: sources on the left, the tap on the right; each reservoir a circle as big as its
+// capacity and filled to its level, each pipe as thick as the water behind it ──
+const RES = id => D.res.find(r => r.reservoir_id === id), capOf = id => RES(id)?.capacity_hm3 || 0;
+const ICON = { river: 'M2 7c2-2 4-2 6 0s4 2 6 0M2 12c2-2 4-2 6 0s4 2 6 0', aquifer: 'M2 5h14M2 9h14M2 13h14', spring: 'M9 2c3 4 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5 5-9z',
+  desalination: 'M9 2c3 4 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5 5-9zM6 11.5h6', reclaimed: 'M4 8a5 5 0 0 1 9-3M14 10a5 5 0 0 1-9 3M13 2v3h-3M5 16v-3h3', transfer: 'M2 9h12M10 5l4 4-4 4', reservoir: 'M2 13h14M4 13V6h10v7' };
+const MANY = { river: 'ríos', aquifer: 'acuíferos', spring: 'manantiales', desalination: 'desaladoras', transfer: 'trasvases', reclaimed: 'agua regenerada', reservoir: 'otros embalses' };
+const ONE = { river: 'río', aquifer: 'acuífero', spring: 'manantial', desalination: 'desaladora', transfer: 'trasvase', reclaimed: 'agua regenerada', reservoir: 'embalse' };
+function pathGraph(t) {
+  const N = new Map(); let E = [];
+  const node = (k, o) => { if (!N.has(k)) N.set(k, { k, ...o }); return N.get(k); };
+  const edge = (a, b, o = {}) => { if (a !== b && !E.some(e => e.a === a && e.b === b)) E.push({ a, b, ...o }); };
+  node('tap', { kind: 'tap' });
+  const units = t.tree.filter(x => x.depth === 0 && !x.source_type), isUnit = new Set(units.map(u => u.id));
+  for (const u of units) { node('u:' + u.id, { kind: 'box', label: u.unit, url: u.url, doc: u.doc, what: 'Plan hidrológico' }); edge('u:' + u.id, 'tap'); }
+  const taker = x => isUnit.has(x.id) ? 'u:' + x.id : node('n:' + x.id, { kind: 'box', label: x.unit, url: x.url, doc: x.doc, what: 'Fuente' }).k;
+  for (const x of t.tree.filter(x => x.source_type)) { const to = taker(x), backup = x.role === 'backup';
+    if (x.network_unit_id) { const k = isUnit.has(x.network_unit_id) ? 'u:' + x.network_unit_id : 'n:' + x.network_unit_id; node(k, { kind: 'box', label: x.source_name, what: 'Fuente' }); edge(k, to, { backup }); }
+    else if (x.source_type === 'reservoir' && RES(x.reservoir_id)) { node('r:' + x.reservoir_id, { kind: 'res', ids: [x.reservoir_id] }); edge('r:' + x.reservoir_id, to, { backup }); }
+    else { const n = node('t:' + x.source_type + ':' + to, { kind: 'type', type: x.source_type, names: [], backup: true }); if (x.source_name && !n.names.includes(x.source_name)) n.names.push(x.source_name);
+      if (!backup) n.backup = false; edge(n.k, to); } }
+  for (const e of E) { const n = N.get(e.a); if (n.kind === 'type') e.backup = n.backup; }
+  for (const id of t.up) if (RES(id) && !N.has('r:' + id)) node('r:' + id, { kind: 'res', ids: [id], up: true });
+  for (const l of t.links || []) if (N.get('r:' + l.f)?.up && N.has('r:' + l.t)) edge('r:' + l.f, 'r:' + l.t, { river: true });
+  // the biggest reservoirs by name, the rest together in one circle
+  const merge = (up, keep) => { const ks = [...N.values()].filter(n => n.kind === 'res' && !!n.up === up).sort((a, b) => capOf(b.ids[0]) - capOf(a.ids[0])).slice(keep).map(n => n.k);
+    if (ks.length < 2) return; const k = up ? 'agg:up' : 'agg'; node(k, { kind: 'res', up, ids: ks.flatMap(x => N.get(x).ids) });
+    for (const e of E) { if (ks.includes(e.a)) e.a = k; if (ks.includes(e.b)) e.b = k; } ks.forEach(x => N.delete(x));
+    const seen = new Set(); E = E.filter(e => e.a !== e.b && !seen.has(e.a + '>' + e.b) && seen.add(e.a + '>' + e.b)); };
+  merge(false, 5); merge(true, 3);
+  // columns: the tap at 0, each node one column left of the furthest node it feeds
+  const rank = new Map([['tap', 0]]);
+  for (let i = 0; i < 30; i++) for (const e of E) if (rank.has(e.b)) rank.set(e.a, Math.max(rank.get(e.a) ?? 0, rank.get(e.b) + 1));
+  for (const k of [...N.keys()]) if (!rank.has(k)) N.delete(k);
+  E = E.filter(e => N.has(e.a) && N.has(e.b));
+  for (const n of N.values()) { n.rank = rank.get(n.k); n.cap = n.kind === 'res' ? n.ids.reduce((s, id) => s + capOf(id), 0) : 0; }
+  const flow = new Map(), byRank = [...N.values()].sort((a, b) => b.rank - a.rank);
+  for (const n of byRank) flow.set(n.k, n.cap + E.filter(e => e.b === n.k).reduce((s, e) => s + (flow.get(e.a) || 0), 0));
+  return { N, E, flow, R: Math.max(...rank.values()) }; }
+function pathSvg(t, W) {
+  const { N, E, flow, R } = pathGraph(t); if (N.size < 2) return '';
+  const maxCap = Math.max(1, ...[...N.values()].map(n => n.cap)), maxFlow = Math.max(1, ...flow.values());
+  const lanesAt = r => [...N.values()].filter(n => n.rank === r).length > 6, BW = 168, L = 84 + (lanesAt(R) ? 62 : 0), colW = Math.max(196, Math.min(300, (W - L - BW / 2 - 8) / Math.max(1, R))), Wt = L + colW * R + BW / 2 + 8;
+  for (const n of N.values()) { n.r = n.kind === 'res' ? 6 + 18 * Math.sqrt(n.cap / maxCap) : 0;
+    n.h = n.kind === 'res' ? 2 * n.r + 34 : n.kind === 'type' ? 58 : n.kind === 'tap' ? 60 : n.url && n.label.length > 24 ? 60 : 50; n.x = L + colW * (R - n.rank) + (n.rank === 0 ? 0 : 0); }
+  const cols = Array.from({ length: R + 1 }, (_, r) => [...N.values()].filter(n => n.rank === r)), gap = 12;
+  // a long column is staggered in two lanes, so it takes about half the height
+  const step = c => c.length > 6 ? 0.56 : 1, colH = c => c.reduce((s, n) => s + (n.h + gap) * step(c), -gap * step(c)) + (c.length > 6 ? c.at(-1).h * 0.44 : 0);
+  const H = Math.max(...cols.map(colH)) + 24;
+  for (const c of cols) { for (const n of c) { const to = E.filter(e => e.a === n.k).map(e => N.get(e.b).y).filter(y => y != null); n.o = to.length ? to.reduce((a, b) => a + b, 0) / to.length : 0; }
+    const grp = n => n.kind === 'type' ? 2 : n.k.startsWith('agg') ? 1 : 0; c.sort((a, b) => Math.round(a.o / 12) - Math.round(b.o / 12) || grp(a) - grp(b) || b.cap - a.cap); let y = (H - colH(c)) / 2;
+    c.forEach((n, i) => { n.y = y + (n.kind === 'res' ? n.r : n.kind === 'type' ? 12 : n.h / 2); if (step(c) < 1) n.x += i % 2 ? 62 : -62; y += (n.h + gap) * step(c); }); }
+  const tapN = N.get('tap'); tapN.x = Wt - BW / 2 - 4;
+  const half = n => n.kind === 'res' ? n.r : n.kind === 'type' ? 12 : BW / 2;
+  // pipes, arriving spread over the height of what they feed
+  const pipes = E.map(e => { const a = N.get(e.a), b = N.get(e.b), ins = E.filter(x => x.b === e.b).sort((p, q) => N.get(p.a).y - N.get(q.a).y), i = ins.indexOf(e);
+    const span = Math.min(b.h - 14, ins.length * 7), yb = b.y + (ins.length > 1 ? -span / 2 + span * i / (ins.length - 1) : 0);
+    const x1 = a.x + half(a), x2 = b.x - half(b), dx = (x2 - x1) / 2, w = 1.5 + 11 * Math.sqrt((flow.get(e.a) || 0) / maxFlow);
+    return `<path class="e${e.river ? ' rv' : e.backup ? ' bk' : ''}" d="M${x1},${a.y}C${x1 + dx},${a.y} ${x2 - dx},${yb} ${x2},${yb}" stroke-width="${w.toFixed(1)}"/>`; }).join('');
+  const lines = (txt, max = 24) => { const out = ['']; for (const w of String(txt).split(' ')) { if ((out.at(-1) + ' ' + w).trim().length > max && out.at(-1)) out.push(w); else out[out.length - 1] = (out.at(-1) + ' ' + w).trim(); }
+    return out.length > 2 ? [out[0], out.slice(1).join(' ').slice(0, max - 1) + '…'] : out; };
+  let clip = 0;
+  const nodes = [...N.values()].map(n => {
+    if (n.kind === 'res') { const rs = n.ids.map(RES).filter(Boolean), cap = rs.reduce((s, r) => s + r.capacity_hm3, 0), sto = rs.reduce((s, r) => s + (r.stored_hm3 ?? r.capacity_hm3 * (r.fill_pct ?? 0) / 100), 0);
+      const f = cap ? Math.max(0, Math.min(1, sto / cap)) : 0, one = rs.length === 1, id = 'gc' + (clip++), name = one ? rs[0].reservoir_name : `+${rs.length} embalses`;
+      const tip = one ? `${rs[0].reservoir_name}: ${fmt(100 * f, 0)} % de ${fmt(cap)} hm³${n.up ? ' · aguas arriba' : ''}` : `${rs.map(r => `${r.reservoir_name} ${fmt(r.fill_pct, 0)} %`).join(', ')}`;
+      return `<g class="rn${n.up ? ' up' : ''}"${one ? ` data-res="${rs[0].reservoir_id}"` : ''}><title>${esc(tip)}</title><clipPath id="${id}"><rect x="${n.x - n.r}" y="${n.y + n.r - 2 * n.r * f}" width="${2 * n.r}" height="${2 * n.r * f}"/></clipPath>
+        <circle class="bg" cx="${n.x}" cy="${n.y}" r="${n.r}"/><circle class="fl" cx="${n.x}" cy="${n.y}" r="${n.r}" clip-path="url(#${id})"/><circle class="ol" cx="${n.x}" cy="${n.y}" r="${n.r}"/>
+        <text class="nm" x="${n.x}" y="${n.y + n.r + 15}">${esc(name.length > 22 ? name.slice(0, 21) + '…' : name)}</text><text class="pc" x="${n.x}" y="${n.y + n.r + 29}">${fmt(100 * f, 0)} %${n.up ? ' · aguas arriba' : ''}</text></g>`; }
+    if (n.kind === 'type') { const label = n.names.length === 1 ? `${ONE[n.type] || n.type} ${n.names[0].replace(new RegExp('^' + (ONE[n.type] || '') + '\\s+', 'i'), '')}` : `${MANY[n.type] || n.type} (${n.names.length || 1})`;
+      return `<g class="tn${n.backup ? ' bk' : ''}"><title>${esc((n.names.length ? n.names.join(', ') : ONE[n.type]) + (n.backup ? ' · de reserva' : ''))}</title><rect x="${n.x - 12}" y="${n.y - 12}" width="24" height="24" rx="6"/><path d="${ICON[n.type] || ICON.reservoir}" transform="translate(${n.x - 9},${n.y - 9})"/>
+        <text class="nm" x="${n.x}" y="${n.y + 27}">${esc(label.length > 24 ? label.slice(0, 23) + '…' : label)}</text><text class="pc" x="${n.x}" y="${n.y + 41}">${n.backup ? 'de reserva' : n.type === 'desalination' ? 'agua del mar' : n.type === 'aquifer' ? 'agua subterránea' : ''}</text></g>`; }
+    if (n.kind === 'tap') { const ls = lines(t.name, 13);
+      return `<g class="hn"><rect x="${n.x - BW / 2}" y="${n.y - n.h / 2}" width="${BW}" height="${n.h}" rx="8"/><path d="M0 6h9v-3h5v3h4a4 4 0 0 1 4 4v3h-4v-3H0z" transform="translate(${n.x - BW / 2 + 12},${n.y - 9})"/>
+        ${ls.map((l, i) => `<text class="nm" x="${n.x - BW / 2 + 42}" y="${n.y - 4 - 8 * (ls.length - 1) + 16 * i}">${esc(l)}</text>`).join('')}<text class="pc" x="${n.x - BW / 2 + 42}" y="${n.y + 14 + 8 * (ls.length - 1)}">${fmt(t.pop)} hab.</text></g>`; }
+    const ls = lines(n.label), body = `<rect x="${n.x - BW / 2}" y="${n.y - n.h / 2}" width="${BW}" height="${n.h}" rx="6"/>${ls.map((l, i) => `<text class="nm" x="${n.x - BW / 2 + 10}" y="${n.y + 5 - 8 * (ls.length - 1) + 16 * i - (n.url ? 6 : 0)}">${esc(l)}</text>`).join('')}`
+      + (n.url ? `<text class="lk" x="${n.x - BW / 2 + 10}" y="${n.y + n.h / 2 - 7}">${n.what} ↗</text>` : '');
+    return n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="bn"><title>${esc(n.doc || n.label)}</title>${body}</a>` : `<g class="bn"><title>${esc(n.label)}</title>${body}</g>`; }).join('');
+  return `<svg class="gsvg" viewBox="0 0 ${Wt.toFixed(0)} ${H.toFixed(0)}" width="${Wt.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="El camino del agua hasta ${esc(t.name)}">${pipes}${nodes}</svg>`; }
+// how full the water behind the tap is, as one tank: one block per reservoir, as wide as its capacity, filled to its level
+function tankHtml(t) { const rs = [...t.ids].map(RES).filter(r => r && r.capacity_hm3 > 0 && r.fill_pct != null).sort((a, b) => b.capacity_hm3 - a.capacity_hm3); if (!rs.length) return '';
+  return `<div class="tank" role="img" aria-label="Cada embalse, tan ancho como su capacidad y lleno hasta su nivel">${rs.map(r => `<div class="seg" style="flex:${r.capacity_hm3} 1 0" title="${esc(r.reservoir_name)}: ${fmt(r.fill_pct, 0)} % de ${fmt(r.capacity_hm3)} hm³"${t.up.has(r.reservoir_id) && !t.src.has(r.reservoir_id) ? ' data-up' : ''}><i style="height:${Math.max(0, Math.min(100, r.fill_pct))}%"></i><span>${esc(r.reservoir_name)}</span></div>`).join('')}<b class="lvl" style="bottom:${Math.max(0, Math.min(100, t.fill_pct))}%"><span>${fmt(t.fill_pct, 1)} % entre todos</span></b></div>
+    <p class="muted small" style="margin:6px 0 0">Cada bloque es un embalse, tan ancho como su capacidad y lleno hasta su nivel. La línea marca el nivel de todos juntos.</p>`; }
 function grifo() { const t = TAP, el = $('grifo-out'); if (!t) return; el.hidden = false;
   const units = t.tree.filter(x => x.depth === 0 && !x.source_type), rows = t.tree.filter(x => x.source_type);
   const takers = []; for (const x of rows) { let g = takers.find(g => g.id === x.id); if (!g) takers.push(g = { id: x.id, unit: x.unit, type: x.type, doc: x.doc, url: x.url, depth: x.depth, rows: [] });
@@ -702,7 +803,7 @@ function grifo() { const t = TAP, el = $('grifo-out'); if (!t) return; el.hidden
   const d = (a, b) => a == null || b == null ? null : a - b, dLy = d(t.fill_pct, t.ly), dAvg = d(t.fill_pct, t.avg10);
   const pts = v => `${fmt(Math.abs(v), 1)} ${Math.abs(v) >= 0.95 && Math.abs(v) < 1.05 ? 'punto' : 'puntos'}`;
   const figs = has ? `<div class="gfig"><div class="label">Embalses detrás de tu grifo</div><div class="big">${fmt(t.fill_pct, 1)}<small> %</small></div>
-      <div class="meter" style="margin-top:12px"><i style="width:${Math.min(100, t.fill_pct)}%"></i></div>
+      ${tankHtml(t)}
       <div class="pair"><div><b>${fmt(t.stored)} hm³</b>Agua embalsada</div><div><b>${fmt(t.cap)} hm³</b>Capacidad · ${t.reservoirs} embalses</div></div>
       <div class="pair cmp"><div>Frente a hace un año<b class="${dLy > 0 ? 'upc' : dLy < 0 ? 'downc' : ''}">${dLy == null ? '—' : signed(dLy, 1) + ' <span>pts</span>'}</b></div><div>Frente a la media de 10 años<b class="${dAvg > 0 ? 'upc' : dAvg < 0 ? 'downc' : ''}">${dAvg == null ? '—' : signed(dAvg, 1) + ' <span>pts</span>'}</b></div></div></div>`
     : '';
@@ -713,9 +814,14 @@ function grifo() { const t = TAP, el = $('grifo-out'); if (!t) return; el.hidden
     + (has ? `<p class="muted small">Cómo lo calculamos: juntamos los embalses de los que se toma el agua, directamente o a través de redes y trasvases, y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Un embalse grande pesa más que uno pequeño. Parte de esa agua también la usan otros (riego, energía, caudal ecológico), y un municipio puede recibir agua de varias fuentes en distinta proporción.</p>` : '')
     + `<p class="muted small">Fuentes: ${listEs([...new Map(t.tree.filter(x => x.doc).map(x => [x.doc, docLink(x.doc, x.url)])).values()])}${has ? `; niveles de MITECO y los SAIH, ${when(t.as_of)}` : ''}.</p>`;
   el.innerHTML = `<div class="gtop"><h3>El agua de ${esc(t.name)}</h3><span class="muted">${esc(t.prov)}</span><span class="sp"></span>${t.ids.size ? '<button class="linkbtn" id="g-map">Ver en el mapa ↑</button>' : ''}</div>`
-    + `<div>${flow}</div><div class="gexp">${figs}${exp}</div>`;
+    + (units.length ? `<div class="gpath"><div class="label">El camino del agua</div><div class="gscroll" id="g-svg"></div><p class="muted small" style="margin:6px 0 0">El agua va de izquierda a derecha. Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel; cada tubería, tan gruesa como el agua que hay detrás.${t.up.size ? ' La línea de puntos es el río que baja de un embalse aguas arriba.' : ''}${rows.some(x => x.role === 'backup') ? ' Las discontinuas son fuentes de reserva.' : ''} Pasa el ratón por encima para ver los nombres.</p></div>` : '')
+    + (has ? `<div class="gleft">${figs}</div><div class="gexp">${exp}</div>` : `<div class="gexp wide">${exp}</div>`)
+    + (units.length ? `<details class="gall"><summary>Todas las fuentes, una a una</summary>${flow}</details>` : '');
+  const box = $('g-svg'); if (box) { box.innerHTML = pathSvg(t, box.clientWidth || 900); const sv = box.querySelector('svg');
+    if (sv && sv.width.baseVal.value > box.clientWidth + 4) box.insertAdjacentHTML('beforebegin', '<p class="muted small" style="margin:4px 0 0">Desliza para ver todo el camino →</p>'); }
   $('g-map')?.addEventListener('click', async () => { if (scope.t !== 'm' || scope.k !== t.code) await setScope('m', t.code); $('panorama').scrollIntoView(); });
   el.querySelectorAll('[data-res]').forEach(b => b.onclick = async () => { await setScope('r', +b.dataset.res); $('panorama').scrollIntoView(); }); }
+let gResize; addEventListener('resize', () => { clearTimeout(gResize); gResize = setTimeout(() => { if (TAP && !$('grifo-out').hidden) grifo(); }, 200); });
 async function showTap(code, scroll) { const tp = await loadTap(code); if (!tp) return; TAP = tp; tapIn.value = tp.name; grifo(); if (scroll) $('grifo').scrollIntoView();
   if (scope.t !== 'm' || scope.k !== code) setScope('m', code); }
 
