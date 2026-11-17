@@ -1,7 +1,7 @@
 # embalses on LakehouseBox, as OpenTofu / Terraform.
 #
 # The same deployment as lakehouse.yaml (which `lhbox apply` reads), for teams that keep infrastructure in Terraform (CI checks that the two agree):
-# the public catalog, what its scheduled SQL may reach, the 14 sinks that keep it filled, and its documentation.
+# the public catalog, what its scheduled SQL may reach, the 16 sinks that keep it filled, and its documentation.
 # Tables are not here: they come from sql/migrations/ (`lhbox migrate`), so no apply can drop a table or its rows.
 #
 #   export LHBOX_API_KEY=...        # `lhbox login` makes one
@@ -30,6 +30,7 @@ locals {
     miteco_reservoir_weekly = { table = "obs.reservoir_weekly", sql = "sql/ingest/reservoir_weekly.sql", every = "1d", offset = "6h" }               # weekly bulletin, published Tuesdays
     aemet_precipitation     = { table = "obs.precipitation", sql = "sql/ingest/aemet_precipitation.sql", every = "30m", offset = "23m" }
     aemet_weather           = { table = "obs.weather", sql = "sql/ingest/aemet_weather.sql", every = "30m", offset = "23m" }
+    siar_precipitation      = { table = "obs.precipitation", sql = "sql/ingest/siar_precipitation.sql", every = "1h", offset = "25m" } # SiAR daily rain, 06-16 UTC
   }
 
   # Derived tables: scheduled SQL that reads the catalog itself; each run replaces the table.
@@ -70,6 +71,9 @@ resource "lakehousebox_sql_connection" "aemet" {
   name        = "aemet"
   integration = "aemet"
 }
+
+# SiAR's token is a `query` connection (sent as ?token=), created once by hand and not declared here; lakehouse.yaml
+# names it (connection siar) and gives the command. siar_precipitation needs it.
 
 resource "lakehousebox_sql_sink" "ingest" {
   for_each = local.ingest

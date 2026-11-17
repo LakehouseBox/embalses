@@ -30,6 +30,13 @@ catalogs:
       aemet:
         url_prefix: https://opendata.aemet.es/
         integration: aemet
+      # SiAR's API token travels as ?token= (kind query, LakehouseBox #3364). Created once by hand:
+      #   lhbox sink connection create siar --catalog embalses --url-prefix https://servicio.mapa.gob.es/siarapi/API/V1/Datos/ --param token=env:SIAR_TOKEN
+      # The token comes from Mi SiAR (Editar perfil); if SiAR answers 401, generate a new one and `lhbox sink connection replace siar`.
+      siar:
+        url_prefix: https://servicio.mapa.gob.es/siarapi/API/V1/Datos/
+        kind: query
+        value_env: SIAR_TOKEN
 
     sinks:
       # ── pulled by LakehouseBox itself (scheduled SQL over public URLs) ──
@@ -58,6 +65,12 @@ catalogs:
         sql: sql/ingest/aemet_weather.sql
         every: 30m
         offset: 23m
+
+      siar_precipitation:                            # SiAR daily rain, one chunk of 50 stations an hour, 06-16 UTC (its rate limits)
+        table: obs.precipitation
+        sql: sql/ingest/siar_precipitation.sql
+        every: 1h
+        offset: 25m
 
       # ── derived tables: scheduled SQL that reads the catalog itself; each run replaces the table ──
       now_rain_grid:        { table: now.rain_grid,        sql: sql/now/rain_grid.sql,        every: 1h, offset: 28m, mode: replace, min_rows: 1000, format_version: 2 }

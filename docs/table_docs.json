@@ -163,16 +163,16 @@
     }
   },
   "ref.stations": {
-    "doc": "Every measuring station in one register: AEMET weather stations (official inventory) and the SAIH real-time stations of each basin authority (MITECO's national SAIH register): reservoirs, river gauges and rain gauges. One row per physical station per network; station_id is network:native_code. SiAR agro-weather stations to be added. Sources: AEMET OpenData, MITECO ArcGIS 'SAIH'.",
+    "doc": "Every measuring station in one register: AEMET weather stations (official inventory), the SAIH real-time stations of each basin authority (MITECO's national SAIH register): reservoirs, river gauges and rain gauges, and the 519 active SiAR agro-weather stations (network siar, MAPA's Info/ESTACIONES, added 2026-11-17). MITECO's register lists no Cantábrico reservoir, so the 13 SAIH Cantábrico reservoir stations (the viewer's codes) were added by hand from sql/reference/stations_cantabrico.sql (2026-11-17). One row per physical station per network; station_id is network:native_code. Sources: AEMET OpenData, MITECO ArcGIS 'SAIH', SAIH Cantábrico viewer, SiAR API.",
     "columns": {
       "station_id": "network:native_code, unique across networks, e.g. saih-tajo:E_36, aemet:5769X. Key.",
-      "network": "Network: aemet, aca, or saih-<basin> (saih-tajo, saih-ebro, …).",
+      "network": "Network: aemet, aca, siar, or saih-<basin> (saih-tajo, saih-ebro, …).",
       "operator": "Organisation that runs the station.",
       "native_code": "The station's code in its own network, as its feed uses it (for Júcar, Segura and Andalusia the register uses names).",
       "station_name": "Name as published (for reservoir stations without one, the reservoir's name).",
       "station_type": "reservoir, river_gauge, rain_gauge or weather_station.",
-      "variables": "What it measures: water_level, stored_volume, fill_pct, flow, precipitation, air_temperature, relative_humidity, wind.",
-      "reservoir_id": "Reservoir it measures (ref.reservoirs); set for reservoir stations within 1.5 km of a bulletin dam.",
+      "variables": "What it measures: water_level, stored_volume, fill_pct, flow, precipitation, air_temperature, relative_humidity, wind, solar_radiation.",
+      "reservoir_id": "Reservoir it measures (ref.reservoirs); set for reservoir stations within 1.5 km of a bulletin dam (SAIH Cantábrico: matched by name and capacity).",
       "basin_id": "River basin district (ref.basins).",
       "catchment_id": "Catchment unit it sits in (ref.catchments); drives upstream-rain calculations. Null outside the Iberian peninsula.",
       "elevation_m": "Station altitude, m (AEMET).",
@@ -180,19 +180,19 @@
       "first_seen_at": "When it entered this register (UTC).",
       "last_seen_at": "Last time a feed returned a value for it (UTC); filled by the ingestion.",
       "location": "Station position, Point, EPSG:4326.",
-      "source": "Key of the source (aemet-opendata, miteco-arcgis)."
+      "source": "Key of the source (aemet-opendata, miteco-arcgis, saih-cantabrico, siar)."
     }
   },
   "obs.precipitation": {
-    "doc": "Rain measured at each gauge, always as the amount over an explicit interval, so 10-, 15- and 60-minute networks can be added up. Append-only, partitioned by day of period_end_at. Today: AEMET hourly observations (~830 stations) since 2026-11-10 22:00 UTC; SAIH and SiAR gauges to follow. Real-time values are provisional (not validated by the publisher).",
+    "doc": "Rain measured at each gauge, always as the amount over an explicit interval, so 10-, 15-, 60-minute and daily networks can be added up. Append-only, partitioned by day of period_end_at. Sources: AEMET hourly observations (~830 stations, period_minutes 60) since 2026-11-10 22:00 UTC; SiAR daily totals (519 agro-weather stations, period_minutes 1440, the Europe/Madrid calendar day, a day late) since 2026-11-17 (sink siar_precipitation). Sinks deliver at least once: de-duplicate on (station_id, period_end_at, source). Real-time values are provisional (not validated by the publisher).",
     "columns": {
       "station_id": "Gauge (ref.stations).",
       "period_start_at": "Start of the interval the rain fell in (UTC).",
       "period_end_at": "End of the interval (UTC). AEMET's fint.",
-      "period_minutes": "Interval length in minutes (60 for AEMET).",
+      "period_minutes": "Interval length in minutes (60 for AEMET, 1440 for SiAR's daily totals).",
       "precipitation_mm": "Rain in the interval, mm (1 mm = 1 litre per m²).",
       "is_provisional": "True for real-time values not yet validated by the publisher.",
-      "source": "Key of the source (aemet-opendata, …).",
+      "source": "Key of the source (aemet-opendata, siar).",
       "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
