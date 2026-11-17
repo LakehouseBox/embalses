@@ -1,6 +1,6 @@
--- Reservoir readings from the two regional water agencies → embalses.obs.reservoir_readings. Scheduled SQL, hourly.
--- One sink for both because LakehouseBox takes at most 8 sinks per table and obs.reservoir_readings has one per SAIH;
--- the cost is that one source failing fails the run for both.
+-- Reservoir readings from the feeds that share one sink → embalses.obs.reservoir_readings. Scheduled SQL, hourly.
+-- SAIH Hidrosur, the ACA (Catalonia) and the CH Duero's open data share one sink because LakehouseBox takes at most 8
+-- sinks per table and obs.reservoir_readings has one per SAIH viewer; the cost is that one source failing fails the run.
 --
 -- 1. SAIH Hidrosur (Junta de Andalucía): the public viewer's "Datos de última hora" page,
 --    redhidrosurmedioambiente.es/saih/resumen/embalses: one HTML table with the 29 reservoirs of the three Andalusian
@@ -21,6 +21,11 @@
 --    the ACA station ids in ref.stations. Not in the bulletin: E16 Foix, E18 Siurana.
 --    Times: dia + hora are NOT Madrid wall-clock (29 March has 02:xx readings; 25 October has no repeated hour), so a
 --    fixed offset. The dataset does not say which; read here as UTC, as Meteocat's XEMA does (if UTC+1, 1 h late).
+--
+-- 3. CH Duero: its open-data portal (datos.chduero.es, CKAN) publishes estado_embalses.json, a snapshot of 36 reservoirs
+--    (volume, %, spill flow) with each reservoir's own time, `actualizacion`, in UTC; refreshed every 10-30 min.
+--    One GET a run. Codes (E2001…) are the CHD's; volumes may carry a thousands comma ("1,063.238"); "n/d" is missing.
+--    Links: sql/reference/stations_duero.sql (station_id saih-duero:E2001 …).
 WITH
 -- ── SAIH Hidrosur ──
 hs_page AS MATERIALIZED (
@@ -85,10 +90,26 @@ aca AS (
   FROM aca_r r JOIN aca_codes c USING (codi_estacio)
   GROUP BY ALL
 ),
+-- ── CH Duero ──
+duero AS (
+  SELECT 'saih-duero:' || e.codigo                                               AS station_id,
+         TRY_CAST(e.actualizacion AS TIMESTAMP) AT TIME ZONE 'UTC'               AS observed_at,
+         NULL::DOUBLE                                                            AS water_level_masl,
+         TRY_CAST(replace(e.volumen_actual_hm3, ',', '') AS DOUBLE)              AS stored_volume_hm3,
+         TRY_CAST(replace(e.volumen_actual_percent, ',', '') AS DOUBLE)          AS fill_pct,
+         'saih-duero'                                                            AS source,
+         TRY_CAST(replace(e.q_vertido_actual_m3s, ',', '') AS DOUBLE)            AS outflow_m3s
+  FROM (SELECT unnest(from_json((http_get(
+          'https://datos.chduero.es/dataset/f2eebe21-10eb-4b04-bf5b-71578dc3562c/resource/9b642c38-59b8-4ab0-8abd-6580ed64d261/download/estado_embalses.json'
+        )).body, '[{"codigo":"VARCHAR","actualizacion":"VARCHAR","volumen_actual_hm3":"VARCHAR","volumen_actual_percent":"VARCHAR","q_vertido_actual_m3s":"VARCHAR"}]')) AS e)
+),
 rows AS (
-  SELECT * FROM hs UNION ALL SELECT * FROM hs_sum UNION ALL SELECT * FROM aca
+  SELECT *, NULL::DOUBLE AS outflow_m3s FROM hs
+  UNION ALL SELECT *, NULL::DOUBLE FROM hs_sum
+  UNION ALL SELECT *, NULL::DOUBLE FROM aca
+  UNION ALL SELECT * FROM duero
 )
 SELECT station_id, NULL::INTEGER AS reservoir_id, observed_at, water_level_masl, stored_volume_hm3, fill_pct,
-       NULL::DOUBLE AS inflow_m3s, NULL::DOUBLE AS outflow_m3s, true AS is_provisional, source
+       NULL::DOUBLE AS inflow_m3s, outflow_m3s, true AS is_provisional, source
 FROM rows
 WHERE observed_at IS NOT NULL AND stored_volume_hm3 IS NOT NULL

@@ -180,7 +180,7 @@
       "first_seen_at": "When it entered this register (UTC).",
       "last_seen_at": "Last time a feed returned a value for it (UTC); filled by the ingestion.",
       "location": "Station position, Point, EPSG:4326.",
-      "source": "Key of the source (aemet-opendata, miteco-arcgis, saih-cantabrico, siar)."
+      "source": "Key of the source (aemet-opendata, miteco-arcgis, saih-cantabrico, saih-tajo, saih-ebro, saih-guadiana, saih-hidrosur, chduero-open-data, siar): where the row came from; hand-matched rows are loaded by sql/reference/stations_*.sql."
     }
   },
   "obs.precipitation": {
@@ -227,7 +227,7 @@
       "inflow_m3s": "Water entering, m³/s, where published.",
       "outflow_m3s": "Water released through the dam, m³/s, where published.",
       "is_provisional": "True for real-time values not yet validated.",
-      "source": "Key of the source (saih-ebro, saih-guadalquivir, saih-segura, saih-minosil, saih-cantabrico, saih-guadiana, saih-tajo, saih-hidrosur, aca).",
+      "source": "Key of the source (saih-ebro, saih-guadalquivir, saih-segura, saih-minosil, saih-cantabrico, saih-guadiana, saih-tajo, saih-hidrosur, saih-duero (the CH Duero's open data), aca).",
       "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
