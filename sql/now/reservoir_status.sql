@@ -1,5 +1,6 @@
--- now.reservoir_status: one row per bulletin reservoir: latest state (live SAIH reading if under 6 h old, else the weekly
--- bulletin), recent change, rain upstream (reads now.upstream_rain) and the same week in past years.
+-- now.reservoir_status: one row per bulletin reservoir: latest state (live SAIH reading if under 6 h old, the ACA's daily
+-- reading if under 36 h old, else the weekly bulletin), recent change, rain upstream (reads now.upstream_rain) and the same
+-- week in past years.
 -- Runs inside LakehouseBox as a derived sink (scheduled SQL that reads the catalog), mode replace: each run swaps the table.
 -- One SELECT; see lakehouse.yaml for its schedule.
 WITH
@@ -20,7 +21,7 @@ same_week AS (   -- the same week in each of the 10 earlier years: the bulletin 
   QUALIFY row_number() OVER (PARTITION BY l.reservoir_id, y.k
                              ORDER BY abs(datediff('day', w.bulletin_date, l.bulletin_date - to_years(y.k::int)))) = 1
 ),
-live AS (   -- live SAIH readings of the last 4 days, de-duplicated, with their reservoir from ref.stations
+live AS (   -- live SAIH (and daily ACA) readings of the last 4 days, de-duplicated, with their reservoir from ref.stations
   SELECT DISTINCT r.station_id, s.reservoir_id, r.observed_at, r.stored_volume_hm3, r.inflow_m3s, r.outflow_m3s, r.source
   FROM embalses.obs.reservoir_readings r JOIN embalses.ref.stations s USING (station_id)
   WHERE r.observed_at > now() - INTERVAL 4 DAY AND s.reservoir_id IS NOT NULL AND r.stored_volume_hm3 IS NOT NULL
@@ -40,7 +41,7 @@ live_now AS (
          n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 24) AS change_24h,
          n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 72) AS change_72h
   FROM newest n LEFT JOIN back b USING (reservoir_id)
-  WHERE n.observed_at > now() - INTERVAL 6 HOUR
+  WHERE n.observed_at > now() - CASE WHEN n.source = 'aca' THEN INTERVAL 36 HOUR ELSE INTERVAL 6 HOUR END   -- ACA publishes once a day
   GROUP BY n.reservoir_id, n.observed_at, n.stored_volume_hm3, n.inflow_m3s, n.outflow_m3s, n.source
 ),
 avg10 AS (SELECT reservoir_id, round(avg(fill_pct), 1) AS fill FROM same_week GROUP BY 1)

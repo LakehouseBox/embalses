@@ -293,7 +293,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <p>Todo lo que ves aquí sale de un catálogo abierto. Consulta con SQL, descarga el resultado o conecta tus herramientas, sin cuenta y sin pedir permiso.</p>
       <ul>
         <li>20 tablas documentadas: embalses, cuencas, ríos, estaciones, lluvia horaria, lecturas en directo y el boletín semanal desde 1988.</li>
-        <li>Se actualizan solas: los datos en directo cada 15 minutos o cada hora, el boletín cada semana.</li>
+        <li>Se actualizan solas: los datos en directo cada 15 minutos o cada hora (Cataluña, una vez al día), el boletín cada semana.</li>
         <li>Formato abierto (Apache Iceberg), publicado en <a href="https://lakehousebox.com">LakehouseBox</a>.</li>
       </ul>
       <h3 style="margin-top:18px">Desde tu ordenador, con DuckDB</h3>
@@ -634,7 +634,7 @@ function table() { const qv = norm($('q').value), rows = D.res.filter(r => inSco
   $('t-res').innerHTML = `<thead><tr><th>Embalse</th><th>Cuenca</th><th class="r">Embalsado</th><th class="r">Capacidad</th><th>Nivel</th><th class="r">Cambio</th><th>Dato</th></tr></thead><tbody>` + rows.slice(0, shown).map(r => { const v = trend(r);
     return `<tr data-id="${r.reservoir_id}" class="${scope.t === 'r' && r.reservoir_id === scope.k ? 'on' : ''}"><td><div class="name">${esc(r.reservoir_name)}</div><div class="sub">${esc([title(r.river_name), r.province].filter(Boolean).join(' · '))}</div></td><td>${esc(r.basin_name || '')}</td><td class="r num">${fmt(r.stored_hm3)} hm³</td><td class="r num">${fmt(r.capacity_hm3)} hm³</td>
       <td><div class="fillcell"><div class="bar"><span style="width:${Math.min(100, r.fill_pct || 0)}%"></span>${r.fill_10y != null ? `<b style="left:${Math.min(100, r.fill_10y)}%" title="Media de 10 años"></b>` : ''}</div><span class="num">${fmt(r.fill_pct, 0)} %</span></div></td>
-      <td class="r num ${v > 0 ? 'upc' : v < 0 ? 'downc' : ''}">${v == null ? '—' : `${signed(v, Math.abs(v) < 10 ? 1 : 0)} hm³`}</td><td><span class="pill ${r.data_source === 'miteco-weekly' ? 'w' : ''}"><i></i>${r.data_source === 'miteco-weekly' ? 'semanal' : 'en directo'}</span></td></tr>`; }).join('') + '</tbody>'; }
+      <td class="r num ${v > 0 ? 'upc' : v < 0 ? 'downc' : ''}">${v == null ? '—' : `${signed(v, Math.abs(v) < 10 ? 1 : 0)} hm³`}</td><td><span class="pill ${r.data_source === 'miteco-weekly' ? 'w' : ''}"><i></i>${r.data_source === 'miteco-weekly' ? 'semanal' : r.data_source === 'aca' ? 'diario' : 'en directo'}</span></td></tr>`; }).join('') + '</tbody>'; }
 for (const [id, k] of [['t-up', 'up'], ['t-fill', 'fill'], ['t-cap', 'cap']]) $(id).onclick = () => { sortBy = k; shown = 8; press(['t-up', 't-fill', 't-cap'], id); table(); };
 $('t-res').onclick = e => { const tr = e.target.closest('tr[data-id]'); if (tr) { setScope('r', +tr.dataset.id); $('panorama').scrollIntoView(); } };
 $('q').oninput = () => { shown = 8; table(); }; $('more').onclick = () => { shown += 30; table(); };
@@ -659,8 +659,8 @@ async function ficha() { if (scope.t === 'm') return TAP && tapFicha(); $('ficha
       <div><b>${f?.catchment_area_km2 != null ? fmt(f.catchment_area_km2) + ' km²' : '—'}</b>Cuenca vertiente</div><div><b>${f?.surface_area_ha != null ? fmt(f.surface_area_ha) + ' ha' : '—'}</b>Superficie del embalse</div></div></div></div>
       <details${open ? ' open' : ''}><summary>Sobre la presa y sus usos</summary><dl>` + row('Presa', f && esc(title(nice(f.dam_name)))) + row('Tipo de presa', f && esc(f.dam_type)) + row('Usos', f && esc((f.uses || []).join(', ')))
       + row('Hidroeléctrico', !f || f.is_hydroelectric == null ? null : f.is_hydroelectric ? `sí${f.energy_capacity_gwh ? ` · ${fmt(f.energy_capacity_gwh, 0)} GWh` : ''}` : 'no') + row('Aportación media anual', f && n(f.mean_annual_inflow_hm3, 0, 'hm³'))
-      + row('Último dato', live ? `en directo · ${when(r.reading_at)}` : 'boletín semanal') + row('Cambio en 24 h', r.change_24h_hm3 == null ? null : signed(r.change_24h_hm3, 1) + ' hm³') + row('Entrada', n(r.inflow_m3s, 1, 'm³/s')) + row('Salida', n(r.outflow_m3s, 1, 'm³/s'))
-      + row('Precipitación caída sobre la cuenca, 24 h', r.rain_24h_hm3 == null ? null : `${fmt(r.rain_24h_hm3, 1)} hm³`) + `</dl><p class="muted small" style="margin:10px 0 0">La precipitación sobre la cuenca es lluvia caída, no agua que haya entrado en el embalse: parte se infiltra, se evapora o tarda días en llegar. Fuentes: MITECO (Boletín Hidrológico e Inventario de Presas y Embalses), AEMET${live ? ' y SAIH de la confederación; el dato en directo es provisional' : ''}.</p></details>`;
+      + row('Último dato', live ? `${r.data_source === 'aca' ? 'diario (ACA)' : 'en directo'} · ${when(r.reading_at)}` : 'boletín semanal') + row('Cambio en 24 h', r.change_24h_hm3 == null ? null : signed(r.change_24h_hm3, 1) + ' hm³') + row('Entrada', n(r.inflow_m3s, 1, 'm³/s')) + row('Salida', n(r.outflow_m3s, 1, 'm³/s'))
+      + row('Precipitación caída sobre la cuenca, 24 h', r.rain_24h_hm3 == null ? null : `${fmt(r.rain_24h_hm3, 1)} hm³`) + `</dl><p class="muted small" style="margin:10px 0 0">La precipitación sobre la cuenca es lluvia caída, no agua que haya entrado en el embalse: parte se infiltra, se evapora o tarda días en llegar. Fuentes: MITECO (Boletín Hidrológico e Inventario de Presas y Embalses), AEMET${live ? (r.data_source === 'aca' ? " y Agència Catalana de l'Aigua; el dato diario es provisional" : ' y SAIH de la confederación; el dato en directo es provisional') : ''}.</p></details>`;
     $('f-rain').onclick = () => setLayer('rain'); drawCatchment(r); };
   paint(null);
   try { const f = (await q(SQL.ficha(id))).rows[0]; if (f && scope.t === 'r' && scope.k === id) paint(f); } catch (e) { console.error(e); } }

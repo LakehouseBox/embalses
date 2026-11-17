@@ -216,7 +216,7 @@
     }
   },
   "obs.reservoir_readings": {
-    "doc": "Live reservoir level and storage from each basin's SAIH network, plus inflow and outflow where published. Append-only, partitioned by day of observed_at. One row per station and observation time; sinks deliver at least once, so de-duplicate on (station_id, observed_at). Provisional real-time values.",
+    "doc": "Live reservoir level and storage from each basin's SAIH network (and the ACA's daily open data for Catalonia), plus inflow and outflow where published. Append-only, partitioned by day of observed_at. One row per station and observation time; sinks deliver at least once, so de-duplicate on (station_id, observed_at). Provisional real-time values.",
     "columns": {
       "station_id": "Reservoir station (ref.stations).",
       "reservoir_id": "Reservoir (ref.reservoirs), copied from ref.stations for easy filtering.",
@@ -227,7 +227,7 @@
       "inflow_m3s": "Water entering, m³/s, where published.",
       "outflow_m3s": "Water released through the dam, m³/s, where published.",
       "is_provisional": "True for real-time values not yet validated.",
-      "source": "Key of the source (saih-ebro, saih-guadalquivir, …).",
+      "source": "Key of the source (saih-ebro, saih-guadalquivir, saih-segura, saih-minosil, saih-cantabrico, saih-guadiana, saih-tajo, aca).",
       "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
@@ -292,7 +292,7 @@
       "reservoir_id": "Reservoir (ref.reservoirs).",
       "as_of": "When this row was computed (UTC).",
       "latest_reading_at": "Time of the newest value used (UTC).",
-      "data_source": "saih-<basin> for a live reading, or miteco-weekly for the bulletin.",
+      "data_source": "saih-<basin> for a live reading (under 6 h old), aca for the ACA's daily reading (under 36 h old), or miteco-weekly for the bulletin.",
       "stored_volume_hm3": "Latest stored volume, hm³.",
       "capacity_hm3": "Capacity, hm³.",
       "fill_pct": "Latest fill level, %.",
