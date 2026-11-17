@@ -216,7 +216,7 @@
     }
   },
   "obs.reservoir_readings": {
-    "doc": "Live reservoir level and storage from each basin's SAIH network (and the ACA's daily open data for Catalonia), plus inflow and outflow where published. Append-only, partitioned by day of observed_at. One row per station and observation time; sinks deliver at least once, so de-duplicate on (station_id, observed_at). Provisional real-time values.",
+    "doc": "Live reservoir level and storage from each basin's SAIH network, Andalusia's Hidrosur, and the ACA's daily open data for Catalonia, plus inflow and outflow where published. Append-only, partitioned by day of observed_at. One row per station and observation time; sinks deliver at least once, so de-duplicate on (station_id, observed_at). Provisional real-time values.",
     "columns": {
       "station_id": "Reservoir station (ref.stations).",
       "reservoir_id": "Reservoir (ref.reservoirs), copied from ref.stations for easy filtering.",
@@ -227,7 +227,7 @@
       "inflow_m3s": "Water entering, m³/s, where published.",
       "outflow_m3s": "Water released through the dam, m³/s, where published.",
       "is_provisional": "True for real-time values not yet validated.",
-      "source": "Key of the source (saih-ebro, saih-guadalquivir, saih-segura, saih-minosil, saih-cantabrico, saih-guadiana, saih-tajo, aca).",
+      "source": "Key of the source (saih-ebro, saih-guadalquivir, saih-segura, saih-minosil, saih-cantabrico, saih-guadiana, saih-tajo, saih-hidrosur, aca).",
       "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },

@@ -23,7 +23,7 @@ done
 LHBOX_NO_VERSION_CHECK=1 lhbox sink list | python3 -c '
 import json, sys
 d = json.load(sys.stdin); sinks = d if isinstance(d, list) else d.get("sinks") or d.get("items") or []
-ingest = ["saih_ebro", "saih_guadalquivir", "saih_segura", "saih_minosil", "saih_cantabrico", "saih_guadiana", "saih_tajo", "aca_reservoirs", "miteco_reservoir_weekly", "aemet_precipitation", "aemet_weather", "siar_precipitation"]
+ingest = ["saih_ebro", "saih_guadalquivir", "saih_segura", "saih_minosil", "saih_cantabrico", "saih_guadiana", "saih_tajo", "regional_reservoirs", "miteco_reservoir_weekly", "aemet_precipitation", "aemet_weather", "siar_precipitation"]
 ids = {s["name"]: s["sink_id"] for s in sinks if not s.get("deleted_at")}
 for n in ingest: print("lakehousebox_sql_sink.ingest[\"%s\"] %s" % (n, ids[n]))
 for n in ("now_rain_grid", "now_upstream_rain", "now_reservoir_status", "now_basin_summary", "now_station_status", "now_municipality_water"): print("lakehousebox_sql_sink.derived[\"%s\"] %s" % (n, ids[n]))

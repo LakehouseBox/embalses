@@ -28,7 +28,7 @@ locals {
     saih_cantabrico         = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_cantabrico.sql", every = "15m", offset = "10m" }
     saih_guadiana           = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_guadiana.sql", every = "1h", offset = "12m" } # one request per reservoir, so hourly
     saih_tajo               = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_tajo.sql", every = "1h", offset = "29m" }     # one request per reservoir; the source is hourly
-    aca_reservoirs          = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_aca.sql", every = "6h", offset = "90m" }      # Catalonia's open data, published once a day
+    regional_reservoirs     = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_regional.sql", every = "1h", offset = "14m" } # SAIH Hidrosur hourly + ACA daily
     miteco_reservoir_weekly = { table = "obs.reservoir_weekly", sql = "sql/ingest/reservoir_weekly.sql", every = "1d", offset = "6h" }               # weekly bulletin, published Tuesdays
     aemet_precipitation     = { table = "obs.precipitation", sql = "sql/ingest/aemet_precipitation.sql", every = "30m", offset = "23m" }
     aemet_weather           = { table = "obs.weather", sql = "sql/ingest/aemet_weather.sql", every = "30m", offset = "23m" }
