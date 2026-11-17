@@ -18,7 +18,8 @@
 --    Fetched only by the 08, 14 and 20 UTC runs (one GET each); keeps the hourly values (hh:00) of the last two days,
 --    so rows repeat between those runs and readers de-duplicate.
 --    The dataset's station codes (E01…) are not MITECO's (026E01…): the list below maps the 7 bulletin reservoirs to
---    the ACA station ids in ref.stations. Not in the bulletin: E16 Foix, E18 Siurana.
+--    the ACA station ids in ref.stations (E18 Siurana is the bulletin's Ciurana, Ebro district; sql/reference/stations_aca.sql).
+--    Not in the bulletin: E16 Foix.
 --    Times: dia + hora are NOT Madrid wall-clock (29 March has 02:xx readings; 25 October has no repeated hour), so a
 --    fixed offset. The dataset does not say which; read here as UTC, as Meteocat's XEMA does (if UTC+1, 1 h late).
 --
@@ -67,7 +68,8 @@ aca_codes(codi_estacio, station_id) AS (VALUES
   ('E12', 'aca:168E01'),   -- La Llosa del Cavall
   ('E13', 'aca:170E01'),   -- Sant Ponç
   ('E14', 'aca:158E01'),   -- La Baells
-  ('E19', 'aca:236E01')    -- Riudecanyes
+  ('E19', 'aca:236E01'),   -- Riudecanyes
+  ('E18', 'aca:E18')       -- Siurana (bulletin: Ciurana)
 ),
 aca_r AS MATERIALIZED (
   SELECT unnest(from_json((http_get(
