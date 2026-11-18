@@ -1,0 +1,120 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" font-family="Inter, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-label="Every official source is one SQL sink in LakehouseBox; the page, your own DuckDB and an agent all read one public catalog">
+  <title>Every official source is one SQL sink; everything reads one public catalog</title>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8a9bab"/></marker>
+  </defs>
+  <rect width="1200" height="800" fill="#ffffff"/>
+
+  <!-- title -->
+  <text x="40" y="48" font-size="24" font-weight="700" fill="#0f2233">Every official source is one SQL sink; everything reads one public catalog</text>
+  <text x="40" y="76" font-size="15" fill="#55697a">The embalses project on LakehouseBox: 12 ingest sinks, 7 derived sinks, reference data loaded once, one public Apache Iceberg catalog.</text>
+
+  <!-- column headings -->
+  <text x="40" y="118" font-size="12" font-weight="700" letter-spacing="1.2" fill="#55697a">OFFICIAL SOURCES</text>
+  <text x="520" y="118" font-size="12" font-weight="700" letter-spacing="1.2" fill="#55697a">LAKEHOUSEBOX</text>
+  <text x="944" y="118" font-size="12" font-weight="700" letter-spacing="1.2" fill="#55697a">WHO READS IT</text>
+
+  <!-- sources -->
+  <g font-size="13.5" fill="#0f2233">
+    <!-- live -->
+    <rect x="40" y="132" width="420" height="168" rx="8" fill="none" stroke="#c9d4de"/>
+    <text x="56" y="158" font-size="15" font-weight="700">Reservoir levels, live</text>
+    <text x="56" y="184">SAIH Ebro · Guadalquivir · Segura · Miño-Sil · Cantábrico</text>
+    <text x="56" y="202" fill="#55697a" font-size="12.5">every 15 min · JSON APIs, HTML tables, viewer endpoints</text>
+    <text x="56" y="228">SAIH Tajo · Guadiana · Hidrosur (Junta de Andalucía)</text>
+    <text x="56" y="246" fill="#55697a" font-size="12.5">hourly · one request per reservoir on two of them</text>
+    <text x="56" y="272">CH Duero open data · Agència Catalana de l'Aigua</text>
+    <text x="56" y="290" fill="#55697a" font-size="12.5">hourly and daily · CKAN JSON, Socrata</text>
+
+    <!-- weekly -->
+    <rect x="40" y="316" width="420" height="64" rx="8" fill="none" stroke="#c9d4de"/>
+    <text x="56" y="342" font-size="15" font-weight="700">MITECO weekly bulletin</text>
+    <text x="56" y="366" fill="#55697a" font-size="12.5">all 375 reservoirs · Tuesdays · history since 1988</text>
+
+    <!-- rain -->
+    <rect x="40" y="396" width="420" height="88" rx="8" fill="none" stroke="#c9d4de"/>
+    <text x="56" y="422" font-size="15" font-weight="700">Rain and weather</text>
+    <text x="56" y="446">AEMET OpenData · SiAR (Ministry of Agriculture)</text>
+    <text x="56" y="468" fill="#55697a" font-size="12.5">every 30 min and hourly · keys held by LakehouseBox, not in the SQL</text>
+
+    <!-- reference -->
+    <rect x="40" y="500" width="420" height="200" rx="8" fill="#f3f7fc" stroke="#c9d4de"/>
+    <text x="56" y="526" font-size="15" font-weight="700">Reference data, loaded once</text>
+    <text x="56" y="552">River-basin plans 2022–2027: 43 documents, 25 districts</text>
+    <text x="56" y="574">Canal de Isabel II · Taibilla · Tajo–Segura and</text>
+    <text x="56" y="592">Negratín–Almanzora transfers</text>
+    <text x="56" y="614">MITECO dam and reservoir inventory</text>
+    <text x="56" y="636">INE + IGN: 8,132 municipalities and population</text>
+    <text x="56" y="658">HydroSHEDS: rivers and catchments (CC BY 4.0)</text>
+    <text x="56" y="684" fill="#55697a" font-size="12.5">read by agents from PDFs and portals into ref.* tables</text>
+  </g>
+
+  <!-- LakehouseBox container -->
+  <rect x="504" y="132" width="400" height="568" rx="10" fill="#eef3f8" stroke="#8a9bab"/>
+  <g font-size="13.5" fill="#0f2233">
+    <!-- ingest sinks -->
+    <rect x="524" y="152" width="360" height="132" rx="8" fill="#ffffff" stroke="#8a9bab"/>
+    <text x="540" y="178" font-size="15" font-weight="700">12 ingest sinks</text>
+    <text x="540" y="200" fill="#55697a" font-size="12.5">one DuckDB SELECT each, on a schedule</text>
+    <text x="540" y="226">obs.reservoir_readings  ·  8 sinks</text>
+    <text x="540" y="246">obs.reservoir_weekly  ·  every 3 h</text>
+    <text x="540" y="266">obs.precipitation  ·  obs.weather</text>
+
+    <!-- catalog -->
+    <rect x="524" y="320" width="360" height="132" rx="8" fill="#e3edfb" stroke="#1d63d8" stroke-width="2"/>
+    <text x="540" y="346" font-size="15" font-weight="700">Public catalog  jatorre/embalses</text>
+    <text x="540" y="368" fill="#55697a" font-size="12.5">Apache Iceberg · documented tables · AGENTS.md</text>
+    <text x="540" y="394">obs.*  readings, rain, the bulletin since 1988</text>
+    <text x="540" y="414">ref.*  reservoirs, stations, rivers, supply</text>
+    <text x="540" y="434">now.*  the state of things, rebuilt by sinks</text>
+
+    <!-- derived sinks -->
+    <rect x="524" y="488" width="360" height="148" rx="8" fill="#ffffff" stroke="#8a9bab"/>
+    <text x="540" y="514" font-size="15" font-weight="700">7 derived sinks</text>
+    <text x="540" y="536" fill="#55697a" font-size="12.5">SQL over the catalog itself, hourly</text>
+    <text x="540" y="562">now.reservoir_status  ·  now.basin_summary</text>
+    <text x="540" y="582">now.rain_grid  ·  now.upstream_rain  ·  now.station_status</text>
+    <text x="540" y="602">now.municipality_water  (every tap, hourly)</text>
+    <text x="540" y="622">now.municipality_path  (the path of the water, daily)</text>
+
+    <text x="524" y="676" fill="#55697a" font-size="12.5">Declared in lakehouse.yaml; lhbox plan / apply, as with Terraform</text>
+  </g>
+
+  <!-- readers -->
+  <g font-size="13.5" fill="#0f2233">
+    <rect x="944" y="152" width="216" height="104" rx="8" fill="none" stroke="#c9d4de"/>
+    <text x="960" y="178" font-size="15" font-weight="700">Public page</text>
+    <text x="960" y="200" fill="#55697a" font-size="12.5">a LakehouseBox artifact</text>
+    <text x="960" y="222">the map, every tap,</text>
+    <text x="960" y="240">read in the browser</text>
+
+    <rect x="944" y="272" width="216" height="84" rx="8" fill="none" stroke="#c9d4de"/>
+    <text x="960" y="298" font-size="15" font-weight="700">Your DuckDB</text>
+    <text x="960" y="320">ATTACH the catalog,</text>
+    <text x="960" y="338">no account needed</text>
+
+    <rect x="944" y="372" width="216" height="104" rx="8" fill="none" stroke="#c9d4de"/>
+    <text x="960" y="398" font-size="15" font-weight="700">Embalses watch</text>
+    <text x="960" y="420" fill="#55697a" font-size="12.5">a hosted agent</text>
+    <text x="960" y="442">weekly bulletin, emailed</text>
+    <text x="960" y="460">to the page's followers</text>
+  </g>
+
+  <!-- arrows -->
+  <g fill="none" stroke="#8a9bab" stroke-width="1.5" marker-end="url(#a)">
+    <path d="M460 216 C490 216 496 210 522 210"/>
+    <path d="M460 348 C492 348 494 250 522 250"/>
+    <path d="M460 440 C494 440 494 270 522 270"/>
+    <path d="M460 600 C492 600 492 420 522 420"/>
+    <path d="M704 284 V318"/>
+    <path d="M704 452 V486"/>
+    <path d="M884 386 C914 386 914 204 942 204"/>
+    <path d="M884 386 C914 386 914 314 942 314"/>
+    <path d="M884 386 C914 386 914 424 942 424"/>
+  </g>
+  <path d="M884 562 C930 562 930 470 892 452" fill="none" stroke="#8a9bab" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#a)"/>
+  <text x="904" y="586" font-size="12" fill="#55697a">writes back</text>
+
+  <text x="40" y="744" font-size="12.5" fill="#55697a">No servers, cron jobs or Python workers: every source is a scheduled SQL query that fetches it and appends to an Iceberg table.</text>
+  <text x="40" y="764" font-size="12.5" fill="#55697a">Code: github.com/LakehouseBox/embalses · Page: lakehousebox.com/a/II58fpqq</text>
+</svg>
