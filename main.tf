@@ -43,6 +43,7 @@ locals {
     now_basin_summary      = { table = "now.basin_summary", sql = "sql/now/basin_summary.sql", offset = "37m", min_rows = 10 }
     now_station_status     = { table = "now.station_status", sql = "sql/now/station_status.sql", offset = "40m", min_rows = 300 }
     now_municipality_water = { table = "now.municipality_water", sql = "sql/now/municipality_water.sql", offset = "43m", min_rows = 8000 }
+    now_municipality_path  = { table = "now.municipality_path", sql = "sql/now/municipality_path.sql", offset = "46m", min_rows = 30000 }
   }
 
   # Where scheduled SQL may send a request body: the form POSTs of three SAIH viewers.
