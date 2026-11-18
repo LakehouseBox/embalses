@@ -1,7 +1,8 @@
--- The path of each municipality's water as rows, rebuilt hourly by sql/now/municipality_path.sql, one partition per
--- province: the page reads one province's small file when someone clicks a municipality.
+-- The path of each municipality's water as rows, rebuilt hourly by sql/now/municipality_path.sql and written in
+-- municipality order, so a reader that filters on municipality_code skips most of the file. Not partitioned: a sink
+-- writes an unpartitioned table (or a format-version 3 table partitioned by time).
 
--- lhbox: format-version=2 partition=province_code
+-- lhbox: format-version=2
 CREATE TABLE IF NOT EXISTS embalses."now".municipality_path (
   province_code VARCHAR,
   municipality_code VARCHAR,
@@ -17,8 +18,8 @@ CREATE TABLE IF NOT EXISTS embalses."now".municipality_path (
   network_unit_id VARCHAR,
   role VARCHAR
 );
-COMMENT ON TABLE embalses."now".municipality_path IS 'Where each municipality''s tap water comes from, step by step: its supply units and their sources (depth 0), then the sources of each network or transfer they draw on (depth 1, 2 …). One row per unit and source. Rebuilt hourly inside LakehouseBox by sql/now/municipality_path.sql from ref.municipality_supply, ref.supply_units and ref.supply_sources; partitioned by province.';
-COMMENT ON COLUMN embalses."now".municipality_path.province_code IS 'INE province code, the first two digits of municipality_code; the partition.';
+COMMENT ON TABLE embalses."now".municipality_path IS 'Where each municipality''s tap water comes from, step by step: its supply units and their sources (depth 0), then the sources of each network or transfer they draw on (depth 1, 2 …). One row per unit and source. Rebuilt hourly inside LakehouseBox by sql/now/municipality_path.sql from ref.municipality_supply, ref.supply_units and ref.supply_sources, in municipality order.';
+COMMENT ON COLUMN embalses."now".municipality_path.province_code IS 'INE province code, the first two digits of municipality_code.';
 COMMENT ON COLUMN embalses."now".municipality_path.municipality_code IS 'INE municipality code (ref.municipalities).';
 COMMENT ON COLUMN embalses."now".municipality_path.depth IS '0: a supply unit of the municipality; 1 and more: a network or transfer reached through the units above it.';
 COMMENT ON COLUMN embalses."now".municipality_path.id IS 'Supply unit or network (ref.supply_units.supply_unit_id).';

@@ -1,7 +1,7 @@
 -- now.municipality_path: for each municipality, the path of its water as rows: its supply units and their sources
 -- (depth 0), then the sources of every network or transfer they draw on, and of the networks those draw on (depth 1 to 5).
 -- It is what the page drew step by step in the browser (four or five queries a click, 3-4 s); here it is worked out once
--- an hour, so a click reads one province's small file. Reads ref.municipality_supply, ref.supply_units, ref.supply_sources.
+-- an hour, so a click reads one small table, in municipality order. Reads ref.municipality_supply, ref.supply_units, ref.supply_sources.
 -- Runs inside LakehouseBox as a derived sink (scheduled SQL that reads the catalog), mode replace.
 WITH RECURSIVE
 first AS (   -- the municipality's own supply units and their sources
