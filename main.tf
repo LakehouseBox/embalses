@@ -26,10 +26,10 @@ locals {
     saih_segura             = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_segura.sql", every = "15m", offset = "6m" }
     saih_minosil            = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_minosil.sql", every = "15m", offset = "8m" }
     saih_cantabrico         = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_cantabrico.sql", every = "15m", offset = "10m" }
-    saih_guadiana           = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_guadiana.sql", every = "1h", offset = "12m" }                            # one request per reservoir, so hourly
-    saih_tajo               = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_tajo.sql", every = "1h", offset = "29m" }                                # one request per reservoir; the source is hourly
-    regional_reservoirs     = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_regional.sql", every = "1h", offset = "14m" }                            # SAIH Hidrosur hourly + ACA daily
-    miteco_reservoir_weekly = { table = "obs.reservoir_weekly", sql = "sql/ingest/reservoir_weekly.sql", every = "1d", offset = "6h", key = ["reservoir_id", "bulletin_date"] } # weekly bulletin, published Tuesdays
+    saih_guadiana           = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_guadiana.sql", every = "1h", offset = "12m" } # one request per reservoir, so hourly
+    saih_tajo               = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_tajo.sql", every = "1h", offset = "29m" }     # one request per reservoir; the source is hourly
+    regional_reservoirs     = { table = "obs.reservoir_readings", sql = "sql/ingest/reservoir_readings_regional.sql", every = "1h", offset = "14m" } # SAIH Hidrosur hourly + ACA daily
+    miteco_reservoir_weekly = { table = "obs.reservoir_weekly", sql = "sql/ingest/reservoir_weekly.sql", every = "3h", offset = "30m" }              # weekly bulletin, published Tuesdays
     aemet_precipitation     = { table = "obs.precipitation", sql = "sql/ingest/aemet_precipitation.sql", every = "30m", offset = "23m" }
     aemet_weather           = { table = "obs.weather", sql = "sql/ingest/aemet_weather.sql", every = "30m", offset = "23m" }
     siar_precipitation      = { table = "obs.precipitation", sql = "sql/ingest/siar_precipitation.sql", every = "1h", offset = "25m" } # SiAR daily rain, 06-16 UTC
@@ -85,7 +85,6 @@ resource "lakehousebox_sql_sink" "ingest" {
   sql      = file("${path.module}/${each.value.sql}")
   every    = each.value.every
   offset   = each.value.offset
-  key      = try(each.value.key, null)
 
   depends_on = [lakehousebox_sql_post_prefix.saih, lakehousebox_sql_connection.aemet]
 }

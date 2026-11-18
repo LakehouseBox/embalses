@@ -52,10 +52,9 @@ catalogs:
 
       miteco_reservoir_weekly:
         table: obs.reservoir_weekly
-        sql: sql/ingest/reservoir_weekly.sql        # MITECO weekly bulletin (published Tuesdays)
-        every: 1d
-        offset: 6h
-        key: [reservoir_id, bulletin_date]          # each run re-sends the bulletin on show; the key keeps it once
+        sql: sql/ingest/reservoir_weekly.sql        # MITECO weekly bulletin (on its map service on Tuesdays, around 12:30 UTC)
+        every: 3h                                   # one request; picks the bulletin up the afternoon it appears
+        offset: 30m
 
       aemet_precipitation:                           # created by the key's owner: the web key goes only into their queries
         table: obs.precipitation

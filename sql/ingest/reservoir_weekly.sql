@@ -1,11 +1,17 @@
--- MITECO weekly reservoir bulletin → embalses.obs.reservoir_weekly. Scheduled SQL, daily at 06:00 UTC.
--- The bulletin is dated Tuesday, but MITECO's map service sometimes shows it a day or more later. So every run keeps the
--- bulletin on show if it is under 8 days old, and the sink's key (reservoir_id, bulletin_date) replaces the rows it sent
--- before: a late bulletin still lands, and once. (Until 2026-11-18 only the bulletin dated yesterday was kept, so a bulletin
--- that appeared after Wednesday 06:00 UTC would have been missed for good.)
+-- MITECO weekly reservoir bulletin → embalses.obs.reservoir_weekly. Scheduled SQL, every 3 hours.
+-- The bulletin is dated Tuesday and usually reaches MITECO's map service that day (10 Nov 2026: 12:27 UTC), but sometimes
+-- later. So each run (every 3 h) takes the bulletin on show only when the layer's own dataLastEditDate is within the last
+-- 3 h 15 min: a bulletin lands once, whatever day it appears. (A sink key would do this more simply, but keys need a
+-- format-version 2 table and this one is 3.) Until 2026-11-18 only the bulletin dated yesterday was kept at 06:00 UTC,
+-- so a bulletin that appeared after Wednesday 06:00 would have been missed for good. Readers still keep one row per
+-- reservoir and date (QUALIFY), in case MITECO edits the layer twice for one bulletin.
 -- weekly_change_hm3 is left NULL here and computed from the previous bulletin in sql/now/refresh.sql.
 -- History since 1988 was loaded once by tools/miteco_reservoir_weekly.py (same source, layer Embalses_Total).
-WITH f AS (
+WITH edited AS (   -- when MITECO last changed the layer's data, ms since 1970
+  SELECT ((http_get('https://services-eu1.arcgis.com/RvnYk1PBUJ9rrAuT/arcgis/rest/services/Embalses_Mapa/FeatureServer/0?f=json')).body::JSON
+          -> 'editingInfo' ->> 'dataLastEditDate')::BIGINT AS ms
+),
+f AS (
   SELECT unnest(features) AS f
   FROM read_json('https://services-eu1.arcgis.com/RvnYk1PBUJ9rrAuT/arcgis/rest/services/Embalses_Mapa/FeatureServer/0/query?where=1%3D1&outFields=EMBALSE_ID,agua_actual,agua_total,energia_actual,energia_total,fecha,boletin_anyo,boletin_num&returnGeometry=false&f=json')
 )
@@ -22,3 +28,4 @@ SELECT f.attributes.EMBALSE_ID::INTEGER                                   AS res
        'miteco-arcgis'                                                    AS source
 FROM f
 WHERE (make_timestamp(f.attributes.fecha::BIGINT * 1000) AT TIME ZONE 'UTC')::DATE >= current_date - 8
+  AND (SELECT ms FROM edited) > epoch_ms(now()) - 195 * 60 * 1000

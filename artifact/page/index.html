@@ -391,8 +391,10 @@ WHERE ms.municipality_code = '${code}'`,
        s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
 FROM embalses.ref.supply_units u LEFT JOIN embalses.ref.supply_sources s USING (supply_unit_id)
 WHERE u.supply_unit_id IN (${ids.map(id => `'${String(id).replace(/'/g, "''")}'`).join(', ')}) AND s.municipality_code IS NULL`,
-  weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(stored_volume_hm3) AS s, sum(capacity_hm3) AS c
-FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1 ORDER BY 1`,
+  weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(s) AS s, sum(c) AS c
+FROM (SELECT bulletin_date, reservoir_id, max(stored_volume_hm3) AS s, max(capacity_hm3) AS c   -- one row per reservoir and bulletin
+      FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1, 2)
+GROUP BY 1 ORDER BY 1`,
 };
 
 // ───────── state ─────────
