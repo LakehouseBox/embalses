@@ -113,7 +113,7 @@ button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
 .crumbs b { color: var(--ink); }
 /* the map and the level: one frame */
 .frame { margin-top: 18px; border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); }
-.pane { padding: 16px 18px 18px; min-width: 0; } .pane + .pane { border-left: 1px solid var(--line); }
+.pane { padding: 16px 18px 18px; min-width: 0; } .pane.loading > :not(.labelrow):not(#n-sub) { opacity: .35; transition: opacity .15s; } .pane.loading #n-sub::after { content: ' · cargando…'; } .pane + .pane { border-left: 1px solid var(--line); }
 .under { grid-column: 1 / -1; border-top: 1px solid var(--line); padding: 18px; }
 .maptools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
 .mapcard.fs { position: fixed; inset: 0; z-index: 50; background: var(--surface); display: flex; flex-direction: column; }
@@ -448,7 +448,7 @@ const scopeName = sc => sc.t === 'es' ? 'España' : sc.t === 'm' ? (TAP?.code ==
 // ───────── weekly series: national at start, a selected area on demand ─────────
 const SER = {}; let ST = null;
 // ───────── the municipalities of a province, coloured by how full the reservoirs behind their taps are ─────────
-const MPROV = {}; let muniShown = [], MHOVER = null;
+const MPROV = {}; let muniShown = [], MHOVER = null, PRE = 0;
 function muniProv() { if (layer !== 'res') return null; if (scope.t === 'm') return String(scope.k).slice(0, 2);
   const sc = AS(); if (sc.t === 'p') return PCODE[sc.k] || null;
   if (sc.t === 'c' && !overview()) { const ps = AREAS.p.filter(p => p.parent === sc.k); return ps.length === 1 ? PCODE[ps[0].name] || null : null; } return null; }
@@ -614,7 +614,8 @@ const mtip = $('map-tip');
 cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) { m = p.r; break; } }
   const mu = !m ? muniAt(mx, my) : null, a = mu ? null : areaAt(mx, my), can = !m && a && a.name !== AS().k && pickable(a) ? a : null; cv.style.cursor = m || mu || can ? 'pointer' : '';
-  if (can !== HOVER || mu !== MHOVER) { HOVER = can; MHOVER = mu; if (ANIM === 1) draw(); }
+  if (can !== HOVER || mu !== MHOVER) { HOVER = can; MHOVER = mu; if (ANIM === 1) draw();
+    clearTimeout(PRE); if (mu && scope.k !== mu.code) PRE = setTimeout(() => loadTap(mu.code), 250); }
   if (m) { const v = trend(m); mtip.innerHTML = `<b>${esc(m.reservoir_name)}</b> <span class="muted">· ${esc(m.basin_name || '')}</span><br><span class="num">${fmt(m.fill_pct, 1)} % · ${fmt(m.stored_hm3)} de ${fmt(m.capacity_hm3)} hm³</span><br><span class="muted num">media 10 años ${fmt(m.fill_10y, 1)} % · hace un año ${fmt(m.fill_last_year, 1)} %</span>${v != null && Math.abs(v) >= 0.5 ? `<br><span class="${v > 0 ? 'upc' : 'downc'} num">${signed(v, 1)} hm³</span> <span class="muted">${m.change_since_bulletin_hm3 != null ? 'desde el último boletín' : 'en la última semana'}</span>` : ''}`; }
   else if (mu) { const w = mu.w, kinds = (w?.kinds || []).filter(k => k !== 'network').map(k => KINDS[k] || k);
     mtip.innerHTML = `<b>${esc(mu.name)}</b>${w?.pop ? ` <span class="muted">· ${fmt(w.pop)} hab.</span>` : ''}<br>` + (w?.fill_pct != null ? `<span class="num"><b>${fmt(w.fill_pct, 1)} %</b></span> <span class="muted">· ${w.reservoirs} ${w.reservoirs === 1 ? 'embalse' : 'embalses'} detrás de su grifo</span>`
@@ -709,8 +710,14 @@ function route() { if (!PLACE) PLACE = lhbox.state || '';   // a cached start ca
 lhbox.onState(s => { PLACE = s || ''; route(); });
 document.addEventListener('click', e => { const a = e.target.closest('a[href^="#"]'); if (!a || a.getAttribute('href').startsWith('#/')) return; e.preventDefault(); const el = a.getAttribute('href').length > 1 && document.querySelector(a.getAttribute('href')); (el || document.body).scrollIntoView(); });
 $('share').onclick = async () => { try { if (!await lhbox.copy(SHARE())) throw 0; $('share').textContent = 'Enlace copiado'; } catch (e) { $('share').textContent = 'Copia la dirección del navegador'; } setTimeout(() => $('share').textContent = 'Copiar enlace', 2000); };
-async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER = null; MHOVER = null; mtip.hidden = true;
-  if (t === 'm') { const tp = await loadTap(k); if (!tp) return setScope('es', null, push); TAP = tp; }
+let NAV = 0;   // the latest navigation: an earlier one that finishes later is dropped
+async function setScope(t, k, push = true) { const from = BB, was = scope, nav = ++NAV, pane = $('n-label').closest('.pane'); HOVER = null; MHOVER = null; mtip.hidden = true;
+  if (t === 'm') { const nm = muniShown.find(o => o.a.code === k)?.a.name || TAPNAME[k];
+    if (nm) { $('n-label').textContent = `Tu agua · ${nm}`; $('n-sub').hidden = false; $('n-sub').textContent = 'De dónde viene su agua'; }
+    pane.classList.add('loading'); cv.style.cursor = 'progress';
+    const tp = await loadTap(k); if (nav !== NAV) return; cv.style.cursor = '';
+    if (!tp) { pane.classList.remove('loading'); return setScope('es', null, push); } TAP = tp; }
+  else pane.classList.add('loading');
   if (t === 'r') { const r = D.res.find(x => x.reservoir_id === k); if (!r) return setScope('es', null, push);
     const keep = was.t === 'r' ? was.parent : was, inside = keep.t !== 'es' && r.in?.[keep.t] === keep.k;
     scope = { t, k, parent: inside ? keep : group === 'c' && r.in?.p ? (regionOf(r.in.p) || !r.in.c ? { t: 'p', k: r.in.p } : { t: 'c', k: r.in.c }) : r.in?.b ? { t: 'b', k: r.in.b } : { t: 'es', k: null } }; }
@@ -719,7 +726,8 @@ async function setScope(t, k, push = true) { const from = BB, was = scope; HOVER
   crumbs(); $('groupseg').hidden = t !== 'es';
   const an = AREA_NOTES[AS().k]; $('area-note').hidden = !an; $('area-note').textContent = an ? 'Nota: ' + an : '';
   remember(push); animate(from, target()); shown = 8; table(); ficha();
-  try { const S = await series(); if (scope.t === t && scope.k === k) { if (S) { ST = stats(S); numbers(); yearChart(); } else noLevel(); } } catch (e) { console.error(e); } }
+  try { const S = await series(); if (nav === NAV && scope.t === t && scope.k === k) { if (S) { ST = stats(S); numbers(); yearChart(); } else noLevel(); } } catch (e) { console.error(e); }
+  if (nav === NAV) pane.classList.remove('loading'); }
 function noLevel() {   // a tap with no bulletin reservoir behind it
   $('n-label').textContent = `Tu agua · ${scopeName(scope)}`; $('n-sub').hidden = false; $('n-sub').textContent = 'Sin embalses del boletín detrás de este grifo';
   $('n-pct').className = 'big'; $('n-pct').textContent = '—'; shownPct = null; $('n-meter').style.width = '0';
@@ -740,7 +748,11 @@ function recent() { const all = inView(), live = all.filter(r => r.data_source !
   const newest = live.map(r => r.reading_at).filter(Boolean).sort().at(-1), one = all.length === 1;
   $('recent-note').innerHTML = (one ? `Lectura en directo · ${when(newest)}` : `En directo: ${live.length} de ${all.length} embalses (${fmt(100 * capLive / cap, 0)} % de la capacidad) · última lectura ${when(newest)}`)
     + ' · <a href="#metodologia">Fuentes y metodología</a>'; }
-async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; if (TAP?.code === code) return TAP;
+// one load per municipality: a second click, or a hover that already started it, waits for the same answer
+const TAPS = new Map(), TAPNAME = {};   // TAPNAME: names picked in the search box, shown while their municipality loads
+function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return Promise.resolve(null); if (TAP?.code === code) return Promise.resolve(TAP);
+  if (!TAPS.has(code)) TAPS.set(code, fetchTap(code).then(t => { if (!t) TAPS.delete(code); return t; })); return TAPS.get(code); }
+async function fetchTap(code) {
   try { const [[w], first] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapUnits(code)).then(r => r.rows)]); if (!w) return null;
     // tree: one row per unit (no source_type), then one per source, with the depth of the unit that takes it
     const tree = [], seen = new Set(), add = (rows, depth) => { for (const x of rows) { if (!seen.has(x.id)) { seen.add(x.id); if (depth === 0) tree.push({ ...x, depth, source_type: null }); }
@@ -897,7 +909,7 @@ const tapIn = $('tap-q'), tapList = $('tap-list');
 function tapShow() { tapList.hidden = !tapIn.value.trim(); tapIn.setAttribute('aria-expanded', !tapList.hidden);
   tapList.innerHTML = tapHits.length ? tapHits.map((m, i) => `<li role="option" id="tap-${i}" data-i="${i}" aria-selected="${i === tapSel}">${esc(m.name)}<span>${esc(m.prov)} · ${fmt(m.pop)} hab.</span></li>`).join('') : `<li class="none">${MUNIS ? 'Ningún municipio coincide' : 'Cargando municipios…'}</li>`;
   tapIn.setAttribute('aria-activedescendant', tapHits.length ? 'tap-' + tapSel : ''); }
-function tapPick(m) { tapIn.value = ''; tapIn.blur(); tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); setScope('m', m.code); }
+function tapPick(m) { TAPNAME[m.code] = m.name; tapIn.value = ''; tapIn.blur(); tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); setScope('m', m.code); }
 tapIn.addEventListener('focus', () => { munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); });
 tapIn.addEventListener('input', () => { tapSel = 0; tapHits = tapFind(tapIn.value); tapShow(); });
 // the list of municipalities (8,132 rows) loads in the background once the page has its data, so typing answers at once
