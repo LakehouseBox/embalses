@@ -299,6 +299,8 @@
       "change_6h_hm3": "Change over 6 hours, hm³ (live stations only).",
       "change_24h_hm3": "Change over 24 hours, hm³ (live stations only).",
       "change_72h_hm3": "Change over 72 hours, hm³ (live stations only).",
+      "change_12h_hm3": "Change over 12 hours, hm³ (live stations only).",
+      "change_48h_hm3": "Change over 48 hours, hm³ (live stations only).",
       "change_since_bulletin_hm3": "Change since the last weekly bulletin, hm³ (live stations only).",
       "weekly_change_hm3": "Change in the last weekly bulletin, hm³.",
       "inflow_m3s": "Latest inflow, m³/s, where published.",

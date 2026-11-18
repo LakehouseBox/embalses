@@ -27,9 +27,9 @@ live AS (   -- live SAIH (and daily ACA) readings of the last 4 days, de-duplica
   WHERE r.observed_at > now() - INTERVAL 4 DAY AND s.reservoir_id IS NOT NULL AND r.stored_volume_hm3 IS NOT NULL
 ),
 newest AS (SELECT * FROM live QUALIFY row_number() OVER (PARTITION BY reservoir_id ORDER BY observed_at DESC) = 1),
-back AS (   -- the readings closest to 6, 24 and 72 h before the newest one (within 90 min)
+back AS (   -- the readings closest to 6, 12, 24, 48 and 72 h before the newest one (within 90 min)
   SELECT n.reservoir_id, h.hours, l.stored_volume_hm3
-  FROM newest n, (VALUES (6), (24), (72)) h(hours), live l
+  FROM newest n, (VALUES (6), (12), (24), (48), (72)) h(hours), live l
   WHERE l.reservoir_id = n.reservoir_id
     AND abs(datediff('minute', l.observed_at, n.observed_at - to_hours(h.hours))) <= 90
   QUALIFY row_number() OVER (PARTITION BY n.reservoir_id, h.hours
@@ -39,7 +39,9 @@ live_now AS (
   SELECT n.reservoir_id, n.observed_at, n.stored_volume_hm3, n.inflow_m3s, n.outflow_m3s, n.source,
          n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 6)  AS change_6h,
          n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 24) AS change_24h,
-         n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 72) AS change_72h
+         n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 72) AS change_72h,
+         n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 12) AS change_12h,
+         n.stored_volume_hm3 - max(b.stored_volume_hm3) FILTER (WHERE b.hours = 48) AS change_48h
   FROM newest n LEFT JOIN back b USING (reservoir_id)
   WHERE n.observed_at > now() - CASE WHEN n.source = 'aca' THEN INTERVAL 36 HOUR ELSE INTERVAL 6 HOUR END   -- ACA publishes once a day
   GROUP BY n.reservoir_id, n.observed_at, n.stored_volume_hm3, n.inflow_m3s, n.outflow_m3s, n.source
@@ -72,7 +74,10 @@ SELECT r.reservoir_id,
        r.province                                                                         AS province,
        r.region                                                                           AS region,
        round(ST_X(r.dam_location), 5)                                                     AS longitude,
-       round(ST_Y(r.dam_location), 5)                                                     AS latitude
+       round(ST_Y(r.dam_location), 5)                                                     AS latitude,
+       -- added by migration 009, so they come last, in the table's column order
+       round(v.change_12h, 3)                                                             AS change_12h_hm3,
+       round(v.change_48h, 3)                                                             AS change_48h_hm3
 FROM embalses.ref.reservoirs r
 LEFT JOIN embalses.ref.basins b USING (basin_id)
 LEFT JOIN latest l USING (reservoir_id)
