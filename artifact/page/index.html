@@ -160,6 +160,10 @@ summary::-webkit-details-marker { display: none; }
 .ficha dt { font-size: 12px; color: var(--muted); } .ficha dd { margin: 0; font-weight: 600; font-size: 15px; }
 /* sections */
 .sec { margin-top: 34px; padding-top: 30px; border-top: 1px solid var(--line); }
+.method { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 0; font-size: 15px; }
+.method > div + div { border-left: 1px solid var(--line); padding-left: 26px; margin-left: 26px; }
+.method h3 { margin-bottom: 8px; } .method dl { margin: 0; } .method dt { font-weight: 700; margin-top: 12px; } .method dt:first-child { margin-top: 0; } .method dd { margin: 2px 0 0; color: var(--muted); line-height: 1.5; }
+@media (max-width: 760px) { .method { grid-template-columns: 1fr; } .method > div + div { border-left: 0; padding-left: 0; margin-left: 0; margin-top: 22px; } }
 .sechead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
 .raingrid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.85fr) minmax(0, 1.2fr); gap: 0; align-items: start; }
 .raingrid > div + div { border-left: 1px solid var(--line); padding-left: 26px; margin-left: 26px; }
@@ -324,11 +328,32 @@ ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg,
       <div class="result" id="result" hidden></div>
     </div>
   </section>
+  <section class="sec" id="metodologia">
+    <div class="sechead"><h2>Fuentes de datos y metodología</h2></div>
+    <div class="method">
+      <div><h3>De dónde salen los datos</h3><dl>
+        <dt>Niveles en directo</dt><dd>Los SAIH de las confederaciones del Tajo, Ebro, Guadalquivir, Guadiana, Segura, Miño-Sil y Cantábrico; los datos abiertos de la Confederación Hidrográfica del Duero; el SAIH Hidrosur de la Junta de Andalucía; y la Agència Catalana de l'Aigua, una vez al día. Se leen cada 15 minutos o cada hora.</dd>
+        <dt>Boletín semanal</dt><dd>Boletín Hidrológico de MITECO, con todos los embalses del boletín (sale los martes), e Inventario de Presas y Embalses.</dd>
+        <dt>Lluvia</dt><dd>AEMET OpenData y SiAR (Ministerio de Agricultura, Pesca y Alimentación).</dd>
+        <dt>De dónde viene el agua de tu grifo</dt><dd>Planes hidrológicos de cuenca 2022–2027 (anejos de usos y demandas) y Canal de Isabel II. Municipios y población: INE e IGN.</dd>
+        <dt>Ríos y cuencas vertientes</dt><dd>HydroSHEDS (CC BY 4.0).</dd>
+      </dl></div>
+      <div><h3>Cómo se calcula</h3><dl>
+        <dt>El dato de hoy</dt><dd>Cada embalse cuenta con su última lectura en directo (de menos de 6 horas; las de Cataluña, de menos de 36). Los que no tienen lectura en directo cuentan con el último boletín semanal, y no cambian hasta el siguiente. El número del boletín oficial aparece debajo del dato de hoy.</dd>
+        <dt>Porcentajes</dt><dd>Agua embalsada entre capacidad, sumando todos los embalses de la zona: un embalse grande pesa más que uno pequeño. Una variación como +3,7 % es la diferencia entre dos porcentajes.</dd>
+        <dt>Frente a hace un año y a la media de 10 años</dt><dd>La misma semana en los boletines de MITECO del año anterior y de los diez anteriores.</dd>
+        <dt>En las últimas horas</dt><dd>Lo que han cambiado juntos los embalses con lectura en directo en 6, 12, 24 y 48 horas. Una ventana aparece cuando cubre al menos el 80 % de esa agua.</dd>
+        <dt>Tu agua</dt><dd>Los embalses de los que toma agua tu municipio según su plan hidrológico, directamente o a través de redes y trasvases, y los que están aguas arriba de ellos. Parte de esa agua la usan también el riego, la energía o el caudal ecológico.</dd>
+        <dt>Provincias</dt><dd>Cada embalse cuenta en la provincia de su presa, según el Inventario de Presas y Embalses.</dd>
+        <dt>Lluvia sobre la cuenca</dt><dd>Lluvia caída, no agua que haya entrado en el embalse: parte se infiltra, se evapora o tarda días en llegar.</dd>
+      </dl><p class="muted small" style="margin:14px 0 0">Las lecturas en directo son provisionales: los organismos todavía no las han validado.</p></div>
+    </div>
+  </section>
 </main></div>
 
 <footer><div class="wrap cols">
   <div><h3>Qué es esto</h3><p>Una vista del agua embalsada en España, la lluvia y cómo llega a los embalses, hecha solo con datos oficiales y abiertos.</p><p>Las lecturas en tiempo real son provisionales: los organismos todavía no las han validado.</p></div>
-  <div><h3>Fuentes</h3><p>MITECO · Boletín Hidrológico e Inventario de Presas y Embalses</p><p>AEMET OpenData · SAIH del Ebro, Guadalquivir, Guadiana, Segura, Miño-Sil y Cantábrico</p><p>HydroSHEDS · CC BY 4.0</p></div>
+  <div><h3>Fuentes</h3><p>MITECO, los SAIH de las confederaciones, la Agència Catalana de l'Aigua, AEMET, SiAR, los planes hidrológicos, INE, IGN y HydroSHEDS.</p><p><a href="#metodologia">Fuentes de datos y metodología</a></p></div>
   <div><h3>Cómo está hecho</h3><p>Los datos se recogen y se publican con <a href="https://lakehousebox.com">LakehouseBox</a>. Tu navegador los consulta directamente, sin servidor intermedio.</p><p><a href="https://lakehousebox.com/examples/embalses/">Cómo está hecho ↗</a></p><p><a href="https://github.com/LakehouseBox/embalses">Proyecto abierto en GitHub ↗</a></p></div>
 </div></footer>
 
@@ -737,11 +762,9 @@ function recent() { const all = inView(), live = all.filter(r => r.data_source !
     const ok = has.reduce((t, r) => t + (r.capacity_hm3 || 0), 0) >= 0.8 * capLive;   // most of the live water, or the sum misleads
     el.className = !ok ? '' : sum > 0.05 ? 'upc' : sum < -0.05 ? 'downc' : ''; el.textContent = ok ? `${signed(sum, Math.abs(sum) < 10 ? 1 : 0)} hm³` : '—';
     $(`r-${h}p`).textContent = ok ? '' : 'completándose'; }
-  const newest = live.map(r => r.reading_at).filter(Boolean).sort().at(-1), bull = all.filter(r => r.data_source === 'miteco-weekly').map(r => r.reading_at).filter(Boolean).sort().at(-1);
-  const one = all.length === 1, rest = all.length - live.length;
-  $('recent-note').textContent = (one ? `Lectura en directo · ${when(newest)}.` : `En directo: ${live.length} de ${all.length} embalses (${fmt(100 * capLive / cap, 0)} % de la capacidad) · última lectura ${when(newest)}.`)
-    + (rest ? ` ${rest === 1 ? 'El otro llega' : `Los otros ${rest} llegan`} con el boletín semanal de MITECO${bull ? ` (último: ${dfmt(new Date(bull))})` : ''} y no cambian entre boletines.` : '')
-    + ' Fuente: SAIH de las confederaciones' + (live.some(r => r.data_source === 'aca') ? " y Agència Catalana de l'Aigua" : '') + '; los datos en directo son provisionales.'; }
+  const newest = live.map(r => r.reading_at).filter(Boolean).sort().at(-1), one = all.length === 1;
+  $('recent-note').innerHTML = (one ? `Lectura en directo · ${when(newest)}` : `En directo: ${live.length} de ${all.length} embalses (${fmt(100 * capLive / cap, 0)} % de la capacidad) · última lectura ${when(newest)}`)
+    + ' · <a href="#metodologia">Fuentes y metodología</a>'; }
 async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; if (TAP?.code === code) return TAP;
   try { const [[w], first] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapUnits(code)).then(r => r.rows)]); if (!w) return null;
     // tree: one row per unit (no source_type), then one per source, with the depth of the unit that takes it
