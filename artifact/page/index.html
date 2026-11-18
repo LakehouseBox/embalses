@@ -377,20 +377,13 @@ FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
        w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
        w.fill_pct_same_week_last_year AS ly, w.fill_pct_10y_average AS avg10, strftime(w.as_of, '%Y-%m-%dT%H:%M:%SZ') AS as_of
 FROM embalses."now".municipality_water w JOIN embalses.ref.municipalities m USING (municipality_code) WHERE w.municipality_code = '${code}'`,
-  // the path of the water, one step at a time (a recursive query is too slow in the browser): the municipality's supply units
-  // and their sources, then the sources of each network or transfer they draw on
-  tapUnits: code => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
-       s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
-FROM embalses.ref.municipality_supply ms JOIN embalses.ref.supply_units u USING (supply_unit_id)
-LEFT JOIN embalses.ref.supply_sources s ON s.supply_unit_id = ms.supply_unit_id AND (s.municipality_code IS NULL OR s.municipality_code = ms.municipality_code)
-WHERE ms.municipality_code = '${code}'`,
+  // the path of the water, worked out hourly in now.municipality_path: the municipality's units and their sources (depth 0),
+  // then the networks they draw on (depth 1, 2 …), in one query
+  tapPath: code => `SELECT depth, id, unit, type, doc, url, source_type, source_name, reservoir_id, network_unit_id, role
+FROM embalses."now".municipality_path WHERE municipality_code = '${code}' ORDER BY depth, id`,
   muniShapes: pc => `SELECT municipality_code AS code, municipality_name AS name, geojson FROM embalses.ref.municipality_outlines WHERE province_code = '${pc}'`,
   muniLevels: pc => `SELECT municipality_code AS code, fill_pct, reservoirs, population AS pop, source_types AS kinds FROM embalses."now".municipality_water WHERE municipality_code LIKE '${pc}%'`,
-  tapLinks: ids => `SELECT from_reservoir_id AS f, to_reservoir_id AS t FROM embalses.ref.reservoir_links WHERE link_type = 'river' AND from_reservoir_id IN (${ids.map(Number).join(', ')})`,
-  tapNets: ids => `SELECT u.supply_unit_id AS id, u.unit_name AS unit, u.unit_type AS type, u.source_document AS doc, u.source_url AS url,
-       s.source_type, s.source_name, s.reservoir_id, s.network_unit_id, s.role
-FROM embalses.ref.supply_units u LEFT JOIN embalses.ref.supply_sources s USING (supply_unit_id)
-WHERE u.supply_unit_id IN (${ids.map(id => `'${String(id).replace(/'/g, "''")}'`).join(', ')}) AND s.municipality_code IS NULL`,
+  links: `SELECT from_reservoir_id AS f, to_reservoir_id AS t FROM embalses.ref.reservoir_links WHERE link_type = 'river'`,
   weekly: where => `SELECT strftime(bulletin_date, '%Y-%m-%d') AS d, sum(s) AS s, sum(c) AS c
 FROM (SELECT bulletin_date, reservoir_id, max(stored_volume_hm3) AS s, max(capacity_hm3) AS c   -- one row per reservoir and bulletin
       FROM embalses.obs.reservoir_weekly WHERE bulletin_date >= DATE '2015-12-01' AND (fill_pct IS NULL OR fill_pct <= 110) ${where} GROUP BY 1, 2)
@@ -752,18 +745,15 @@ function recent() { const all = inView(), live = all.filter(r => r.data_source !
 const TAPS = new Map(), TAPNAME = {};   // TAPNAME: names picked in the search box, shown while their municipality loads
 function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return Promise.resolve(null); if (TAP?.code === code) return Promise.resolve(TAP);
   if (!TAPS.has(code)) TAPS.set(code, fetchTap(code).then(t => { if (!t) TAPS.delete(code); return t; })); return TAPS.get(code); }
+let LINKS = null;   // the river links between reservoirs (a few hundred rows), read once
 async function fetchTap(code) {
-  try { const [[w], first] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapUnits(code)).then(r => r.rows)]); if (!w) return null;
-    // tree: one row per unit (no source_type), then one per source, with the depth of the unit that takes it
-    const tree = [], seen = new Set(), add = (rows, depth) => { for (const x of rows) { if (!seen.has(x.id)) { seen.add(x.id); if (depth === 0) tree.push({ ...x, depth, source_type: null }); }
-      if (x.source_type) tree.push({ ...x, depth }); } };
-    add(first, 0); const done = new Set(first.map(x => x.id));
-    for (let depth = 1, next = first; depth <= 5; depth++) {
-      const ids = [...new Set(next.map(x => x.network_unit_id).filter(id => id && !done.has(id)))]; if (!ids.length) break;
-      ids.forEach(id => done.add(id)); next = (await q(SQL.tapNets(ids))).rows; add(next, depth); }
+  try { const [[w], rows, links] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapPath(code)).then(r => r.rows),
+                                                       LINKS ??= q(SQL.links).then(r => r.rows).catch(e => { LINKS = null; throw e; })]); if (!w) return null;
+    // tree: one row per unit of the municipality (no source_type), then one per source, with the depth of the unit that takes it
+    const tree = [], seen = new Set();
+    for (const x of rows) { if (x.depth === 0 && !seen.has(x.id)) { seen.add(x.id); tree.push({ ...x, source_type: null }); } if (x.source_type) tree.push(x); }
     const src = new Set(w.src || []), up = new Set(w.up || []);
-    const links = up.size ? (await q(SQL.tapLinks([...up]))).rows : [];
-    return { ...w, code, src, up, tree, links, ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
+    return { ...w, code, src, up, tree, links: links.filter(l => up.has(l.f)), ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
   catch (e) { console.error(e); return null; } }
 
 // ───────── tu grifo: the path of the water, from the reservoirs to the tap, with how full they are ─────────
