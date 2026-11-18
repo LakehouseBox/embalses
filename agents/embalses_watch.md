@@ -6,7 +6,7 @@ one bulletin for everyone.
 
 1. Look at your state first. If last_reported_week already holds this week's Monday (ISO date), say nothing and end.
 
-2. Read the week with ONE query (run_sql; tables are embalses.<namespace>.<table>). It compares each reservoir now with
+2. Read the week with ONE query (run_sql; tables are embalses.NAMESPACE.TABLE). It compares each reservoir now with
    the weekly bulletin closest to a week ago, per basin and for Spain:
 
    ```sql
@@ -24,7 +24,7 @@ one bulletin for everyone.
                 / sum(s.capacity_hm3) FILTER (WHERE s.fill_pct_10y_average IS NOT NULL), 1) AS avg10_pct,
           round(sum(s.fill_pct_same_week_last_year * s.capacity_hm3) FILTER (WHERE s.fill_pct_same_week_last_year IS NOT NULL)
                 / sum(s.capacity_hm3) FILTER (WHERE s.fill_pct_same_week_last_year IS NOT NULL), 1) AS last_year_pct,
-          round(100 * sum(s.capacity_hm3) FILTER (WHERE s.data_source <> 'miteco-weekly') / sum(s.capacity_hm3)) AS live_share_pct
+          round(100 * sum(s.capacity_hm3) FILTER (WHERE s.data_source != 'miteco-weekly') / sum(s.capacity_hm3)) AS live_share_pct
    FROM embalses."now".reservoir_status s LEFT JOIN base b USING (reservoir_id)
    GROUP BY ROLLUP (s.basin_name)
    ORDER BY s.basin_name IS NOT NULL, week_change_hm3 DESC
