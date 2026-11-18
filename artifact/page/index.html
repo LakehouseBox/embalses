@@ -136,6 +136,12 @@ button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
 .pair { display: grid; grid-template-columns: 1fr 1fr; margin-top: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
 .pair > div { font-size: 14px; color: var(--muted); } .pair > div + div { border-left: 1px solid var(--line); padding-left: 22px; }
 .pair b { display: block; font-size: 26px; font-weight: 700; color: var(--ink); line-height: 1.2; } .pair.cmp b { font-size: 21px; } .pair b.upc { color: var(--up); } .pair b.downc { color: var(--down); } .pair.cmp b span { font-size: 14px; font-weight: 400; color: var(--muted); }
+.recent { margin-top: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.recent .rgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 8px; }
+.recent .rgrid > div { font-size: 13px; color: var(--muted); } .recent .rgrid > div + div { border-left: 1px solid var(--line); padding-left: 14px; }
+.recent .rgrid b { display: block; font-size: 19px; font-weight: 700; color: var(--ink); line-height: 1.25; white-space: nowrap; } .recent .rgrid b.upc { color: var(--up); } .recent .rgrid b.downc { color: var(--down); }
+.recent .rgrid i { display: block; font-style: normal; font-size: 12.5px; color: var(--muted); }
+.recent p { margin: 8px 0 0; }
 .chart { position: relative; margin-top: 16px; } .chart svg { display: block; width: 100%; height: auto; }
 .chart path.ln { stroke-dasharray: 1; stroke-dashoffset: 1; animation: lndraw .9s ease-out forwards; }
 @keyframes lndraw { to { stroke-dashoffset: 0; } }
@@ -250,8 +256,14 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
       <div class="muted" id="n-sub" hidden></div>
       <div class="headline"><div class="big skeleton" id="n-pct" data-sk="res">—</div><div class="chips2"><span class="chip" id="n-week"></span><span class="chip" id="n-week2"></span></div></div>
       <div class="meter"><i id="n-meter" style="width:0"></i></div>
+      <div class="muted small" id="n-basis" style="margin-top:6px"></div>
       <div class="pair"><div><b id="n-stored" data-sk="res">—</b>Agua embalsada</div><div><b id="n-cap" data-sk="res">—</b>Capacidad total</div></div>
       <div class="pair cmp"><div>Frente a hace un año<b id="n-ly" data-sk="res">—</b></div><div>Frente a la media de 10 años<b id="n-avg" data-sk="res">—</b></div></div>
+      <div class="recent" id="recent" hidden>
+        <h3>En las últimas horas</h3>
+        <div class="rgrid"><div>6 h<b id="r-6">—</b><i id="r-6p"></i></div><div>12 h<b id="r-12">—</b><i id="r-12p"></i></div><div>24 h<b id="r-24">—</b><i id="r-24p"></i></div><div>48 h<b id="r-48">—</b><i id="r-48p"></i></div></div>
+        <p class="muted small" id="recent-note"></p>
+      </div>
       <div class="chart" id="yearbox">
         <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 id="year-title">Evolución del nivel</h3><div class="legend" id="year-legend"></div></div>
         <svg id="year" viewBox="0 0 560 250" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div>
@@ -348,7 +360,7 @@ const SQL = {
   res: `SELECT reservoir_id, reservoir_name, basin_name, province, region, river_name, longitude AS lon, latitude AS lat,
        capacity_hm3, round(stored_volume_hm3, 1) AS stored_hm3, round(fill_pct, 1) AS fill_pct,
        fill_pct_same_week_last_year AS fill_last_year, fill_pct_10y_average AS fill_10y,
-       weekly_change_hm3, change_since_bulletin_hm3, change_24h_hm3, data_source, inflow_m3s, outflow_m3s,
+       weekly_change_hm3, change_since_bulletin_hm3, change_6h_hm3, change_12h_hm3, change_24h_hm3, change_48h_hm3, data_source, inflow_m3s, outflow_m3s,
        strftime(latest_reading_at, '%Y-%m-%dT%H:%M:%SZ') AS reading_at,
        upstream_rain_24h_mm AS rain_24h_mm, upstream_rain_volume_24h_hm3 AS rain_24h_hm3
 FROM embalses."now".reservoir_status`,
@@ -467,8 +479,11 @@ function numbers() { const { last, prev, Y, byYear, avg10, lw } = ST, ly = byYea
   $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').innerHTML = `${signed(dw, 1)} p.p. <span>esta semana</span>`; const dv = last.s - prev.s; $('n-week2').className = 'chip' + (dv < 0 ? ' down' : ''); $('n-week2').innerHTML = `${signed(dv, Math.abs(dv) < 10 ? 1 : 0)} hm³ <span>esta semana</span>`;
   $('n-stored').textContent = fmt(last.s) + ' hm³'; $('n-cap').textContent = fmt(last.c) + ' hm³';
   const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${signed(d, 1)} p.p. <span>(${fmt(v, 1)} %)</span>`; };
-  cmp('n-ly', ly); cmp('n-avg', av); $('n-date').textContent = `Boletín oficial · ${dfmt(last.d)} · MITECO`
-    + (scope.t === 'm' && TAP?.fill_pct != null && Math.abs(TAP.fill_pct - last.f) >= 0.5 ? ` · con las lecturas en directo de hoy, ${fmt(TAP.fill_pct, 1)} %` : '');
+  cmp('n-ly', ly); cmp('n-avg', av); recent(); $('n-date').textContent = `Boletín oficial · ${dfmt(last.d)} · MITECO`;
+  // the big number is the weekly bulletin (it is what the comparisons and the chart use); say so, and give today's figure
+  // from the live readings when it differs
+  const iv = inView(), c = iv.reduce((t, r) => t + (r.capacity_hm3 || 0), 0), now = c ? 100 * iv.reduce((t, r) => t + (r.stored_hm3 || 0), 0) / c : null;
+  $('n-basis').textContent = `Boletín oficial del ${dfmt(last.d)}` + (now != null && iv.some(r => r.data_source !== 'miteco-weekly') && Math.abs(now - last.f) >= 0.1 ? ` · con las lecturas de hoy: ${fmt(now, 1)} %` : '');
   }
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW = 560, VH = 250, m = { l: 40, r: 16, t: 22, b: 24 }, cur = byYear[Y] || [], ly = byYear[Y - 1] || [];
@@ -697,7 +712,23 @@ function noLevel() {   // a tap with no bulletin reservoir behind it
   $('n-label').textContent = `Tu agua · ${scopeName(scope)}`; $('n-sub').hidden = false; $('n-sub').textContent = 'Sin embalses del boletín detrás de este grifo';
   $('n-pct').className = 'big'; $('n-pct').textContent = '—'; shownPct = null; $('n-meter').style.width = '0';
   for (const id of ['n-week', 'n-week2']) $(id).hidden = true; for (const id of ['n-stored', 'n-cap', 'n-ly', 'n-avg']) { $(id).className = ''; $(id).textContent = '—'; }
-  $('n-meter').parentElement.hidden = true; $('yearbox').hidden = true; $('n-date').textContent = ''; }
+  $('n-meter').parentElement.hidden = true; $('yearbox').hidden = true; $('recent').hidden = true; $('n-date').textContent = ''; $('n-basis').textContent = ''; }
+// ───────── the last hours: how the water in view moved over 6, 12, 24 and 48 h, from the live readings ─────────
+// Sums the change of every reservoir in view that has a live reading (SAIH hourly, ACA daily); the rest come from the weekly
+// bulletin and cannot move between bulletins. Says how much of the capacity is live and when the newest reading is from.
+function inView() { if (scope.t === 'r') return [selRes()].filter(Boolean); if (scope.t === 'm') return D.res.filter(r => TAP?.ids.has(r.reservoir_id));
+  const a = selArea(); return a ? a.res : D.res; }
+function recent() { const all = inView(), live = all.filter(r => r.data_source !== 'miteco-weekly'), box = $('recent');
+  const cap = all.reduce((t, r) => t + (r.capacity_hm3 || 0), 0), capLive = live.reduce((t, r) => t + (r.capacity_hm3 || 0), 0);
+  if (!live.length || !cap) { box.hidden = true; return; } box.hidden = false;
+  for (const h of [6, 12, 24, 48]) { const v = live.map(r => r[`change_${h}h_hm3`]).filter(x => x != null), sum = v.reduce((t, x) => t + x, 0), el = $('r-' + h);
+    el.className = !v.length ? '' : sum > 0.05 ? 'upc' : sum < -0.05 ? 'downc' : ''; el.textContent = v.length ? `${signed(sum, Math.abs(sum) < 10 ? 1 : 0)} hm³` : '—';
+    $(`r-${h}p`).textContent = v.length ? `${signed(100 * sum / cap, 2)} p.p.` : 'aún sin datos'; }
+  const newest = live.map(r => r.reading_at).filter(Boolean).sort().at(-1), bull = all.filter(r => r.data_source === 'miteco-weekly').map(r => r.reading_at).filter(Boolean).sort().at(-1);
+  const one = all.length === 1, rest = all.length - live.length;
+  $('recent-note').textContent = (one ? `Lectura en directo · ${when(newest)}.` : `En directo: ${live.length} de ${all.length} embalses (${fmt(100 * capLive / cap, 0)} % de la capacidad) · última lectura ${when(newest)}.`)
+    + (rest ? ` ${rest === 1 ? 'El otro llega' : `Los otros ${rest} llegan`} con el boletín semanal de MITECO${bull ? ` (último: ${dfmt(new Date(bull))})` : ''} y no cambian entre boletines.` : '')
+    + ' Fuente: SAIH de las confederaciones' + (live.some(r => r.data_source === 'aca') ? " y Agència Catalana de l'Aigua" : '') + '; los datos en directo son provisionales.'; }
 async function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return null; if (TAP?.code === code) return TAP;
   try { const [[w], first] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapUnits(code)).then(r => r.rows)]); if (!w) return null;
     // tree: one row per unit (no source_type), then one per source, with the depth of the unit that takes it
