@@ -462,7 +462,8 @@ function stats(S) { const last = S[S.length - 1], prev = S[S.length - 2], Y = la
   for (const w of S) (byYear[w.d.getUTCFullYear()] ??= [])[wk(w.d)] = w.f;
   const avg10 = Array.from({ length: 52 }, (_, i) => { const v = []; for (let y = Y - 10; y < Y; y++) if (byYear[y]?.[i] != null) v.push(byYear[y][i]); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : null; });
   return { last, prev, Y, byYear, avg10, lw: wk(last.d) }; }
-async function series() { const a = selArea(), one = scope.t === 'r', tap = scope.t === 'm', key = one ? 'r:' + scope.k : tap ? 'm:' + scope.k : a ? a.type + ':' + a.name : 'es';
+const serKey = () => { const a = selArea(); return scope.t === 'r' ? 'r:' + scope.k : scope.t === 'm' ? 'm:' + scope.k : a ? a.type + ':' + a.name : 'es'; };
+async function series() { const a = selArea(), one = scope.t === 'r', tap = scope.t === 'm', key = serKey();
   if (tap && !TAP?.ids.size) return null;   // groundwater, desalination or rivers only: no reservoir level to show
   if (!SER[key]) { const ids = one ? [+scope.k] : tap ? [...TAP.ids] : a ? a.res.map(r => r.reservoir_id) : null; if (!one && a && !ids.length) return SER.es;
     const { rows } = await q(SQL.weekly(ids ? `AND reservoir_id IN (${ids.join(',')})` : ''));
@@ -472,20 +473,28 @@ let shownPct = null, pctRun = 0;
 function countTo(el, v) { const from = shownPct ?? v * 0.6, run = ++pctRun, t0 = performance.now(), put = x => el.innerHTML = `${fmt(x, 1)}<small> %</small>`; shownPct = v;
   if (CALM) return put(v);
   const step = now => { if (run !== pctRun) return; const t = Math.min(1, (now - t0) / 700); put(from + (v - from) * ease(t)); if (t < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); }
-function numbers() { const { last, prev, Y, byYear, avg10, lw } = ST, ly = byYear[Y - 1]?.[lw], av = avg10[lw], dw = last.f - prev.f;
+// What the panel shows: today's water, from the live readings plus the latest bulletin for reservoirs with no live feed;
+// the weekly bulletin is the subline and the chart. Where nothing in view is live, the bulletin is today's figure.
+function nowOf(list, S) { const last = S[S.length - 1], prev = S[S.length - 2], cap = list.reduce((t, r) => t + (r.capacity_hm3 || 0), 0);
+  const live = list.some(r => r.data_source !== 'miteco-weekly'), st = list.reduce((t, r) => t + (r.stored_hm3 || 0), 0), use = live && cap > 0;
+  const age = (Date.now() - last.d) / 864e5, base = use && age >= 4 ? last : prev;   // about a week ago
+  const f = use ? 100 * st / cap : last.f, sv = use ? st : last.s;
+  return { use, f, s: sv, c: use ? cap : last.c, dw: f - base.f, dv: sv - base.s, last, d: use ? new Date() : last.d }; }
+function numbers() { const { last, Y, byYear, avg10, lw } = ST, N = nowOf(inView(), SER[serKey()] || [ST.prev, last]), tw = N.use ? wk(N.d) : lw;
+  const ly = byYear[Y - 1]?.[tw] ?? byYear[Y - 1]?.[lw], av = avg10[tw] ?? avg10[lw]; ST.now = N.use ? N : null;
   const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'm' ? `Tu agua · ${scopeName(scope)}` : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? scopeName(scope) : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
   $('n-sub').hidden = !r && scope.t !== 'm'; if (r) $('n-sub').textContent = [title(r.river_name), r.province].filter(Boolean).join(' · ');
   if (scope.t === 'm') $('n-sub').textContent = `${TAP.ids.size} ${TAP.ids.size === 1 ? 'embalse' : 'embalses'} detrás de tu grifo, contando los de aguas arriba`;
   for (const id of ['n-week', 'n-week2', 'yearbox']) $(id).hidden = false; $('n-meter').parentElement.hidden = false;
-  $('n-pct').className = 'big'; countTo($('n-pct'), last.f); $('n-meter').style.width = Math.min(100, last.f) + '%';
-  $('n-week').className = 'chip' + (dw < 0 ? ' down' : ''); $('n-week').innerHTML = `${signed(dw, 1)} p.p. <span>esta semana</span>`; const dv = last.s - prev.s; $('n-week2').className = 'chip' + (dv < 0 ? ' down' : ''); $('n-week2').innerHTML = `${signed(dv, Math.abs(dv) < 10 ? 1 : 0)} hm³ <span>esta semana</span>`;
-  $('n-stored').textContent = fmt(last.s) + ' hm³'; $('n-cap').textContent = fmt(last.c) + ' hm³';
-  const cmp = (el, v) => { const d = v == null ? null : last.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${signed(d, 1)} p.p. <span>(${fmt(v, 1)} %)</span>`; };
-  cmp('n-ly', ly); cmp('n-avg', av); recent(); $('n-date').textContent = `Boletín oficial · ${dfmt(last.d)} · MITECO`;
-  // the big number is the weekly bulletin (it is what the comparisons and the chart use); say so, and give today's figure
-  // from the live readings when it differs
-  const iv = inView(), c = iv.reduce((t, r) => t + (r.capacity_hm3 || 0), 0), now = c ? 100 * iv.reduce((t, r) => t + (r.stored_hm3 || 0), 0) / c : null;
-  $('n-basis').textContent = `Boletín oficial del ${dfmt(last.d)}` + (now != null && iv.some(r => r.data_source !== 'miteco-weekly') && Math.abs(now - last.f) >= 0.1 ? ` · con las lecturas de hoy: ${fmt(now, 1)} %` : '');
+  $('n-pct').className = 'big'; countTo($('n-pct'), N.f); $('n-meter').style.width = Math.min(100, N.f) + '%';
+  const pts = v => `${signed(v, 1)} %`;   // percentage points, written the way people read them
+  $('n-week').className = 'chip' + (N.dw < 0 ? ' down' : ''); $('n-week').innerHTML = `${pts(N.dw)} <span>en una semana</span>`;
+  $('n-week2').className = 'chip' + (N.dv < 0 ? ' down' : ''); $('n-week2').innerHTML = `${signed(N.dv, Math.abs(N.dv) < 10 ? 1 : 0)} hm³ <span>en una semana</span>`;
+  $('n-stored').textContent = fmt(N.s) + ' hm³'; $('n-cap').textContent = fmt(N.c) + ' hm³';
+  const cmp = (el, v) => { const d = v == null ? null : N.f - v; $(el).className = d == null ? '' : d >= 0 ? 'upc' : 'downc'; $(el).innerHTML = d == null ? '—' : `${pts(d)} <span>(${fmt(v, 1)} %)</span>`; };
+  cmp('n-ly', ly); cmp('n-avg', av); recent(); $('n-date').textContent = `Semanas: boletín oficial de MITECO${N.use ? '; el punto «hoy», con las lecturas en directo' : ''}.`;
+  const bd = last.d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', timeZone: 'UTC' }).replace('.', '');
+  $('n-basis').textContent = `Boletín oficial de MITECO del ${bd}` + (N.use ? `: ${fmt(last.f, 1)} %` : '');
   }
 const MES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW = 560, VH = 250, m = { l: 40, r: 16, t: 22, b: 24 }, cur = byYear[Y] || [], ly = byYear[Y - 1] || [];
@@ -494,10 +503,11 @@ function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW 
   const path = a => { let d = '', pen = false; a.forEach((v, i) => { if (v == null) { pen = false; return; } d += `${pen ? 'L' : 'M'}${X(i).toFixed(1)},${Yy(v).toFixed(1)}`; pen = true; }); return d; };
   let g = ''; for (let v = y0; v <= y1; v += st) g += `<line x1="${m.l}" x2="${VW - m.r}" y1="${Yy(v)}" y2="${Yy(v)}" stroke="${css('--line')}"/><text x="${m.l - 6}" y="${Yy(v) + 4}" text-anchor="end" font-size="12" fill="${css('--faint')}">${v} %</text>`;
   MES.forEach((n, k) => g += `<text x="${X((Date.UTC(2025, k, 15) - Date.UTC(2025, 0, 1)) / 864e5 / 7)}" y="${VH - 6}" text-anchor="middle" font-size="12" fill="${css('--faint')}">${n}</text>`);
-  const lx = X(lw), end = lw > 42;
+  const lx = X(lw), end = lw > 42, nw = ST.now && ST.now.d.getUTCFullYear() === Y ? Math.max(lw, Math.min(51, (ST.now.d - Date.UTC(Y, 0, 1)) / 864e5 / 7)) : null;
+  const tx = nw == null ? lx : X(nw), ty = nw == null ? Yy(cur[lw]) : Yy(ST.now.f), tv = nw == null ? cur[lw] : ST.now.f;
   svg.innerHTML = `${g}<path d="${path(avg10)}" fill="none" stroke="${css('--avg')}" stroke-width="2" stroke-dasharray="5 4"/><path class="ln" pathLength="1" d="${path(ly)}" fill="none" stroke="${css('--s2')}" stroke-width="2"/>
-    <path class="ln" pathLength="1" d="${path(cur)}" fill="none" stroke="${css('--s1')}" stroke-width="3" stroke-linejoin="round"/><circle cx="${lx}" cy="${Yy(cur[lw])}" r="5" fill="${css('--s1')}" stroke="#fff" stroke-width="2"/>
-    <text x="${lx + (end ? -9 : 9)}" y="${Yy(cur[lw]) - 10}" text-anchor="${end ? 'end' : 'start'}" font-size="14" font-weight="700" fill="${css('--ink')}" paint-order="stroke" stroke="#fff" stroke-width="4">${fmt(cur[lw], 1)} %</text>
+    <path class="ln" pathLength="1" d="${path(cur)}" fill="none" stroke="${css('--s1')}" stroke-width="3" stroke-linejoin="round"/>${nw == null ? '' : `<path d="M${lx.toFixed(1)},${Yy(cur[lw]).toFixed(1)}L${tx.toFixed(1)},${ty.toFixed(1)}" fill="none" stroke="${css('--s1')}" stroke-width="2" stroke-dasharray="3 3"/><circle cx="${lx}" cy="${Yy(cur[lw])}" r="3.5" fill="${css('--s1')}"/>`}<circle cx="${tx}" cy="${ty}" r="5" fill="${css('--s1')}" stroke="#fff" stroke-width="2"/>
+    <text x="${tx + (end ? -9 : 9)}" y="${ty - 10}" text-anchor="${end ? 'end' : 'start'}" font-size="14" font-weight="700" fill="${css('--ink')}" paint-order="stroke" stroke="#fff" stroke-width="4">${nw == null ? '' : 'hoy '}${fmt(tv, 1)} %</text>
     <line class="xh" y1="${m.t}" y2="${VH - m.b}" stroke="${css('--faint')}" visibility="hidden"/><rect class="hit" x="${m.l}" y="${m.t}" width="${VW - m.l - m.r}" height="${VH - m.t - m.b}" fill="transparent"/>`;
   $('year-legend').innerHTML = `<span><i style="border-color:${css('--s1')}"></i>${Y}</span><span><i style="border-color:${css('--s2')}"></i>${Y - 1}</span><span><i style="border-color:${css('--avg')};border-top-style:dashed"></i>Media 10 años</span>`;
   const tip = $('year-tip'), xh = svg.querySelector('.xh'), h = svg.querySelector('.hit');
@@ -723,9 +733,10 @@ function inView() { if (scope.t === 'r') return [selRes()].filter(Boolean); if (
 function recent() { const all = inView(), live = all.filter(r => r.data_source !== 'miteco-weekly'), box = $('recent');
   const cap = all.reduce((t, r) => t + (r.capacity_hm3 || 0), 0), capLive = live.reduce((t, r) => t + (r.capacity_hm3 || 0), 0);
   if (!live.length || !cap) { box.hidden = true; return; } box.hidden = false;
-  for (const h of [6, 12, 24, 48]) { const v = live.map(r => r[`change_${h}h_hm3`]).filter(x => x != null), sum = v.reduce((t, x) => t + x, 0), el = $('r-' + h);
-    el.className = !v.length ? '' : sum > 0.05 ? 'upc' : sum < -0.05 ? 'downc' : ''; el.textContent = v.length ? `${signed(sum, Math.abs(sum) < 10 ? 1 : 0)} hm³` : '—';
-    $(`r-${h}p`).textContent = v.length ? `${signed(100 * sum / cap, 2)} p.p.` : 'aún sin datos'; }
+  for (const h of [6, 12, 24, 48]) { const has = live.filter(r => r[`change_${h}h_hm3`] != null), sum = has.reduce((t, r) => t + r[`change_${h}h_hm3`], 0), el = $('r-' + h);
+    const ok = has.reduce((t, r) => t + (r.capacity_hm3 || 0), 0) >= 0.8 * capLive;   // most of the live water, or the sum misleads
+    el.className = !ok ? '' : sum > 0.05 ? 'upc' : sum < -0.05 ? 'downc' : ''; el.textContent = ok ? `${signed(sum, Math.abs(sum) < 10 ? 1 : 0)} hm³` : '—';
+    $(`r-${h}p`).textContent = ok ? '' : 'completándose'; }
   const newest = live.map(r => r.reading_at).filter(Boolean).sort().at(-1), bull = all.filter(r => r.data_source === 'miteco-weekly').map(r => r.reading_at).filter(Boolean).sort().at(-1);
   const one = all.length === 1, rest = all.length - live.length;
   $('recent-note').textContent = (one ? `Lectura en directo · ${when(newest)}.` : `En directo: ${live.length} de ${all.length} embalses (${fmt(100 * capLive / cap, 0)} % de la capacidad) · última lectura ${when(newest)}.`)
@@ -938,10 +949,12 @@ function showOutlines(rows) { done('wait-map'); const of = (layer, t) => rows.fi
 let routed = false;
 const nice = n => String(n || '').replace(/^(.*), (El|La|Los|Las)$/i, '$2 $1');   // the bulletin writes "Atazar, El"
 function showReservoirs(rows) { for (const r of rows) r.reservoir_name = nice(r.reservoir_name); D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
-  if (!routed && AREAS.b.length) { routed = true; route(); } }
+  if (!routed && AREAS.b.length) { routed = true; route(); }
+  if (ST && SER[serKey()]) { numbers(); yearChart(); } subhead(); }
 function showNational(rows) { SER.es = toSeries(rows); done('wait-res'); const N = stats(SER.es); if (scope.t === 'es') { ST = N; numbers(); yearChart(); }
-  const { last, avg10, lw, prev } = N, av = avg10[lw], d = last.f - av;
-  $('subhead').textContent = `${d > 3 ? 'Por encima de' : d < -3 ? 'Por debajo de' : 'En línea con'} la media de 10 años, con ${last.s >= prev.s ? 'ascenso' : 'descenso'} en la última semana.`; }
+  subhead(); }
+function subhead() { const N0 = SER.es && stats(SER.es); if (!N0) return; const T = nowOf(D.res, SER.es), av = N0.avg10[T.use ? wk(T.d) : N0.lw] ?? N0.avg10[N0.lw], d = T.f - av;
+  $('subhead').textContent = `${d > 3 ? 'Por encima de' : d < -3 ? 'Por debajo de' : 'En línea con'} la media de 10 años, ${T.dv >= 0 ? 'y subiendo' : 'y bajando'} en la última semana.`; }
 (async () => {
   try {
     const ready = READY = connect();
