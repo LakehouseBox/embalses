@@ -55,6 +55,7 @@ catalogs:
         sql: sql/ingest/reservoir_weekly.sql        # MITECO weekly bulletin (published Tuesdays)
         every: 1d
         offset: 6h
+        key: [reservoir_id, bulletin_date]          # each run re-sends the bulletin on show; the key keeps it once
 
       aemet_precipitation:                           # created by the key's owner: the web key goes only into their queries
         table: obs.precipitation

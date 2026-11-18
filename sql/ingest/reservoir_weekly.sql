@@ -1,5 +1,8 @@
 -- MITECO weekly reservoir bulletin → embalses.obs.reservoir_weekly. Scheduled SQL, daily at 06:00 UTC.
--- The bulletin is dated Tuesday; this keeps only the bulletin dated yesterday, so each one lands once.
+-- The bulletin is dated Tuesday, but MITECO's map service sometimes shows it a day or more later. So every run keeps the
+-- bulletin on show if it is under 8 days old, and the sink's key (reservoir_id, bulletin_date) replaces the rows it sent
+-- before: a late bulletin still lands, and once. (Until 2026-11-18 only the bulletin dated yesterday was kept, so a bulletin
+-- that appeared after Wednesday 06:00 UTC would have been missed for good.)
 -- weekly_change_hm3 is left NULL here and computed from the previous bulletin in sql/now/refresh.sql.
 -- History since 1988 was loaded once by tools/miteco_reservoir_weekly.py (same source, layer Embalses_Total).
 WITH f AS (
@@ -18,4 +21,4 @@ SELECT f.attributes.EMBALSE_ID::INTEGER                                   AS res
        nullif(f.attributes.energia_total, 0)::DOUBLE                      AS energy_capacity_gwh,
        'miteco-arcgis'                                                    AS source
 FROM f
-WHERE (make_timestamp(f.attributes.fecha::BIGINT * 1000) AT TIME ZONE 'UTC')::DATE = current_date - 1
+WHERE (make_timestamp(f.attributes.fecha::BIGINT * 1000) AT TIME ZONE 'UTC')::DATE >= current_date - 8
