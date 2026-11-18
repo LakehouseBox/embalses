@@ -372,11 +372,11 @@ FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_2
   outlines: `SELECT layer, outline_id, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
   ficha: id => `SELECT dam_name, dam_type, uses, catchment_area_km2, surface_area_ha, mean_annual_inflow_hm3, is_hydroelectric, energy_capacity_gwh
 FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
-  munis: `SELECT municipality_code AS code, municipality_name AS name, province_name AS prov, population AS pop FROM embalses.ref.municipalities`,
-  tap: code => `SELECT w.municipality_name AS name, w.province_name AS prov, w.population AS pop, m.longitude AS lon, m.latitude AS lat, w.supply_unit_names AS units, w.source_types AS kinds,
+  munis: `SELECT municipality_code AS code, municipality_name AS name, province_name AS prov, population AS pop, longitude AS lon, latitude AS lat FROM embalses.ref.municipalities`,
+  tap: code => `SELECT w.municipality_name AS name, w.province_name AS prov, w.population AS pop, w.supply_unit_names AS units, w.source_types AS kinds,
        w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
        w.fill_pct_same_week_last_year AS ly, w.fill_pct_10y_average AS avg10, strftime(w.as_of, '%Y-%m-%dT%H:%M:%SZ') AS as_of
-FROM embalses."now".municipality_water w JOIN embalses.ref.municipalities m USING (municipality_code) WHERE w.municipality_code = '${code}'`,
+FROM embalses."now".municipality_water w WHERE w.municipality_code = '${code}'`,   // its place comes from munis(), read once
   // the path of the water, worked out hourly in now.municipality_path: the municipality's units and their sources (depth 0),
   // then the networks they draw on (depth 1, 2 …), in one query
   tapPath: code => `SELECT depth, id, unit, type, doc, url, source_type, source_name, reservoir_id, network_unit_id, role
@@ -746,9 +746,10 @@ const TAPS = new Map(), TAPNAME = {};   // TAPNAME: names picked in the search b
 function loadTap(code) { if (!/^\d{5}$/.test(String(code))) return Promise.resolve(null); if (TAP?.code === code) return Promise.resolve(TAP);
   if (!TAPS.has(code)) TAPS.set(code, fetchTap(code).then(t => { if (!t) TAPS.delete(code); return t; })); return TAPS.get(code); }
 let LINKS = null;   // the river links between reservoirs (a few hundred rows), read once
+const links0 = () => LINKS ??= q(SQL.links).then(r => r.rows).catch(e => { LINKS = null; throw e; });
 async function fetchTap(code) {
-  try { const [[w], rows, links] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapPath(code)).then(r => r.rows),
-                                                       LINKS ??= q(SQL.links).then(r => r.rows).catch(e => { LINKS = null; throw e; })]); if (!w) return null;
+  try { const [[w], rows, links, list] = await Promise.all([q(SQL.tap(code)).then(r => r.rows), q(SQL.tapPath(code)).then(r => r.rows), links0(), munis()]); if (!w) return null;
+    const m = list.find(x => x.code === code); w.lon = m?.lon ?? null; w.lat = m?.lat ?? null;
     // tree: one row per unit of the municipality (no source_type), then one per source, with the depth of the unit that takes it
     const tree = [], seen = new Set();
     for (const x of rows) { if (x.depth === 0 && !seen.has(x.id)) { seen.add(x.id); tree.push({ ...x, source_type: null }); } if (x.source_type) tree.push(x); }
@@ -890,8 +891,9 @@ let gResize; addEventListener('resize', () => { clearTimeout(gResize); gResize =
 let MUNIS = null, tapHits = [], tapSel = 0;
 const ART = /^(el|la|los|las|l|les|els|a|o|as|os|lo|sa|es|ses) /;
 const mkey = s => norm(s).replace(/[^a-z0-9ñ]+/g, ' ').trim();
-async function munis() { if (!MUNIS) MUNIS = (await q(SQL.munis)).rows.map(m => { const k = mkey(m.name);
-    return { ...m, k, w: k.split(' '), starts: m.name.split('/').map(mkey).flatMap(p => ART.test(p) ? [p, p.replace(ART, '')] : [p]) }; }); return MUNIS; }
+let MUNIP = null;   // the one read of the municipality list, shared by everyone who asks for it
+function munis() { return MUNIP ??= q(SQL.munis).then(r => MUNIS = r.rows.map(m => { const k = mkey(m.name);
+    return { ...m, k, w: k.split(' '), starts: m.name.split('/').map(mkey).flatMap(p => ART.test(p) ? [p, p.replace(ART, '')] : [p]) }; }), e => { MUNIP = null; throw e; }); }
 function tapFind(qv) { const t = mkey(qv); if (!t || !MUNIS) return []; const toks = t.split(' '), out = [];
   for (const m of MUNIS) { const s = m.starts.some(p => p.startsWith(t)) ? 0 : toks.every(x => m.w.some(w => w.startsWith(x))) ? 1 : t.length >= 3 && m.k.includes(t) ? 2 : -1; if (s >= 0) out.push([s, m]); }
   return out.sort((a, b) => a[0] - b[0] || (b[1].pop || 0) - (a[1].pop || 0)).slice(0, 8).map(x => x[1]); }
@@ -903,7 +905,9 @@ function tapPick(m) { TAPNAME[m.code] = m.name; tapIn.value = ''; tapIn.blur(); 
 tapIn.addEventListener('focus', () => { munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); });
 tapIn.addEventListener('input', () => { tapSel = 0; tapHits = tapFind(tapIn.value); tapShow(); });
 // the list of municipalities (8,132 rows) loads in the background once the page has its data, so typing answers at once
-setTimeout(() => { if (!MUNIS) munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } }).catch(e => console.error(e)); }, 4000);
+setTimeout(() => {   // after the page is up: what a first click on a municipality needs, read ahead (one query at a time)
+  munis().then(() => { if (tapIn.value.trim()) { tapHits = tapFind(tapIn.value); tapShow(); } })
+    .then(() => links0()).then(() => q(SQL.tapPath('00000'))).catch(e => console.error(e)); }, 4000);
 tapIn.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); tapSel = Math.max(0, Math.min(tapHits.length - 1, tapSel + (e.key === 'ArrowDown' ? 1 : -1))); tapShow(); }
   else if (e.key === 'Enter') { e.preventDefault(); if (tapHits[tapSel]) tapPick(tapHits[tapSel]); else if (tapIn.value.trim()) munis().then(() => { tapHits = tapFind(tapIn.value); tapSel = 0; if (tapHits[0]) tapPick(tapHits[0]); else tapShow(); }).catch(e => console.error(e)); } else if (e.key === 'Escape') { tapList.hidden = true; tapIn.setAttribute('aria-expanded', 'false'); } });
 tapList.addEventListener('mousedown', e => { const li = e.target.closest('li[data-i]'); if (li) { e.preventDefault(); tapPick(tapHits[+li.dataset.i]); } });
