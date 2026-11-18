@@ -396,7 +396,8 @@
       "weekly_change_hm3": "stored_volume_hm3 minus the same reservoir's previous bulletin; null for its first bulletin (a few gaps span more than a week)",
       "stored_energy_gwh": "energia_actual: theoretical hydroelectric energy stored, GWh (null/0 for non-hydro reservoirs)",
       "energy_capacity_gwh": "energia_total: hydroelectric energy at capacity, GWh",
-      "source": "'miteco-arcgis'"
+      "source": "'miteco-arcgis'",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
   "obs.daily_weather": {
