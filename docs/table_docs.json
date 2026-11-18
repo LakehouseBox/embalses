@@ -436,5 +436,24 @@
       "geojson": "GeoJSON geometry as text (Polygon or MultiPolygon), WGS84 longitude and latitude, simplified for display (tolerance 0.002°, coordinates to 0.0001°). Neighbouring outlines are simplified one by one, so they may not meet exactly.",
       "source": "Where the outline comes from."
     }
+  },
+  "now.municipality_path": {
+    "doc": "Where each municipality's tap water comes from, step by step: its supply units and their sources (depth 0), then the sources of each network or transfer they draw on (depth 1, 2 …). One row per unit and source, in municipality order. Built inside LakehouseBox by sql/now/municipality_path.sql from ref.municipality_supply, ref.supply_units and ref.supply_sources: once a day, and at once after those tables are reloaded.",
+    "columns": {
+      "province_code": "INE province code, the first two digits of municipality_code.",
+      "municipality_code": "INE municipality code (ref.municipalities).",
+      "depth": "0: a supply unit of the municipality; 1 and more: a network or transfer reached through the units above it.",
+      "id": "Supply unit or network (ref.supply_units.supply_unit_id).",
+      "unit": "Its name, as the basin plan or the network gives it.",
+      "type": "urban or network (ref.supply_units.unit_type).",
+      "doc": "The document it was read from.",
+      "url": "Where that document is published.",
+      "source_type": "reservoir, river, aquifer, spring, desalination, transfer, reclaimed or network; null when the plan names no source.",
+      "source_name": "The source, as the plan names it.",
+      "reservoir_id": "Bulletin reservoir (ref.reservoirs), for a reservoir source.",
+      "network_unit_id": "For a network or transfer source: the unit whose own sources follow at the next depth.",
+      "role": "backup for a source used only in droughts or emergencies; otherwise null.",
+      "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
+    }
   }
 }

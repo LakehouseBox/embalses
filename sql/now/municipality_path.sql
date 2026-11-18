@@ -1,7 +1,8 @@
 -- now.municipality_path: for each municipality, the path of its water as rows: its supply units and their sources
 -- (depth 0), then the sources of every network or transfer they draw on, and of the networks those draw on (depth 1 to 5).
--- It is what the page drew step by step in the browser (four or five queries a click, 3-4 s); here it is worked out once
--- an hour, so a click reads one small table, in municipality order. Reads ref.municipality_supply, ref.supply_units, ref.supply_sources.
+-- It is what the page drew step by step in the browser (four or five queries a click, 3-4 s); here it is worked out ahead,
+-- so a click reads one small table, in municipality order. Its inputs change only when sql/reference/water_supply.sql is
+-- run, so it runs once a day (04:46 UTC) as a safety net; after a reload, run it at once: lhbox sink run now_municipality_path Reads ref.municipality_supply, ref.supply_units, ref.supply_sources.
 -- Runs inside LakehouseBox as a derived sink (scheduled SQL that reads the catalog), mode replace.
 WITH RECURSIVE
 first AS (   -- the municipality's own supply units and their sources

@@ -43,7 +43,7 @@ locals {
     now_basin_summary      = { table = "now.basin_summary", sql = "sql/now/basin_summary.sql", offset = "37m", min_rows = 10 }
     now_station_status     = { table = "now.station_status", sql = "sql/now/station_status.sql", offset = "40m", min_rows = 300 }
     now_municipality_water = { table = "now.municipality_water", sql = "sql/now/municipality_water.sql", offset = "43m", min_rows = 8000 }
-    now_municipality_path  = { table = "now.municipality_path", sql = "sql/now/municipality_path.sql", offset = "46m", min_rows = 30000 }
+    now_municipality_path  = { table = "now.municipality_path", sql = "sql/now/municipality_path.sql", every = "1d", offset = "286m", min_rows = 30000 } # its inputs change only when sql/reference/water_supply.sql is run
   }
 
   # Where scheduled SQL may send a request body: the form POSTs of three SAIH viewers.
@@ -96,7 +96,7 @@ resource "lakehousebox_sql_sink" "derived" {
   name     = each.key
   table    = each.value.table
   sql      = file("${path.module}/${each.value.sql}")
-  every    = "1h"
+  every    = try(each.value.every, "1h")
   offset   = each.value.offset
   mode     = "replace"
   min_rows = each.value.min_rows

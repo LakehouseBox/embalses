@@ -8,6 +8,7 @@
 -- When a curated folder describes how an urban unit is served (rows for that unit), they replace the plan's generic
 -- network rows for it ("Red del CYII" -> the treatment plants that serve it).
 -- Run from the repository root:  lhbox duckdb --catalog embalses -- -f sql/reference/water_supply.sql
+-- Then rebuild the page's paths at once (otherwise they follow at 04:46 UTC):  lhbox sink run now_municipality_path --wait
 -- Reloading: before 2026-11-16 02:30 UTC, DELETE + INSERT left a deletion file (puffin) that the in-browser runtime of an
 -- account page could not read (HTTP 404); the tables were then reloaded into empty tables. LakehouseBox fix #3219 reached
 -- production that night, so a plain DELETE + INSERT is fine after it.
