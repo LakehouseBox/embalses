@@ -162,6 +162,18 @@
       "source": "Key of the source (ph-tajo-2022-2027, …)."
     }
   },
+  "ref.river_intake_reservoirs": {
+    "doc": "Estimated, not stated by any plan: for a municipality whose supply takes water from a river (ref.supply_sources, source_type river) and that has no bulletin reservoir behind it otherwise, the bulletin reservoirs on a river of the same name, in the same basin district, whose water passes within 8 km of the municipality on its way down the river network (HydroSHEDS HydroRIVERS). Regulated tributaries are not included. One row per municipality, intake and reservoir. Peninsula only.",
+    "columns": {
+      "municipality_code": "INE municipality code (ref.municipalities).",
+      "supply_unit_id": "The supply unit whose river source this is (ref.supply_units).",
+      "source_name": "The river, as the plan names it (ref.supply_sources.source_name): \"río Mero\".",
+      "reservoir_id": "Bulletin reservoir upstream on that river (ref.reservoirs).",
+      "distance_km": "Closest distance from the river below the dam to the municipality's point (ref.municipalities longitude, latitude), km. The point stands in for the intake, whose place the plans do not give.",
+      "method": "How the link was made: river-name-downstream-8km.",
+      "source": "Key of the sources (ph-2022-2027 + hydrorivers)."
+    }
+  },
   "ref.stations": {
     "doc": "Every measuring station in one register: AEMET weather stations (official inventory), the SAIH real-time stations of each basin authority (MITECO's national SAIH register): reservoirs, river gauges and rain gauges, and the 519 active SiAR agro-weather stations (network siar, MAPA's Info/ESTACIONES, added 2026-11-17). MITECO's register lists no Cantábrico reservoir, so the 13 SAIH Cantábrico reservoir stations (the viewer's codes) were added by hand from sql/reference/stations_cantabrico.sql (2026-11-17). One row per physical station per network; station_id is network:native_code. Sources: AEMET OpenData, MITECO ArcGIS 'SAIH', SAIH Cantábrico viewer, SiAR API.",
     "columns": {
@@ -363,7 +375,7 @@
     }
   },
   "now.municipality_water": {
-    "doc": "One row per municipality: where its tap water comes from and how full the reservoirs behind it are together. Reservoirs counted are those its supply units take water from (directly or through a network such as Canal de Isabel II or a transfer) plus every reservoir upstream of them on the river network; the level is weighted by capacity, so a large reservoir counts for more than a small one. Municipalities served only by groundwater, desalination or rivers without a bulletin reservoir have no level. Rebuilt hourly inside LakehouseBox by sql/now/municipality_water.sql from ref.municipality_supply, ref.supply_sources, ref.reservoir_links and now.reservoir_status.",
+    "doc": "One row per municipality: where its tap water comes from and how full the reservoirs behind it are together. Reservoirs counted are those its supply units take water from (directly or through a network such as Canal de Isabel II or a transfer) plus every reservoir upstream of them on the river network; the level is weighted by capacity, so a large reservoir counts for more than a small one. Where no plan names a reservoir behind the supply but it takes water from a river, the reservoirs upstream on that river count instead (an estimate: ref.river_intake_reservoirs, listed in river_reservoir_ids). Municipalities served only by groundwater, desalination or rivers with no bulletin reservoir upstream have no level. Rebuilt hourly inside LakehouseBox by sql/now/municipality_water.sql from ref.municipality_supply, ref.supply_sources, ref.reservoir_links, ref.river_intake_reservoirs and now.reservoir_status.",
     "columns": {
       "municipality_code": "INE municipality code (ref.municipalities).",
       "municipality_name": "Name as people write it.",
@@ -380,6 +392,7 @@
       "fill_pct_same_week_last_year": "The same, for the same week a year ago, capacity-weighted, %.",
       "fill_pct_10y_average": "The same week averaged over the previous 10 years, capacity-weighted, %.",
       "as_of": "When the reservoir levels were last updated (now.reservoir_status), UTC.",
+      "river_reservoir_ids": "Estimated: bulletin reservoirs upstream of the municipality's river intakes (ref.river_intake_reservoirs), used only where no plan names a reservoir behind its supply. They count in the levels.",
       "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   },
@@ -438,7 +451,7 @@
     }
   },
   "now.municipality_path": {
-    "doc": "Where each municipality's tap water comes from, step by step: its supply units and their sources (depth 0), then the sources of each network or transfer they draw on (depth 1, 2 …). One row per unit and source, in municipality order. Built inside LakehouseBox by sql/now/municipality_path.sql from ref.municipality_supply, ref.supply_units and ref.supply_sources: once a day, and at once after those tables are reloaded.",
+    "doc": "Where each municipality's tap water comes from, step by step: its supply units and their sources (depth 0), then the sources of each network or transfer they draw on (depth 1, 2 …). One row per unit and source, in municipality order. Built inside LakehouseBox by sql/now/municipality_path.sql from ref.municipality_supply, ref.supply_units, ref.supply_sources and ref.river_intake_reservoirs: once a day, and at once after those tables are reloaded.",
     "columns": {
       "province_code": "INE province code, the first two digits of municipality_code.",
       "municipality_code": "INE municipality code (ref.municipalities).",
@@ -453,6 +466,7 @@
       "reservoir_id": "Bulletin reservoir (ref.reservoirs), for a reservoir source.",
       "network_unit_id": "For a network or transfer source: the unit whose own sources follow at the next depth.",
       "role": "backup for a source used only in droughts or emergencies; otherwise null.",
+      "river_reservoir_ids": "For a river source: bulletin reservoirs upstream of the intake on that river (ref.river_intake_reservoirs). An estimate, not stated by the plan.",
       "__ingest_ts": "when the sink received the batch (RFC 3339, the intake's clock)"
     }
   }

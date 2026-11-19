@@ -2,6 +2,8 @@
 -- together. Follows ref.municipality_supply → ref.supply_sources (through networks and transfers, network_unit_id) to the
 -- source reservoirs, then ref.reservoir_links upstream; levels from now.reservoir_status, weighted by capacity.
 -- Runs inside LakehouseBox as a derived sink (scheduled SQL that reads the catalog), mode replace: each run swaps the table.
+-- Where no plan names a reservoir behind the supply, the reservoirs upstream of its river intakes count instead
+-- (ref.river_intake_reservoirs, an estimate; listed apart in river_reservoir_ids, added by migration 011).
 -- One SELECT; see lakehouse.yaml for its schedule.
 WITH RECURSIVE
 supply AS (SELECT municipality_code, supply_unit_id FROM embalses.ref.municipality_supply),
@@ -28,7 +30,11 @@ upstream_reservoirs AS (
   FROM source_reservoirs s JOIN upstream_of u USING (reservoir_id)
   ANTI JOIN source_reservoirs x ON x.municipality_code = s.municipality_code AND x.reservoir_id = u.upstream_id
 ),
-counted AS (SELECT * FROM source_reservoirs UNION SELECT * FROM upstream_reservoirs),
+river_reservoirs AS (   -- estimated; the loader keeps only municipalities with no source reservoir
+  SELECT DISTINCT r.municipality_code, r.reservoir_id FROM embalses.ref.river_intake_reservoirs r
+  ANTI JOIN source_reservoirs s USING (municipality_code)
+),
+counted AS (SELECT * FROM source_reservoirs UNION SELECT * FROM upstream_reservoirs UNION SELECT * FROM river_reservoirs),
 levels AS (
   SELECT c.municipality_code, count(*)::INTEGER AS reservoirs,
          sum(r.stored_volume_hm3) AS stored_volume_hm3, sum(r.capacity_hm3) AS capacity_hm3,
@@ -49,8 +55,10 @@ kinds AS (
 lists AS (
   SELECT municipality_code,
          list(DISTINCT reservoir_id ORDER BY reservoir_id) FILTER (WHERE kind = 'source') AS source_ids,
-         list(DISTINCT reservoir_id ORDER BY reservoir_id) FILTER (WHERE kind = 'upstream') AS upstream_ids
-  FROM (SELECT *, 'source' AS kind FROM source_reservoirs UNION ALL SELECT *, 'upstream' FROM upstream_reservoirs)
+         list(DISTINCT reservoir_id ORDER BY reservoir_id) FILTER (WHERE kind = 'upstream') AS upstream_ids,
+         list(DISTINCT reservoir_id ORDER BY reservoir_id) FILTER (WHERE kind = 'river') AS river_ids
+  FROM (SELECT *, 'source' AS kind FROM source_reservoirs UNION ALL SELECT *, 'upstream' FROM upstream_reservoirs
+        UNION ALL SELECT *, 'river' FROM river_reservoirs)
   GROUP BY 1
 )
 SELECT m.municipality_code, m.municipality_name, m.province_name, m.population,
@@ -60,7 +68,8 @@ SELECT m.municipality_code, m.municipality_name, m.province_name, m.population,
        round(l.stored_volume_hm3, 1) AS stored_volume_hm3, round(l.capacity_hm3, 1) AS capacity_hm3,
        round(100 * l.stored_volume_hm3 / l.capacity_hm3, 1) AS fill_pct,
        round(l.last_year, 1) AS fill_pct_same_week_last_year, round(l.avg_10y, 1) AS fill_pct_10y_average,
-       (SELECT max(as_of) FROM embalses."now".reservoir_status) AS as_of
+       (SELECT max(as_of) FROM embalses."now".reservoir_status) AS as_of,
+       lists.river_ids AS river_reservoir_ids   -- migration 011: last, in the table's column order
 FROM embalses.ref.municipalities m
 LEFT JOIN units USING (municipality_code)
 LEFT JOIN kinds USING (municipality_code)
