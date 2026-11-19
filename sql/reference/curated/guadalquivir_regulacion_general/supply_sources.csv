@@ -1,0 +1,21 @@
+supply_unit_id,municipality_code,source_rank,source_type,source_name,role,network_unit_id,water_body_code,share_pct,notes
+ES050-RG,,1,reservoir,Tranco de Beas,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,2,reservoir,El Portillo,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,3,reservoir,Negratín,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,4,reservoir,Guadalmena,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,5,reservoir,Siles,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,6,reservoir,Giribaile,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,7,reservoir,Guadalén,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,8,reservoir,La Fernandina,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,9,reservoir,Yeguas,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,10,reservoir,Jándula,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,11,reservoir,Vadomojón,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,12,reservoir,Iznájar,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,13,reservoir,José Torán,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,14,reservoir,Puebla de Cazalla,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,15,reservoir,Torre del Águila,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,16,reservoir,Arenoso,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,17,reservoir,Puente Nuevo,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,18,reservoir,La Breña II,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,19,reservoir,San Rafael de Navallana,main,,,,Apéndice 7.7.1 principales tomas
+ES050-RG,,20,river,río Guadalquivir,main,,,,'Río Guadalquivir desde embalses hasta desembocadura'

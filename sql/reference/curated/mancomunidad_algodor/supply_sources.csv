@@ -1,0 +1,2 @@
+supply_unit_id,municipality_code,source_rank,source_type,source_name,role,network_unit_id,water_body_code,share_pct,notes
+ES030-MARA,,1,reservoir,Almoguera,main,,,,"Tajo water taken at the Almoguera reservoir since 2005, ETAP de Algodor (Noblejas)"
