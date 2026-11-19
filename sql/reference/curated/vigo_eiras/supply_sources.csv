@@ -1,0 +1,5 @@
+supply_unit_id,municipality_code,source_rank,source_type,source_name,role,network_unit_id,water_body_code,share_pct,notes
+ES014-EIRAS,,1,reservoir,Eiras,main,,,,"río Oitavén; treated at the ETAP de O Casal"
+ES014-ES014UDU0111,,2,network,Sistema de Eiras (Vigo),main,ES014-EIRAS,,,"the plan's 'Trasvase Cuenca Miño-Sil'; Xunta: Eiras supplies most of Vigo"
+ES014-ES014UDU0109,,2,network,Sistema de Eiras (Vigo),main,ES014-EIRAS,,,"the plan's 'Trasvase Cuenca Miño-Sil'; Redondela is supplied from Eiras (Vigo press, 30 Aug 2022)"
+ES014-ES014UDU0106,,1,network,Sistema de Eiras (Vigo),main,ES014-EIRAS,,,"the plan's 'Trasvase Cuenca Miño-Sil'; Moaña is supplied from Eiras (Vigo press, 30 Aug 2022)"

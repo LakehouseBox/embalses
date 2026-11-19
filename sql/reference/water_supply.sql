@@ -5,8 +5,9 @@
 --                                    (units keyed by supply_unit_id; rows may link to a network with network_unit_id)
 --   sql/reference/curated/reservoir_aliases.csv  names the plans use for bulletin reservoirs that do not match by rule
 -- Reservoir names are matched to ref.reservoirs: same basin first, else a unique match anywhere.
--- When a curated folder describes how an urban unit is served (rows for that unit), they replace the plan's generic
--- network rows for it ("Red del CYII" -> the treatment plants that serve it).
+-- When a curated folder describes how an urban unit is served (network rows for that unit), they replace the plan's
+-- generic network and transfer rows for it ("Red del CYII" -> the treatment plants that serve it; Vigo's "Trasvase
+-- Cuenca Miño-Sil" -> the Eiras system).
 -- Run from the repository root:  lhbox duckdb --catalog embalses -- -f sql/reference/water_supply.sql
 -- Then rebuild the page's paths at once (otherwise they follow at 04:46 UTC):  lhbox sink run now_municipality_path --wait
 -- Reloading: before 2026-11-16 02:30 UTC, DELETE + INSERT left a deletion file (puffin) that the in-browser runtime of an
@@ -81,7 +82,7 @@ CREATE OR REPLACE TEMP TABLE all_sources AS
 SELECT * FROM curated_sources
 UNION ALL BY NAME
 SELECT p.* FROM plan_sources p
-WHERE NOT (p.source_type = 'network'
+WHERE NOT (p.source_type IN ('network', 'transfer')
            AND p.supply_unit_id IN (SELECT supply_unit_id FROM curated_sources WHERE source_type = 'network'));
 
 CREATE OR REPLACE TEMP TABLE matched AS
