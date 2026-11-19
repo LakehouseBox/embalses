@@ -1000,9 +1000,9 @@ function subhead() { const N0 = SER.es && stats(SER.es); if (!N0) return; const 
     ready.catch(() => {});
     fit(); $('map-note').textContent = 'Cargando el mapa…';
     let shapes = savedShapes(); if (shapes) { showOutlines(shapes); $('map-note').textContent = 'Cargando los datos en directo…'; }
-    // first visit: comunidades and provinces from a small static file (assets/outlines.json, written from ref.map_outlines),
+    // first visit: comunidades and provinces from a small static file (outlines.json next to the page, written from ref.map_outlines),
     // so the map is drawn before the database engine is up; the full outlines replace them when they come
-    else fetch('../assets/outlines.json').then(r => r.ok ? r.json() : null).then(rows => { if (rows && !AREAS.p.length) { showOutlines(rows); $('map-note').textContent = 'Cargando los datos en directo…'; } }).catch(() => {});
+    else fetch('outlines.json').then(r => r.ok ? r.json() : null).then(rows => { if (rows && !AREAS.p.length) { showOutlines(rows); $('map-note').textContent = 'Cargando los datos en directo…'; } }).catch(() => {});
     const old = saved();
     if (old?.res && old?.weekly) { showReservoirs(old.res); showNational(old.weekly); setStatus('Actualizando los datos…'); }
     await ready; if (!old) setStatus('Leyendo los datos…');

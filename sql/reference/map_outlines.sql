@@ -30,4 +30,4 @@ INSTALL spatial; LOAD spatial;
 COPY (SELECT layer, outline_id, name, mean_flow_m3s,
              ST_AsGeoJSON(ST_ReducePrecision(ST_GeomFromGeoJSON(geojson), 0.001)) AS geojson
       FROM embalses.ref.map_outlines WHERE layer IN ('region', 'province') ORDER BY layer, name)
-TO 'artifact/assets/outlines.json' (FORMAT json, ARRAY true);
+TO 'artifact/page/outlines.json' (FORMAT json, ARRAY true);
