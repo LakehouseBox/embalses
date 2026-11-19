@@ -57,7 +57,7 @@ input[type="search"] { font: inherit; font-size: 15px; padding: 8px 12px; border
 main { padding: 30px 0 10px; }
 .intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; align-items: center; }
 .lede { margin: 4px 0 0; font-size: 21px; color: var(--muted); }
-.state { margin: 0; font-size: 19px; color: var(--muted); border-left: 1px solid var(--line); padding-left: 28px; max-width: 34ch; }
+.state { margin: 0; font-size: 19px; color: var(--muted); border-left: 1px solid var(--line); padding-left: 28px; max-width: 34ch; min-height: 2.9em; }
 .tap { margin-top: 20px; display: flex; gap: 10px 16px; align-items: center; flex-wrap: wrap; }
 .tap label { font-weight: 700; font-size: 17px; }
 .tapbox { position: relative; flex: 1 1 300px; max-width: 440px; }
@@ -120,6 +120,7 @@ button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
 .mapcard.fs .mapbox { flex: 1; }
 .mapbox { position: relative; }
 .mapbox canvas { display: block; width: 100%; border-radius: var(--rs); }
+.mapbox #map { aspect-ratio: 1 / 0.8; max-height: 640px; } @media (max-width: 600px) { .mapbox #map { aspect-ratio: 1 / 1.15; } }
 .mapbox #mapfx { position: absolute; left: 0; top: 0; pointer-events: none; }
 .mapbox .fsbtn { position: absolute; right: 8px; top: 8px; width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 16px; }
 .mapbox .overlay { position: absolute; left: 8px; top: 8px; background: rgb(255 255 255 / 0.94); border: 1px solid var(--line); }
@@ -164,7 +165,7 @@ summary::-webkit-details-marker { display: none; }
 .sechead { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
 .raingrid { display: grid; grid-template-columns: minmax(0, 0.95fr) minmax(0, 0.85fr) minmax(0, 1.2fr); gap: 0; align-items: start; }
 .raingrid > div + div { border-left: 1px solid var(--line); padding-left: 26px; margin-left: 26px; }
-.raingrid canvas { width: 100%; display: block; }
+.raingrid canvas { width: 100%; display: block; aspect-ratio: 1 / 0.82; }   /* rainCard() draws it 0.82 as tall as wide */
 .stat { padding: 0 0 12px; } .stat + .stat { border-top: 1px solid var(--line); padding-top: 12px; }
 .stat b { display: block; font-size: 26px; font-weight: 700; line-height: 1.2; } .stat b.xl { font-size: 46px; font-weight: 800; letter-spacing: -0.02em; } .stat b.xl small { font-size: 24px; font-weight: 700; }
 .stat span { color: var(--muted); font-size: 15px; } .stat b.md { font-size: 18px; }
@@ -209,11 +210,11 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
   background: linear-gradient(90deg, var(--land) 30%, #f8fafc 50%, var(--land) 70%) 0 0 / 200% 100%;
   animation: shimmer 1.4s linear infinite; border-radius: var(--rs); }
 .wait-res [data-sk=res], .wait-rain [data-sk=rain] { color: transparent !important; width: fit-content; min-width: 4.5em; }
-.wait-res .big[data-sk] { min-width: 3.2em; } .wait-res .chips2 { visibility: hidden; }
+.wait-res .big[data-sk] { min-width: 3.2em; } .wait-res .chips2, .wait-res #year-legend { visibility: hidden; }
 .wait-res:not(.wait-map) #map { animation: breathe 1.6s ease-in-out infinite; background: none; }   /* grey map, waiting for its colours */
 .sk { display: block; height: 14px; margin: 6px 0; } .sk.t { height: 20px; width: 70%; } .sk.s { width: 45%; }
 .skrow td { padding: 14px 12px; } .skrow .sk { margin: 0; }
-@media (max-width: 600px) { .mapbox .mapkey { position: static; margin-top: 6px; } .status > span { display: none; } .tools .seg { max-width: 100%; overflow-x: auto; } }
+@media (max-width: 600px) { .mapbox .mapkey { position: static; margin-top: 6px; min-height: 64px; } .state { min-height: 4.35em; } .skrow td { height: 88px; } .status > span { display: none; } .tools .seg { max-width: 100%; overflow-x: auto; } }
 @media (prefers-reduced-motion: reduce) { .sk, [data-sk], #map, #year, #rainmap { animation: none !important; } .chart path.ln { animation: none; stroke-dashoffset: 0; } .meter i { transition: none; } html { scroll-behavior: auto; } }
 @media (max-width: 980px) {
   .intro, .frame, .raingrid, .high, .open, footer .cols, .ficha .top3 { grid-template-columns: minmax(0, 1fr); }
@@ -236,7 +237,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
 
 <div class="wrap"><main>
   <div class="intro">
-    <div><h1>El agua en España</h1><p class="lede" id="updated" data-sk="rain">Embalses, lluvia y cómo cambian.</p></div>
+    <div><h1>El agua en España</h1><p class="lede" id="updated" data-sk="rain">Actualizado el miércoles 19 de noviembre a las 12:00</p></div>
     <p class="state" id="subhead">Datos oficiales, actualizados cada hora.</p>
   </div>
   <nav class="crumbs" id="crumbs" aria-label="Dónde estás" hidden></nav>
@@ -255,21 +256,21 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
     <div class="pane">
       <div class="labelrow"><div class="label" id="n-label">Nivel nacional de los embalses</div><button class="linkbtn quiet" id="share" title="Copia un enlace a esta vista">Copiar enlace</button></div>
       <div class="muted" id="n-sub" hidden></div>
-      <div class="headline"><div class="big skeleton" id="n-pct" data-sk="res">—</div><div class="chips2"><span class="chip" id="n-week"></span><span class="chip" id="n-week2"></span></div></div>
+      <div class="headline"><div class="big skeleton" id="n-pct" data-sk="res">—</div><div class="chips2"><span class="chip" id="n-week">+0,0 % en una semana</span><span class="chip" id="n-week2">+00 hm³ en una semana</span></div></div>
       <div class="meter"><i id="n-meter" style="width:0"></i></div>
-      <div class="muted small" id="n-basis" style="margin-top:6px"></div>
-      <div class="pair"><div><b id="n-stored" data-sk="res">—</b>Agua embalsada</div><div><b id="n-cap" data-sk="res">—</b>Capacidad total</div></div>
-      <div class="pair cmp"><div>Frente a hace un año<b id="n-ly" data-sk="res">—</b></div><div>Frente a la media de 10 años<b id="n-avg" data-sk="res">—</b></div></div>
-      <div class="recent" id="recent" hidden>
+      <div class="muted small" id="n-basis" style="margin-top:6px;min-height:1.45em"></div>
+      <div class="pair"><div><b id="n-stored" data-sk="res">00.000 hm³</b>Agua embalsada</div><div><b id="n-cap" data-sk="res">00.000 hm³</b>Capacidad total</div></div>
+      <div class="pair cmp"><div>Frente a hace un año<b id="n-ly" data-sk="res">+0,0 % (00,0 %)</b></div><div>Frente a la media de 10 años<b id="n-avg" data-sk="res">+0,0 % (00,0 %)</b></div></div>
+      <div class="recent" id="recent">
         <h3>En las últimas horas</h3>
-        <div class="rgrid"><div>6 h<b id="r-6">—</b><i id="r-6p"></i></div><div>12 h<b id="r-12">—</b><i id="r-12p"></i></div><div>24 h<b id="r-24">—</b><i id="r-24p"></i></div><div>48 h<b id="r-48">—</b><i id="r-48p"></i></div></div>
-        <p class="muted small" id="recent-note"></p>
+        <div class="rgrid"><div>6 h<b id="r-6" data-sk="res">+0,0 hm³</b><i id="r-6p"></i></div><div>12 h<b id="r-12" data-sk="res">+0,0 hm³</b><i id="r-12p"></i></div><div>24 h<b id="r-24" data-sk="res">+0,0 hm³</b><i id="r-24p"></i></div><div>48 h<b id="r-48" data-sk="res">+0,0 hm³</b><i id="r-48p"></i></div></div>
+        <p class="muted small" id="recent-note" style="min-height:2.9em"></p>
       </div>
       <div class="chart" id="yearbox">
-        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 id="year-title">Evolución del nivel</h3><div class="legend" id="year-legend"></div></div>
+        <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline"><h3 id="year-title">Evolución del nivel</h3><div class="legend" id="year-legend"><span><i></i>2026</span><span><i></i>2025</span><span><i></i>Media 10 años</span></div></div>
         <svg id="year" viewBox="0 0 560 250" role="img" aria-label="Porcentaje embalsado por semana del año"></svg><div class="tip" id="year-tip" hidden></div>
       </div>
-      <div class="muted small" id="n-date"></div>
+      <div class="muted small" id="n-date">Semanas: boletín oficial de MITECO; el punto «hoy», con las lecturas en directo.</div>
     </div>
     <div class="under ficha" id="ficha" hidden></div>
   </div>
@@ -296,7 +297,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
     <div class="sechead" style="margin-bottom:12px"><h2 id="res-title">Principales embalses</h2><span class="sp"></span><span class="muted" id="count"></span></div>
     <div class="tools"><input type="search" id="q" style="width:min(100%,400px)" placeholder="Buscar embalse, río o provincia" aria-label="Buscar embalse">
       <span class="seg" role="group" aria-label="Ordenar por"><button id="t-up" aria-pressed="false">Mayores subidas</button><button id="t-fill" aria-pressed="false">Mayor nivel</button><button id="t-cap" aria-pressed="true">Mayor capacidad</button></span></div>
-    <div class="scroll"><table id="t-res"><tbody><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:40%"><i class="sk"></i></td></tr></tbody></table></div>
+    <div class="scroll"><table id="t-res"><thead><tr><th>Embalse</th><th>Cuenca</th><th class="r">Embalsado</th><th class="r">Capacidad</th><th>Nivel</th><th class="r">Cambio</th><th>Dato</th></tr></thead><tbody><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr><tr class="skrow"><td><i class="sk" style="width:140px"></i><i class="sk" style="width:90px;height:10px;margin-top:6px"></i></td><td><i class="sk" style="width:80px"></i></td><td><i class="sk" style="width:60px"></i></td><td><i class="sk" style="width:60px"></i></td><td style="width:30%"><i class="sk"></i></td><td><i class="sk" style="width:50px"></i></td><td><i class="sk" style="width:60px"></i></td></tr></tbody></table></div>
     <button class="linkbtn" id="more" style="margin-top:12px">Ver más →</button>
   </section>
 
@@ -999,6 +1000,9 @@ function subhead() { const N0 = SER.es && stats(SER.es); if (!N0) return; const 
     ready.catch(() => {});
     fit(); $('map-note').textContent = 'Cargando el mapa…';
     let shapes = savedShapes(); if (shapes) { showOutlines(shapes); $('map-note').textContent = 'Cargando los datos en directo…'; }
+    // first visit: comunidades and provinces from a small static file (assets/outlines.json, written from ref.map_outlines),
+    // so the map is drawn before the database engine is up; the full outlines replace them when they come
+    else fetch('../assets/outlines.json').then(r => r.ok ? r.json() : null).then(rows => { if (rows && !AREAS.p.length) { showOutlines(rows); $('map-note').textContent = 'Cargando los datos en directo…'; } }).catch(() => {});
     const old = saved();
     if (old?.res && old?.weekly) { showReservoirs(old.res); showNational(old.weekly); setStatus('Actualizando los datos…'); }
     await ready; if (!old) setStatus('Leyendo los datos…');

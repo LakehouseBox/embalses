@@ -23,3 +23,11 @@ SELECT 'catchment', rc.reservoir_id::VARCHAR, NULL, NULL, NULL,
        'HydroBASINS level 12 (HydroSHEDS, CC BY 4.0): units upstream of the dam, merged'
 FROM embalses.ref.reservoir_catchments rc JOIN embalses.ref.catchments c USING (catchment_id) GROUP BY rc.reservoir_id;
 SELECT layer, count(*) AS outlines, sum(length(geojson)) AS characters FROM embalses.ref.map_outlines GROUP BY 1 ORDER BY 1;
+
+-- The page draws comunidades and provinces from a static copy on a first visit, before its database engine is up:
+-- rewrite it whenever these outlines change (and publish the page).
+INSTALL spatial; LOAD spatial;
+COPY (SELECT layer, outline_id, name, mean_flow_m3s,
+             ST_AsGeoJSON(ST_ReducePrecision(ST_GeomFromGeoJSON(geojson), 0.001)) AS geojson
+      FROM embalses.ref.map_outlines WHERE layer IN ('region', 'province') ORDER BY layer, name)
+TO 'artifact/assets/outlines.json' (FORMAT json, ARRAY true);
