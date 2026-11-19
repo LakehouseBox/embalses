@@ -120,6 +120,7 @@ button.src { cursor: pointer; } button.src:hover { border-color: var(--brand); }
 .mapcard.fs .mapbox { flex: 1; }
 .mapbox { position: relative; }
 .mapbox canvas { display: block; width: 100%; border-radius: var(--rs); }
+.mapbox #mapfx { position: absolute; left: 0; top: 0; pointer-events: none; }
 .mapbox .fsbtn { position: absolute; right: 8px; top: 8px; width: 34px; height: 34px; padding: 0; justify-content: center; font-size: 16px; }
 .mapbox .overlay { position: absolute; left: 8px; top: 8px; background: rgb(255 255 255 / 0.94); border: 1px solid var(--line); }
 .mapkey { position: absolute; right: 6px; bottom: 6px; background: rgb(255 255 255 / 0.94); border: 1px solid var(--line); border-radius: var(--rs); padding: 8px 10px; font-size: 12px; color: var(--muted); display: grid; gap: 4px; }
@@ -247,7 +248,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
         <span class="seg" role="group" aria-label="Qué muestra el mapa" id="layerseg"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
         <div class="tapbox mini" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="tap-q" role="combobox" aria-label="Busca tu municipio" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Busca tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div>
       </div>
-      <div class="mapbox" id="mapbox"><canvas id="map"></canvas><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
+      <div class="mapbox" id="mapbox"><canvas id="map"></canvas><canvas id="mapfx" aria-hidden="true"></canvas><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
       <p class="muted small" id="map-note" style="margin:8px 0 0">Cargando el mapa…</p>
       <p class="muted small" id="area-note" style="margin:6px 0 0" hidden></p>
     </div>
@@ -513,7 +514,7 @@ function yearChart() { const { Y, byYear, avg10, lw } = ST, svg = $('year'), VW 
 
 // ───────── map ─────────
 const cv = $('map'), ctx = cv.getContext('2d'), ES = { w: -9.45, e: 3.45, s: 35.85, n: 43.9 }, KX = Math.cos(40 * Math.PI / 180);
-let P, BB = ES, shownAreas = [], marks = [];
+let P, BB = ES, shownAreas = [], marks = [], SELP = null;   // SELP: outline of the open area, for the pulse
 const BAND = [0, 20, 30, 40, 50, 60, 70, 80], STEPS = [0.2, 1, 5, 10, 20, 40], bounds = new Map(); let gridIndex = new Map();
 const stepOf = (v, st) => { let i = 0; for (let s = 0; s < st.length; s++) if (v >= st[s]) i = s; return i; };
 let CATCH = new Map();   // reservoir_id → its catchment outline (text until first used, then an area)
@@ -561,9 +562,11 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   if (!es || layer !== 'res') { ctx.strokeStyle = css('--river'); ctx.lineCap = 'round'; const zf = top ? 1 : 1.6;
     for (const r of D.rivers) { const qf = r.mean_flow_m3s || 0; ctx.lineWidth = (qf > 300 ? 2 : qf > 80 ? 1.4 : qf > 20 ? 1 : 0.6) * zf; ctx.beginPath();
       for (const l of (r.geometry.type === 'LineString' ? [r.geometry.coordinates] : r.geometry.coordinates)) l.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.stroke(); } }
-  for (const { a, p } of shownAreas) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2.5; ctx.stroke(p); ctx.strokeStyle = css('--border'); ctx.lineWidth = !es && a.name === sk ? 1.8 : 0.7; ctx.stroke(p); }
+  SELP = null;
+  for (const { a, p } of shownAreas) { const sel = !es && a.name === sk; ctx.strokeStyle = '#fff'; ctx.lineWidth = sel ? 4 : 2.5; ctx.stroke(p); ctx.strokeStyle = sel ? css('--brand-dark') : css('--border'); ctx.lineWidth = sel ? 2.5 : 0.7; ctx.stroke(p);
+    if (sel && scope.t !== 'm' && scope.t !== 'r') SELP = p; }
   for (const { a, p } of muniShown) { const me = scope.t === 'm' && a.code === scope.k; if (a !== MHOVER && !me) continue;
-    if (me) { ctx.globalAlpha = 0.3; ctx.fillStyle = css('--brand'); ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; } ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = me ? 2.5 : 2; ctx.stroke(p); }
+    if (me) { SELP = p; ctx.globalAlpha = 0.3; ctx.fillStyle = css('--brand'); ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; } ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = me ? 2.5 : 2; ctx.stroke(p); }
   if (HOVER) { const h = shownAreas.find(x => x.a === HOVER); if (h) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill(h.p, 'evenodd'); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 2; ctx.stroke(h.p); } }
   if (scope.t === 'm' && TAP && TAP.lon != null) {   // the tap, and a dashed line from each reservoir it takes water from
     const hx = P.x(TAP.lon), hy = P.y(TAP.lat); ctx.globalAlpha = ANIM; ctx.setLineDash([6, 5]); ctx.strokeStyle = css('--brand'); ctx.lineWidth = 2;
@@ -626,6 +629,13 @@ cv.addEventListener('click', e => { if (DRAGGED) { DRAGGED = false; return; } co
 // drag to pan (mouse and pen): the view moves, what is selected stays; only a click opens another area.
 // On touch, one finger keeps scrolling the page.
 let DRAG = null, DRAGGED = false, panRaf = 0;
+// the outline of what is open breathes softly on a layer of its own, so it stays easy to find after panning away
+const fx = $('mapfx'), fxc = fx.getContext('2d');
+(function pulse(now) { requestAnimationFrame(pulse); if (!P || document.hidden) return;
+  const dpr = devicePixelRatio || 1; if (fx.width !== cv.width || fx.height !== cv.height) { fx.width = cv.width; fx.height = cv.height; fx.style.width = cv.clientWidth + 'px'; fx.style.height = cv.style.height; }
+  fxc.setTransform(1, 0, 0, 1, 0, 0); fxc.clearRect(0, 0, fx.width, fx.height); if (!SELP || ANIM < 1) return; fxc.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const t = CALM ? 0.5 : (Math.sin(now / 450) + 1) / 2; fxc.lineJoin = 'round'; fxc.strokeStyle = css('--brand');
+  fxc.globalAlpha = 0.12 + 0.28 * (1 - t); fxc.lineWidth = 3 + 7 * t; fxc.stroke(SELP); })(0);
 cv.addEventListener('pointerdown', e => { if (!P || e.button !== 0 || e.pointerType === 'touch') return; animRun++; ANIM = 1;
   DRAG = { x: e.clientX, y: e.clientY, bb: BB, k: P.k, id: e.pointerId, moved: false }; });
 cv.addEventListener('pointermove', e => { if (!DRAG || e.pointerId !== DRAG.id) return; const dx = e.clientX - DRAG.x, dy = e.clientY - DRAG.y;
