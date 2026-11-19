@@ -971,13 +971,8 @@ $('csv').onclick = () => { if (!lastResult) return; const cell = v => v == null 
 // ───────── start ─────────
 addEventListener('resize', () => { if (P) { animRun++; ANIM = 1; fit(); draw(); rainCard(); } });
 const toSeries = rows => rows.map(r => ({ d: new Date(r.d + 'T00:00:00Z'), s: r.s, c: r.c, f: r.c ? 100 * r.s / r.c : null }));
-const CACHE = 'embalses:v2';   // last answer, shown at once on the next visit while the live data loads
-const saved = () => { try { return JSON.parse(localStorage.getItem(CACHE)); } catch (e) { return null; } };
-const save = o => { try { localStorage.setItem(CACHE, JSON.stringify(o)); } catch (e) {} };
-const SHAPES = 'embalses:outlines:v2';   // outlines never change between visits: keep them so the map is there at once
-const savedShapes = () => { try { return JSON.parse(localStorage.getItem(SHAPES))?.rows || null; } catch (e) { return null; } };
-const stillFresh = () => { try { return Date.now() - JSON.parse(localStorage.getItem(SHAPES)).at < 864e5; } catch (e) { return false; } };
-const saveShapes = rows => { try { localStorage.setItem(SHAPES, JSON.stringify({ at: Date.now(), rows })); } catch (e) {} };
+// No browser storage: the page runs in a sandboxed frame (origin null) where localStorage throws, so every visit starts
+// like the first; the static outlines and the HTTP cache are what make it quick.
 const done = c => document.body.classList.remove(c);
 function showOutlines(rows) { done('wait-map'); const of = (layer, t) => rows.filter(r => r.layer === layer).map(r => area(t, r.name, JSON.parse(r.geojson))).filter(a => !island(a.cx, a.cy));
   AREAS = { b: of('basin', 'b'), c: of('region', 'c'), p: of('province', 'p') };
@@ -1000,16 +995,13 @@ function subhead() { const N0 = SER.es && stats(SER.es); if (!N0) return; const 
     const ready = READY = connect();
     ready.catch(() => {});
     fit(); $('map-note').textContent = 'Cargando el mapa…';
-    let shapes = savedShapes(); if (shapes) { showOutlines(shapes); $('map-note').textContent = 'Cargando los datos en directo…'; }
-    // first visit: comunidades and provinces from a small static file (outlines.json next to the page, written from ref.map_outlines),
+    // comunidades and provinces from a small static file (outlines.json next to the page, written from ref.map_outlines),
     // so the map is drawn before the database engine is up; the full outlines replace them when they come
-    else fetch('outlines.json').then(r => r.ok ? r.json() : null).then(rows => { if (rows && !AREAS.p.length) { showOutlines(rows); $('map-note').textContent = 'Cargando los datos en directo…'; } }).catch(() => {});
-    const old = saved();
-    if (old?.res && old?.weekly) { showReservoirs(old.res); showNational(old.weekly); setStatus('Actualizando los datos…'); }
-    await ready; if (!old) setStatus('Leyendo los datos…');
-    if (!shapes) { shapes = (await q(SQL.outlines)).rows; showOutlines(shapes); saveShapes(shapes); }
+    fetch('outlines.json').then(r => r.ok ? r.json() : null).then(rows => { if (rows && !AREAS.p.length) { showOutlines(rows); $('map-note').textContent = 'Cargando los datos en directo…'; } }).catch(() => {});
+    await ready; setStatus('Leyendo los datos…');
+    showOutlines((await q(SQL.outlines)).rows);
     const res = (await q(SQL.res)).rows; showReservoirs(res);
-    const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly); save({ res, weekly });
+    const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly);
     await loadH3();   // the rain grid's cells; only needed from here on, so the first paint does not wait for it
     D.grid = (await q(SQL.grid)).rows.filter(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return !island(lo, la); }); gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows.filter(g => !island(g.lon, g.lat));
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
