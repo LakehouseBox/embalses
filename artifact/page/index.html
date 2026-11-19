@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Embalses: el agua en España</title>
 <meta name="description" content="El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.">
-<script defer src="https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js"></script>
 <style>
 @font-face { font-family: 'Source Sans 3'; font-style: normal; font-weight: 400; font-display: swap; src: url(../assets/source-sans-3-400.woff2) format('woff2'); }
 @font-face { font-family: 'Source Sans 3'; font-style: normal; font-weight: 600; font-display: swap; src: url(../assets/source-sans-3-600.woff2) format('woff2'); }
@@ -986,6 +985,8 @@ function showOutlines(rows) { done('wait-map'); const of = (layer, t) => rows.fi
   CATCH = new Map(rows.filter(r => r.layer === 'catchment').map(r => [+r.outline_id, r.geojson]));
   if (D.res.length) { assign(); if (!routed) { routed = true; route(); } } animate(BB, BB); if (scope.t === 'r') ficha(); }
 let routed = false;
+const loadH3 = () => window.h3 ? Promise.resolve() : new Promise((ok, ko) => { const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/h3-js@4.1.0/dist/h3-js.umd.js'; s.onload = ok; s.onerror = ko; document.head.append(s); });
 const nice = n => String(n || '').replace(/^(.*), (El|La|Los|Las)$/i, '$2 $1');   // the bulletin writes "Atazar, El"
 function showReservoirs(rows) { for (const r of rows) r.reservoir_name = nice(r.reservoir_name); D.res = rows; if (AREAS.b.length) assign(); animate(BB, BB); table(); if (scope.t === 'r') ficha();
   if (!routed && AREAS.b.length) { routed = true; route(); }
@@ -1009,6 +1010,7 @@ function subhead() { const N0 = SER.es && stats(SER.es); if (!N0) return; const 
     if (!shapes) { shapes = (await q(SQL.outlines)).rows; showOutlines(shapes); saveShapes(shapes); }
     const res = (await q(SQL.res)).rows; showReservoirs(res);
     const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly); save({ res, weekly });
+    await loadH3();   // the rain grid's cells; only needed from here on, so the first paint does not wait for it
     D.grid = (await q(SQL.grid)).rows.filter(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return !island(lo, la); }); gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows.filter(g => !island(g.lon, g.lat));
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
     cards(); rainCard(); draw(); done('wait-rain');
