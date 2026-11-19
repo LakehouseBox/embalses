@@ -372,14 +372,15 @@ FROM embalses."now".station_status WHERE rain_24h_mm IS NOT NULL ORDER BY rain_2
   outlines: `SELECT layer, outline_id, name, mean_flow_m3s, geojson FROM embalses.ref.map_outlines`,
   ficha: id => `SELECT dam_name, dam_type, uses, catchment_area_km2, surface_area_ha, mean_annual_inflow_hm3, is_hydroelectric, energy_capacity_gwh
 FROM embalses.ref.reservoirs WHERE reservoir_id = ${+id}`,
-  munis: `SELECT municipality_code AS code, municipality_name AS name, province_name AS prov, population AS pop, longitude AS lon, latitude AS lat FROM embalses.ref.municipalities`,
+  munis: `SELECT municipality_code AS code, municipality_name AS name, province_name AS prov, population AS pop, longitude AS lon, latitude AS lat FROM embalses.ref.municipalities
+WHERE province_code NOT IN ('07', '35', '38')`,   // the Balearic and Canary Islands are not on the map yet
   tap: code => `SELECT w.municipality_name AS name, w.province_name AS prov, w.population AS pop, w.supply_unit_names AS units, w.source_types AS kinds,
-       w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
+       w.source_reservoir_ids AS src, w.upstream_reservoir_ids AS up, w.river_reservoir_ids AS riv, w.reservoirs, w.fill_pct, w.stored_volume_hm3 AS stored, w.capacity_hm3 AS cap,
        w.fill_pct_same_week_last_year AS ly, w.fill_pct_10y_average AS avg10, strftime(w.as_of, '%Y-%m-%dT%H:%M:%SZ') AS as_of
 FROM embalses."now".municipality_water w WHERE w.municipality_code = '${code}'`,   // its place comes from munis(), read once
   // the path of the water, worked out hourly in now.municipality_path: the municipality's units and their sources (depth 0),
   // then the networks they draw on (depth 1, 2 …), in one query
-  tapPath: code => `SELECT depth, id, unit, type, doc, url, source_type, source_name, reservoir_id, network_unit_id, role
+  tapPath: code => `SELECT depth, id, unit, type, doc, url, source_type, source_name, reservoir_id, network_unit_id, role, river_reservoir_ids AS rres
 FROM embalses."now".municipality_path WHERE municipality_code = '${code}' ORDER BY depth, id`,
   muniShapes: pc => `SELECT municipality_code AS code, municipality_name AS name, geojson FROM embalses.ref.municipality_outlines WHERE province_code = '${pc}'`,
   muniLevels: pc => `SELECT municipality_code AS code, fill_pct, reservoirs, population AS pop, source_types AS kinds FROM embalses."now".municipality_water WHERE municipality_code LIKE '${pc}%'`,
@@ -477,7 +478,7 @@ function numbers() { const { last, Y, byYear, avg10, lw } = ST, N = nowOf(inView
   const ly = byYear[Y - 1]?.[tw] ?? byYear[Y - 1]?.[lw], av = avg10[tw] ?? avg10[lw]; ST.now = N.use ? N : null;
   const r = selRes(); $('n-label').textContent = scope.t === 'es' ? 'Nivel nacional de los embalses' : scope.t === 'm' ? `Tu agua · ${scopeName(scope)}` : scope.t === 'b' ? `Cuenca: ${scope.k}` : scope.t === 'r' ? scopeName(scope) : scope.t === 'p' ? `Provincia: ${scope.k}` : scope.k;
   $('n-sub').hidden = !r && scope.t !== 'm'; if (r) $('n-sub').textContent = [title(r.river_name), r.province].filter(Boolean).join(' · ');
-  if (scope.t === 'm') $('n-sub').textContent = `${TAP.ids.size} ${TAP.ids.size === 1 ? 'embalse' : 'embalses'} detrás de tu grifo, contando los de aguas arriba`;
+  if (scope.t === 'm') $('n-sub').textContent = TAP.riv.size && ![...TAP.src].some(id => TAP.ids.has(id)) ? `${TAP.ids.size} ${TAP.ids.size === 1 ? 'embalse' : 'embalses'} aguas arriba de su toma en el río (estimado)` : `${TAP.ids.size} ${TAP.ids.size === 1 ? 'embalse' : 'embalses'} detrás de tu grifo, contando los de aguas arriba`;
   for (const id of ['n-week', 'n-week2', 'yearbox']) $(id).hidden = false; $('n-meter').parentElement.hidden = false;
   $('n-pct').className = 'big'; countTo($('n-pct'), N.f); $('n-meter').style.width = Math.min(100, N.f) + '%';
   const pts = v => `${signed(v, 1)} %`;   // percentage points, written the way people read them
@@ -566,7 +567,7 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   if (HOVER) { const h = shownAreas.find(x => x.a === HOVER); if (h) { ctx.fillStyle = 'rgba(255,255,255,0.28)'; ctx.fill(h.p, 'evenodd'); ctx.strokeStyle = css('--brand-dark'); ctx.lineWidth = 2; ctx.stroke(h.p); } }
   if (scope.t === 'm' && TAP && TAP.lon != null) {   // the tap, and a dashed line from each reservoir it takes water from
     const hx = P.x(TAP.lon), hy = P.y(TAP.lat); ctx.globalAlpha = ANIM; ctx.setLineDash([6, 5]); ctx.strokeStyle = css('--brand'); ctx.lineWidth = 2;
-    for (const r of D.res) if (TAP.src.has(r.reservoir_id) && r.lon != null) { ctx.beginPath(); ctx.moveTo(P.x(r.lon), P.y(r.lat)); ctx.lineTo(hx, hy); ctx.stroke(); }
+    for (const r of D.res) if ((TAP.src.has(r.reservoir_id) || TAP.riv.has(r.reservoir_id)) && r.lon != null) { ctx.beginPath(); ctx.moveTo(P.x(r.lon), P.y(r.lat)); ctx.lineTo(hx, hy); ctx.stroke(); }
     ctx.setLineDash([]); ctx.globalAlpha = 1; }
   const cat = scope.t === 'r' && catchment(scope.k);
   if (cat) { ctx.beginPath(); for (const poly of polys(cat.geometry)) for (const ring of poly) { ring.forEach(([x, y], i) => i ? ctx.lineTo(P.x(x), P.y(y)) : ctx.moveTo(P.x(x), P.y(y))); ctx.closePath(); }
@@ -600,7 +601,7 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   ctx.globalAlpha = 1;
   $('mapkey').innerHTML = layer === 'rain' ? `<div>Lluvia en ${win.replace('h', ' h')} (mm)</div><div class="ramp">${STEPS.map((s, i) => `<span style="background:var(--f${i + 1})"></span>`).join('')}</div><div class="ticks num">${STEPS.map(s => `<span>${fmt(s, s < 1 ? 1 : 0)}</span>`).join('')}</div>`
     : layer === 'var' ? `<div><span class="upc">▲</span> gana agua · <span class="downc">▼</span> pierde agua</div>` : `<div>% de la capacidad</div><div class="ramp">${BAND.map((s, i) => `<span style="background:var(--a${i + 1})"></span>`).join('')}</div><div class="ticks num">${BAND.map(s => `<span>${s}</span>`).join('')}</div>` + (es ? '' : `<div><span style="color:var(--low)">●</span> por debajo de lo normal · <span style="color:var(--water)">●</span> normal o por encima</div>`) + (muniShown.length ? `<div><span style="display:inline-block;width:12px;height:9px;background:#e6eaee;border:1px solid var(--border);vertical-align:middle"></span> municipio sin embalses del boletín</div>` : '');
-  $('map-note').textContent = muniShown.length && scope.t !== 'm' && scope.t !== 'r' ? 'Cada municipio tiene el color del nivel de los embalses de los que bebe su grifo; en gris, los que beben agua subterránea, desalada o de río. Pulsa el tuyo para ver de dónde viene su agua.' : scope.t === 'm' ? (TAP?.ids.size ? 'Los embalses de los que bebe tu grifo, y los que están aguas arriba de ellos. La línea discontinua une cada embalse de origen con tu municipio; no es el trazado real de la conducción.' : 'Tu grifo no depende de embalses del boletín: su agua es subterránea, desalada o de ríos sin embalse.') : top ? (group === 'c' ? 'Pulsa una comunidad, luego una provincia y luego tu municipio: verás de dónde viene el agua de tu grifo.' : 'Pulsa una cuenca para ver sus embalses.') : es ? 'Pulsa una provincia para ver sus municipios y sus embalses.' : scope.t === 'r' && cat ? 'La zona punteada es la cuenca que vierte al embalse: la lluvia que cae ahí acaba llegando a él.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su detalle.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
+  $('map-note').textContent = muniShown.length && scope.t !== 'm' && scope.t !== 'r' ? 'Cada municipio tiene el color del nivel de los embalses de los que bebe su grifo; en gris, los que beben agua subterránea, desalada o de ríos sin embalse aguas arriba. Pulsa el tuyo para ver de dónde viene su agua.' : scope.t === 'm' ? (TAP?.riv.size && ![...TAP.src].some(id => TAP.ids.has(id)) ? 'Los embalses aguas arriba de la toma de río de tu municipio: una estimación, porque el plan no dice de cuál se suelta el agua. La línea discontinua une cada uno con tu municipio; no es el trazado del río.' : TAP?.ids.size ? 'Los embalses de los que bebe tu grifo, y los que están aguas arriba de ellos. La línea discontinua une cada embalse de origen con tu municipio; no es el trazado real de la conducción.' : 'Tu grifo no depende de embalses del boletín: su agua es subterránea, desalada o de ríos sin embalse.') : top ? (group === 'c' ? 'Pulsa una comunidad, luego una provincia y luego tu municipio: verás de dónde viene el agua de tu grifo.' : 'Pulsa una cuenca para ver sus embalses.') : es ? 'Pulsa una provincia para ver sus municipios y sus embalses.' : scope.t === 'r' && cat ? 'La zona punteada es la cuenca que vierte al embalse: la lluvia que cae ahí acaba llegando a él.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel. Pulsa uno para ver su detalle.' : layer === 'res' ? 'Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel.' : layer === 'var' ? 'Los embalses de la zona que más agua han ganado o perdido.' : 'Lluvia acumulada en la zona y sus pluviómetros con más lluvia.'; }
 const muniAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of muniShown) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of shownAreas) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const mtip = $('map-tip');
@@ -753,8 +754,9 @@ async function fetchTap(code) {
     // tree: one row per unit of the municipality (no source_type), then one per source, with the depth of the unit that takes it
     const tree = [], seen = new Set();
     for (const x of rows) { if (x.depth === 0 && !seen.has(x.id)) { seen.add(x.id); tree.push({ ...x, source_type: null }); } if (x.source_type) tree.push(x); }
-    const src = new Set(w.src || []), up = new Set(w.up || []);
-    return { ...w, code, src, up, tree, links: links.filter(l => up.has(l.f)), ids: new Set([...src, ...up].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
+    // riv: estimated, the reservoirs upstream of a river intake (ref.river_intake_reservoirs), only where no plan names one
+    const src = new Set(w.src || []), up = new Set(w.up || []), riv = new Set(w.riv || []);
+    return { ...w, code, src, up, riv, tree, links: links.filter(l => up.has(l.f)), ids: new Set([...src, ...up, ...riv].filter(id => D.res.some(r => r.reservoir_id === id))) }; }
   catch (e) { console.error(e); return null; } }
 
 // ───────── tu grifo: the path of the water, from the reservoirs to the tap, with how full they are ─────────
@@ -787,16 +789,17 @@ function pathGraph(t) {
     if (x.network_unit_id) { const k = isUnit.has(x.network_unit_id) ? 'u:' + x.network_unit_id : 'n:' + x.network_unit_id; node(k, { kind: 'box', label: x.source_name, what: 'Fuente' }); edge(k, to, { backup }); }
     else if (x.source_type === 'reservoir' && RES(x.reservoir_id)) { node('r:' + x.reservoir_id, { kind: 'res', ids: [x.reservoir_id] }); edge('r:' + x.reservoir_id, to, { backup }); }
     else { const n = node('t:' + x.source_type + ':' + to, { kind: 'type', type: x.source_type, names: [], backup: true }); if (x.source_name && !n.names.includes(x.source_name)) n.names.push(x.source_name);
-      if (!backup) n.backup = false; edge(n.k, to); } }
+      if (!backup) n.backup = false; edge(n.k, to);
+      for (const id of x.rres || []) if (RES(id)) { node('r:' + id, { kind: 'res', ids: [id], up: true, est: true }); edge('r:' + id, n.k, { river: true }); } } }
   for (const e of E) { const n = N.get(e.a); if (n.kind === 'type') e.backup = n.backup; }
   for (const id of t.up) if (RES(id) && !N.has('r:' + id)) node('r:' + id, { kind: 'res', ids: [id], up: true });
   const down = new Map(); for (const l of t.links || []) down.set(l.f, [...(down.get(l.f) || []), l.t]);
-  for (const n of [...N.values()].filter(n => n.up)) { const id = n.ids[0], seen = new Set([id]); let at = [id];
+  for (const n of [...N.values()].filter(n => n.up && !n.est)) { const id = n.ids[0], seen = new Set([id]); let at = [id];
     while (at.length) { const nx = []; for (const a of at) for (const b of down.get(a) || []) { if (seen.has(b)) continue; seen.add(b);
-      if (N.has('r:' + b) && !N.get('r:' + b).up) edge(n.k, 'r:' + b, { river: true }); else nx.push(b); } at = nx; } }
+      if (N.has('r:' + b) && (!N.get('r:' + b).up || N.get('r:' + b).est)) edge(n.k, 'r:' + b, { river: true }); else nx.push(b); } at = nx; } }
   // the biggest reservoirs by name, the rest together in one circle
   const merge = (up, keep) => { const ks = [...N.values()].filter(n => n.kind === 'res' && !!n.up === up).sort((a, b) => capOf(b.ids[0]) - capOf(a.ids[0])).slice(keep).map(n => n.k);
-    if (ks.length < 2) return; const k = up ? 'agg:up' : 'agg'; node(k, { kind: 'res', up, ids: ks.flatMap(x => N.get(x).ids) });
+    if (ks.length < 2) return; const k = up ? 'agg:up' : 'agg'; node(k, { kind: 'res', up, est: ks.every(x => N.get(x).est), ids: ks.flatMap(x => N.get(x).ids) });
     for (const e of E) { if (ks.includes(e.a)) e.a = k; if (ks.includes(e.b)) e.b = k; } ks.forEach(x => N.delete(x));
     const seen = new Set(); E = E.filter(e => e.a !== e.b && !seen.has(e.a + '>' + e.b) && seen.add(e.a + '>' + e.b)); };
   merge(false, 5); merge(true, 3);
@@ -835,10 +838,10 @@ function pathSvg(t, W) {
   const nodes = [...N.values()].map(n => {
     if (n.kind === 'res') { const rs = n.ids.map(RES).filter(Boolean), cap = rs.reduce((s, r) => s + r.capacity_hm3, 0), sto = rs.reduce((s, r) => s + (r.stored_hm3 ?? r.capacity_hm3 * (r.fill_pct ?? 0) / 100), 0);
       const f = cap ? Math.max(0, Math.min(1, sto / cap)) : 0, one = rs.length === 1, id = 'gc' + (clip++), name = one ? rs[0].reservoir_name : `+${rs.length} embalses`;
-      const tip = one ? `${rs[0].reservoir_name}: ${fmt(100 * f, 0)} % de ${fmt(cap)} hm³${n.up ? ' · aguas arriba' : ''}` : `${rs.map(r => `${r.reservoir_name} ${fmt(r.fill_pct, 0)} %`).join(', ')}`;
+      const tip = one ? `${rs[0].reservoir_name}: ${fmt(100 * f, 0)} % de ${fmt(cap)} hm³${n.est ? ' · aguas arriba de la toma en el río (estimado)' : n.up ? ' · aguas arriba' : ''}` : `${rs.map(r => `${r.reservoir_name} ${fmt(r.fill_pct, 0)} %`).join(', ')}`;
       return `<g class="rn${n.up ? ' up' : ''}"${one ? ` data-res="${rs[0].reservoir_id}"` : ''}><title>${esc(tip)}</title><clipPath id="${id}"><rect x="${n.x - n.r}" y="${n.y + n.r - 2 * n.r * f}" width="${2 * n.r}" height="${2 * n.r * f}"/></clipPath>
         <circle class="bg" cx="${n.x}" cy="${n.y}" r="${n.r}"/><circle class="fl" cx="${n.x}" cy="${n.y}" r="${n.r}" clip-path="url(#${id})"/><circle class="ol" cx="${n.x}" cy="${n.y}" r="${n.r}"/>
-        <text class="nm" x="${n.x}" y="${n.y + n.r + 15}">${esc(name.length > 22 ? name.slice(0, 21) + '…' : name)}</text><text class="pc" x="${n.x}" y="${n.y + n.r + 29}">${fmt(100 * f, 0)} %${n.up ? ' · aguas arriba' : ''}</text></g>`; }
+        <text class="nm" x="${n.x}" y="${n.y + n.r + 15}">${esc(name.length > 22 ? name.slice(0, 21) + '…' : name)}</text><text class="pc" x="${n.x}" y="${n.y + n.r + 29}">${fmt(100 * f, 0)} %${n.est ? ' · estimado' : n.up ? ' · aguas arriba' : ''}</text></g>`; }
     if (n.kind === 'type') { const label = n.names.length === 1 ? `${ONE[n.type] || n.type} ${n.names[0].replace(new RegExp('^' + (ONE[n.type] || '') + '\\s+', 'i'), '')}` : `${MANY[n.type] || n.type} (${n.names.length || 1})`;
       return `<g class="tn${n.backup ? ' bk' : ''}"><title>${esc((n.names.length ? n.names.join(', ') : ONE[n.type]) + (n.backup ? ' · de reserva' : ''))}</title><rect x="${n.x - 12}" y="${n.y - 12}" width="24" height="24" rx="6"/><path d="${ICON[n.type] || ICON.reservoir}" transform="translate(${n.x - 9},${n.y - 9})"/>
         <text class="nm" x="${n.x}" y="${n.y + 27}">${esc(label.length > 24 ? label.slice(0, 23) + '…' : label)}</text><text class="pc" x="${n.x}" y="${n.y + 41}">${n.backup ? 'de reserva' : n.type === 'desalination' ? 'agua del mar' : n.type === 'aquifer' ? 'agua subterránea' : ''}</text></g>`; }
@@ -851,7 +854,7 @@ function pathSvg(t, W) {
   return `<svg class="gsvg" viewBox="0 0 ${Wt.toFixed(0)} ${H.toFixed(0)}" width="${Wt.toFixed(0)}" height="${H.toFixed(0)}" role="img" aria-label="El camino del agua hasta ${esc(t.name)}">${pipes}${nodes}</svg>`; }
 // how full the water behind the tap is, as one tank: one block per reservoir, as wide as its capacity, filled to its level
 function tankHtml(t) { const rs = [...t.ids].map(RES).filter(r => r && r.capacity_hm3 > 0 && r.fill_pct != null).sort((a, b) => b.capacity_hm3 - a.capacity_hm3); if (!rs.length) return '';
-  return `<div class="tank" role="img" aria-label="Cada embalse, tan ancho como su capacidad y lleno hasta su nivel">${rs.map(r => `<div class="seg" style="flex:${r.capacity_hm3} 1 0" title="${esc(r.reservoir_name)}: ${fmt(r.fill_pct, 0)} % de ${fmt(r.capacity_hm3)} hm³"${t.up.has(r.reservoir_id) && !t.src.has(r.reservoir_id) ? ' data-up' : ''}><i style="height:${Math.max(0, Math.min(100, r.fill_pct))}%"></i><span>${esc(r.reservoir_name)}</span></div>`).join('')}<b class="lvl" style="bottom:${Math.max(0, Math.min(100, t.fill_pct))}%"><span>${fmt(t.fill_pct, 1)} % entre todos</span></b></div>
+  return `<div class="tank" role="img" aria-label="Cada embalse, tan ancho como su capacidad y lleno hasta su nivel">${rs.map(r => `<div class="seg" style="flex:${r.capacity_hm3} 1 0" title="${esc(r.reservoir_name)}: ${fmt(r.fill_pct, 0)} % de ${fmt(r.capacity_hm3)} hm³"${(t.up.has(r.reservoir_id) || t.riv.has(r.reservoir_id)) && !t.src.has(r.reservoir_id) ? ' data-up' : ''}><i style="height:${Math.max(0, Math.min(100, r.fill_pct))}%"></i><span>${esc(r.reservoir_name)}</span></div>`).join('')}<b class="lvl" style="bottom:${Math.max(0, Math.min(100, t.fill_pct))}%"><span>${fmt(t.fill_pct, 1)} % entre todos</span></b></div>
     <p class="muted small" style="margin:6px 0 0">Cada bloque es un embalse, tan ancho como su capacidad y lleno hasta su nivel. La línea marca el nivel de todos juntos.</p>`; }
 function grifo() { const t = TAP, el = $('ficha'); if (!t || scope.t !== 'm') return; el.hidden = false; el.classList.add('tapcard');
   const units = t.tree.filter(x => x.depth === 0 && !x.source_type), rows = t.tree.filter(x => x.source_type);
@@ -859,26 +862,33 @@ function grifo() { const t = TAP, el = $('ficha'); if (!t || scope.t !== 'm') re
     if (!g.rows.some(y => y.source_type === x.source_type && y.source_name === x.source_name)) g.rows.push(x); }
   const nets = takers.filter(g => g.type === 'network').sort((a, b) => b.depth - a.depth), own = takers.filter(g => g.type !== 'network');
   const upIds = [...t.up].filter(id => D.res.some(r => r.reservoir_id === id)).sort((a, b) => (D.res.find(r => r.reservoir_id === b).capacity_hm3 || 0) - (D.res.find(r => r.reservoir_id === a).capacity_hm3 || 0));
+  const nSrc = [...t.src].filter(id => t.ids.has(id)).length;
+  // estimated: no plan names a reservoir, so the reservoirs upstream of its river intakes stand in (ref.river_intake_reservoirs)
+  const est = !nSrc && t.riv.size > 0, estIds = [...t.riv].filter(id => t.ids.has(id)).sort((a, b) => capOf(b) - capOf(a));
+  const rivers = [...new Set(rows.filter(x => x.rres?.length).map(x => x.source_name))];
   const node = (g, cls = '') => `<div class="node ${cls}"><h4>${esc(g.unit)}${g.url ? `<a href="${esc(g.url)}" target="_blank" rel="noopener" title="${esc(g.doc || '')}">${g.type === 'network' ? 'fuente' : 'plan hidrológico'} ↗</a>` : ''}</h4>${g.rows?.length ? `<div class="srcs">${g.rows.map(srcChip).join('')}</div>` : ''}</div>`;
   const step = (label, body, arrow) => `<div class="step"><div class="label">${label}</div>${body}</div>` + (arrow ? `<div class="arrow">${arrow}</div>` : '');
   const flow = !units.length ? `<p class="muted">Todavía no tenemos los datos de abastecimiento de este municipio.</p>` : `<div class="flow">`
+    + (est && estIds.length ? step(`Aguas arriba de la toma, en el mismo río · estimado`, `<div class="srcs">${estIds.map(resChip).join('')}</div>`, 'su agua baja por el río hasta la toma') : '')
     + (upIds.length ? step(`Aguas arriba · ${upIds.length} ${upIds.length === 1 ? 'embalse' : 'embalses'}`, `<div class="srcs">${upIds.map(resChip).join('')}</div>`, 'su agua baja por el río hasta las tomas') : '')
     + (nets.length ? step(nets.length > 1 ? 'Redes que la traen' : 'Red que la trae', nets.map(g => node(g)).join(''), 'la reparten a') : '')
     + step('Sistema de abastecimiento', units.map(u => node({ ...u, rows: own.find(g => g.id === u.id)?.rows || [] })).join(''), 'llega a')
     + `<div class="node home"><h4>${esc(t.name)}<span class="muted small" style="font-weight:400">${esc(t.prov)} · ${fmt(t.pop)} hab.</span></h4></div></div>`;
-  const has = t.fill_pct != null, nSrc = [...t.src].filter(id => t.ids.has(id)).length, nUp = upIds.length;
+  const has = t.fill_pct != null, nUp = upIds.length;
   const kinds = (t.kinds || []).filter(k => k !== 'network').map(k => KINDS[k] || k);
   const d = (a, b) => a == null || b == null ? null : a - b, dLy = d(t.fill_pct, t.ly), dAvg = d(t.fill_pct, t.avg10);
   const pts = v => `${fmt(Math.abs(v), 1)} ${Math.abs(v) >= 0.95 && Math.abs(v) < 1.05 ? 'punto' : 'puntos'}`;
   const figs = has ? `<div class="label">Cada embalse detrás de tu grifo</div>${tankHtml(t)}` : '';
   const via = nets.map(g => g.unit), plan = units.map(u => u.unit);
   const exp = !units.length ? '' : `<p>${esc(t.name)} ${plan.length > 1 ? `se abastece de las unidades ${listEs(plan.map(p => `<b>${esc(p)}</b>`))}` : `se abastece de la unidad <b>${esc(plan[0])}</b>`} del plan hidrológico${via.length ? `, que recibe el agua de ${listEs(via.map(v => `<b>${esc(v)}</b>`))}` : ''}.${kinds.length ? ` Su agua viene de ${listEs(kinds)}.` : ''}</p>`
-    + (has ? `<p>Toma agua de ${nSrc} ${nSrc === 1 ? 'embalse' : 'embalses'} del boletín${nUp ? `, y ${nUp === 1 ? 'otro está' : `otros ${nUp} están`} aguas arriba de ${nSrc === 1 ? 'él' : 'ellos'}` : ''}. Juntos guardan hoy ${fmt(t.stored)} hm³ de ${fmt(t.cap)}: están al <b>${fmt(t.fill_pct, 1)} %</b>${dLy != null && Math.abs(dLy) >= 0.05 ? `, ${pts(dLy)} ${dLy > 0 ? 'más' : 'menos'} que hace un año` : ''}${dAvg != null && Math.abs(dAvg) >= 0.05 ? ` y ${pts(dAvg)} ${dAvg > 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años` : ''}.</p>`
+    + (has ? `<p>${est ? `Toma el agua del ${listEs(rivers.map(r => esc(r.replace(/^r[ií]o\s+/i, 'río '))))}. El plan no dice de qué embalse se suelta esa agua; estimamos que la ${estIds.length === 1 ? 'regula el embalse' : `regulan los ${estIds.length} embalses`} del boletín que ${estIds.length === 1 ? 'está' : 'están'} aguas arriba de la toma, en el mismo río: ${listEs(estIds.map(id => esc(RES(id).reservoir_name)))}`
+        : `Toma agua de ${nSrc} ${nSrc === 1 ? 'embalse' : 'embalses'} del boletín${nUp ? `, y ${nUp === 1 ? 'otro está' : `otros ${nUp} están`} aguas arriba de ${nSrc === 1 ? 'él' : 'ellos'}` : ''}`}. ${t.ids.size === 1 ? 'Guarda' : 'Juntos guardan'} hoy ${fmt(t.stored)} hm³ de ${fmt(t.cap)}: ${t.ids.size === 1 ? 'está' : 'están'} al <b>${fmt(t.fill_pct, 1)} %</b>${dLy != null && Math.abs(dLy) >= 0.05 ? `, ${pts(dLy)} ${dLy > 0 ? 'más' : 'menos'} que hace un año` : ''}${dAvg != null && Math.abs(dAvg) >= 0.05 ? ` y ${pts(dAvg)} ${dAvg > 0 ? 'por encima' : 'por debajo'} de la media de los últimos 10 años` : ''}.</p>`
       : `<p>Ninguna de sus fuentes es un embalse del boletín semanal, así que no hay un nivel de embalses que mostrar: depende de ${kinds.length ? listEs(kinds) : 'otras fuentes'}.</p>`)
-    + (has ? `<p class="muted small">Cómo lo calculamos: juntamos los embalses de los que se toma el agua, directamente o a través de redes y trasvases, y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Un embalse grande pesa más que uno pequeño. Parte de esa agua también la usan otros (riego, energía, caudal ecológico), y un municipio puede recibir agua de varias fuentes en distinta proporción.</p>` : '')
-    + `<p class="muted small">Fuentes: ${listEs([...new Map(t.tree.filter(x => x.doc).map(x => [x.doc, docLink(x.doc, x.url)])).values()])}${has ? `; niveles de MITECO y los SAIH, ${when(t.as_of)}` : ''}.</p>`;
+    + (est ? `<p class="muted small">Es una aproximación nuestra. El plan hidrológico dice que el agua se toma del río, pero no desde qué embalse se suelta. Contamos los embalses del boletín en ese mismo río cuya agua pasa a menos de 8 km del municipio, siguiendo la red de ríos (HydroSHEDS). No contamos los de sus afluentes, y parte de esa agua la usan otros (riego, energía, caudal ecológico).</p>`
+      : has ? `<p class="muted small">Cómo lo calculamos: juntamos los embalses de los que se toma el agua, directamente o a través de redes y trasvases, y todos los que están aguas arriba de ellos, porque su agua baja hasta la toma. Un embalse grande pesa más que uno pequeño. Parte de esa agua también la usan otros (riego, energía, caudal ecológico), y un municipio puede recibir agua de varias fuentes en distinta proporción.</p>` : '')
+    + `<p class="muted small">Fuentes: ${listEs([...new Map(t.tree.filter(x => x.doc).map(x => [x.doc, docLink(x.doc, x.url)])).values()])}${est ? '; red de ríos HydroSHEDS (HydroRIVERS)' : ''}${has ? `; niveles de MITECO y los SAIH, ${when(t.as_of)}` : ''}.</p>`;
   el.innerHTML = `<div class="gtop"><h3>De dónde viene el agua de ${esc(t.name)}</h3><span class="muted">${esc(t.prov)} · ${fmt(t.pop)} hab.</span></div>`
-    + (units.length ? `<div class="gpath"><div class="label">El camino del agua</div><div class="gscroll" id="g-svg"></div><p class="muted small" style="margin:6px 0 0">El agua va de izquierda a derecha. Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel; cada tubería, tan gruesa como el agua que hay detrás.${t.up.size ? ' La línea de puntos es el río que baja de un embalse aguas arriba.' : ''}${rows.some(x => x.role === 'backup') ? ' Las discontinuas son fuentes de reserva.' : ''} Pasa el ratón por encima para ver los nombres.</p></div>` : '')
+    + (units.length ? `<div class="gpath"><div class="label">El camino del agua</div><div class="gscroll" id="g-svg"></div><p class="muted small" style="margin:6px 0 0">El agua va de izquierda a derecha. Cada círculo es un embalse, del tamaño de su capacidad y lleno hasta su nivel; cada tubería, tan gruesa como el agua que hay detrás.${t.up.size || est ? ' La línea de puntos es el río que baja de un embalse aguas arriba.' : ''}${est ? ' Los embalses marcados «estimado» son una aproximación (abajo, cómo la hacemos).' : ''}${rows.some(x => x.role === 'backup') ? ' Las discontinuas son fuentes de reserva.' : ''} Pasa el ratón por encima para ver los nombres.</p></div>` : '')
     + (has ? `<div class="gleft">${figs}</div><div class="gexp">${exp}</div>` : `<div class="gexp wide">${exp}</div>`)
     + (units.length ? `<details class="gall"><summary>Todas las fuentes, una a una</summary>${flow}</details>` : '');
   const box = $('g-svg'); if (box) { box.innerHTML = pathSvg(t, box.clientWidth || 900); const sv = box.querySelector('svg');
