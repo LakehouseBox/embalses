@@ -605,7 +605,7 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
 const muniAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of muniShown) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const areaAt = (mx, my) => { const dpr = devicePixelRatio || 1; for (const { a, p } of shownAreas) if (ctx.isPointInPath(p, mx * dpr, my * dpr, 'evenodd')) return a; return null; };
 const mtip = $('map-tip');
-cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
+cv.addEventListener('mousemove', e => { if (!P || DRAG?.moved) return; const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top; let m = null;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) { m = p.r; break; } }
   const mu = !m ? muniAt(mx, my) : null, a = mu ? null : areaAt(mx, my), can = !m && a && a.name !== AS().k && pickable(a) ? a : null; cv.style.cursor = m || mu || can ? 'pointer' : '';
   if (can !== HOVER || mu !== MHOVER) { HOVER = can; MHOVER = mu; if (ANIM === 1) draw();
@@ -619,10 +619,22 @@ cv.addEventListener('mousemove', e => { if (!P) return; const rc = cv.getBoundin
   else { mtip.hidden = true; return; }
   mtip.hidden = false; mtip.style.left = Math.max(4, Math.min(mx + 14, P.W - mtip.offsetWidth - 6)) + 'px'; mtip.style.top = Math.min(my + 14, P.H - mtip.offsetHeight - 6) + 'px'; });
 cv.addEventListener('mouseleave', () => { mtip.hidden = true; if (HOVER || MHOVER) { HOVER = null; MHOVER = null; draw(); } });
-cv.addEventListener('click', e => { const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top;
+cv.addEventListener('click', e => { if (DRAGGED) { DRAGGED = false; return; } const rc = cv.getBoundingClientRect(), mx = e.clientX - rc.left, my = e.clientY - rc.top;
   for (let i = marks.length - 1; i >= 0; i--) { const p = marks[i]; if ((mx - p.x) ** 2 + (my - p.y) ** 2 <= (p.rad + 4) ** 2) return setScope('r', p.r.reservoir_id); }
   const mu = muniAt(mx, my); if (mu) return setScope('m', mu.code);
   const a = areaAt(mx, my); if (a && pickable(a) && a.name !== AS().k) setScope(a.type, a.name); });
+// drag to pan (mouse and pen): the view moves, what is selected stays; only a click opens another area.
+// On touch, one finger keeps scrolling the page.
+let DRAG = null, DRAGGED = false, panRaf = 0;
+cv.addEventListener('pointerdown', e => { if (!P || e.button !== 0 || e.pointerType === 'touch') return; animRun++; ANIM = 1;
+  DRAG = { x: e.clientX, y: e.clientY, bb: BB, k: P.k, id: e.pointerId, moved: false }; });
+cv.addEventListener('pointermove', e => { if (!DRAG || e.pointerId !== DRAG.id) return; const dx = e.clientX - DRAG.x, dy = e.clientY - DRAG.y;
+  if (!DRAG.moved && dx * dx + dy * dy < 25) return;   // under 5 px it is still a click
+  if (!DRAG.moved) { DRAG.moved = true; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing'; mtip.hidden = true; HOVER = null; MHOVER = null; }
+  const dLon = -dx / (KX * DRAG.k), dLat = dy / DRAG.k, b = DRAG.bb;
+  cancelAnimationFrame(panRaf); panRaf = requestAnimationFrame(() => { fit({ w: b.w + dLon, e: b.e + dLon, s: b.s + dLat, n: b.n + dLat }); draw(); }); });
+const endDrag = e => { if (!DRAG || e.pointerId !== DRAG.id) return; if (DRAG.moved) { DRAGGED = true; cv.style.cursor = ''; setTimeout(() => { DRAGGED = false; }, 0); } DRAG = null; };
+cv.addEventListener('pointerup', endDrag); cv.addEventListener('pointercancel', endDrag);
 const press = (ids, on) => { for (const i of ids) $(i).setAttribute('aria-pressed', i === on); };
 function setLayer(l, note = true) { layer = l; if (note) remember(false); press(['l-res', 'l-var', 'l-rain'], 'l-' + l); $('winseg').hidden = l !== 'rain'; animate(BB, BB); }
 for (const l of ['res', 'var', 'rain']) $('l-' + l).onclick = () => setLayer(l);
