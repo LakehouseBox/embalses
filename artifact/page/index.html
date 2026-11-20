@@ -10,7 +10,6 @@
 @font-face { font-family: 'Source Sans 3'; font-style: normal; font-weight: 600; font-display: swap; src: url(../assets/source-sans-3-600.woff2) format('woff2'); }
 @font-face { font-family: 'Source Sans 3'; font-style: normal; font-weight: 700; font-display: swap; src: url(../assets/source-sans-3-700.woff2) format('woff2'); }
 @font-face { font-family: 'Source Sans 3'; font-style: normal; font-weight: 800; font-display: swap; src: url(../assets/source-sans-3-800.woff2) format('woff2'); }
-#relief-src { display: none; background-image: url(../assets/relief.webp); }   /* the platform rewrites asset URLs in CSS, not in scripts: the map reads this one */
 :root {
   --bg: #ffffff; --surface: #ffffff; --ink: #0f2233; --muted: #55697a; --faint: #8b9aa8; --line: #e1e8ee; --border: #9fb0be; --land: #eef2f5; --tint: #f3f7fc;
   --brand: #1463e0; --brand-dark: #0c3f7d; --water: #1b6fd1; --low: #d9822b; --river: #6ea5cc;
@@ -249,7 +248,7 @@ footer .cols { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 28px; }
         <span class="seg" role="group" aria-label="Qué muestra el mapa" id="layerseg"><button id="l-res" aria-pressed="true">Nivel</button><button id="l-var" aria-pressed="false">Variaciones</button><button id="l-rain" aria-pressed="false">Lluvia</button></span>
         <div class="tapbox mini" role="search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><input type="search" id="tap-q" role="combobox" aria-label="Busca tu municipio" aria-expanded="false" aria-controls="tap-list" aria-autocomplete="list" autocomplete="off" spellcheck="false" placeholder="Busca tu municipio"><ul id="tap-list" role="listbox" hidden></ul></div>
       </div>
-      <div class="mapbox" id="mapbox"><canvas id="map"></canvas><canvas id="mapfx" aria-hidden="true"></canvas><div id="relief-src" hidden></div><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
+      <div class="mapbox" id="mapbox"><canvas id="map"></canvas><canvas id="mapfx" aria-hidden="true"></canvas><button class="btn fsbtn" id="fs" aria-label="Ver el mapa a pantalla completa" title="Pantalla completa">⛶</button><span class="seg overlay" role="group" aria-label="Periodo de lluvia" id="winseg" hidden><button id="w-1h" aria-pressed="false">1 h</button><button id="w-6h" aria-pressed="false">6 h</button><button id="w-12h" aria-pressed="false">12 h</button><button id="w-24h" aria-pressed="true">24 h</button></span><div class="mapkey" id="mapkey"></div><div class="tip" id="map-tip" hidden></div></div>
       <p class="muted small" id="map-note" style="margin:8px 0 0">Cargando el mapa…</p>
       <p class="muted small" id="area-note" style="margin:6px 0 0" hidden></p>
     </div>
@@ -548,7 +547,7 @@ function fit(bb = target()) { BB = bb;
   if (pc && !ms) loadMuniProv(pc).then(r => { if (r && muniProv() === pc) { fit(BB); draw(); } }); }
 let backdrop = [], comSel = null;
 let RELIEF = null;   // assets/relief.webp: hillshade of the Copernicus DEM (GLO-90), 300 m, drawn in the map's own projection
-function loadRelief() { const i = new Image(); const u = getComputedStyle($('relief-src')).backgroundImage.match(/url\("?([^")]+)/); if (!u) return; i.src = u[1]; i.decode().then(() => { RELIEF = i; if (P && ANIM === 1) draw(); }).catch(() => {}); }
+async function loadRelief() { try { const i = new Image(); i.src = await lhbox.asset('../assets/relief.webp'); await i.decode(); RELIEF = i; if (P && ANIM === 1) draw(); } catch (e) {} }   // lhbox.asset: an address that loads now, even after the page's own signed address has expired
 function text(t, x, y, size, weight, color) { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
 function gauge(r, rad) { rad *= 0.45 + 0.55 * ANIM; const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
   ctx.beginPath(); ctx.arc(x, y, rad + 1.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();

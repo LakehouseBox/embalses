@@ -8,6 +8,6 @@
   "public_url": "https://lakehousebox.com/a/II58fpqq/embalses-el-agua-en-espana",
   "description": "El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.",
   "thumbnail": "card.png",
-  "version": 51,
-  "note": "Map relief: image URL read from CSS (asset URLs are rewritten there)"
+  "version": 53,
+  "note": "Map relief loads through lhbox.asset"
 }
