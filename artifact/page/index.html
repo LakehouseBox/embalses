@@ -329,7 +329,7 @@ ATTACH 'jatorre/embalses' AS embalses (TYPE iceberg,
 
 <footer id="metodologia"><div class="wrap cols">
   <div><h3>Qué es esto</h3><p>Una vista del agua embalsada en España, la lluvia y cómo llega a los embalses, hecha solo con datos oficiales y abiertos.</p><p>El dato de hoy usa la última lectura en directo de cada embalse y, donde no la hay, el boletín semanal. Los porcentajes suman todos los embalses de la zona (uno grande pesa más) y se comparan con la misma semana de años anteriores. Tu agua cuenta los embalses de los que bebe tu municipio y los que están aguas arriba.</p><p>Las lecturas en directo son provisionales: los organismos todavía no las han validado.</p></div>
-  <div><h3>Fuentes</h3><p>Niveles: SAIH de las confederaciones, SAIH Hidrosur, Agència Catalana de l'Aigua y el Boletín Hidrológico de MITECO.</p><p>Lluvia: AEMET y SiAR.</p><p>Tu grifo: planes hidrológicos 2022–2027, Canal de Isabel II, INE e IGN.</p><p>Ríos: HydroSHEDS (CC BY 4.0).</p></div>
+  <div><h3>Fuentes</h3><p>Niveles: SAIH de las confederaciones, SAIH Hidrosur, Agència Catalana de l'Aigua y el Boletín Hidrológico de MITECO.</p><p>Lluvia: AEMET y SiAR.</p><p>Tu grifo: planes hidrológicos 2022–2027, Canal de Isabel II, INE e IGN.</p><p>Ríos: HydroSHEDS (CC BY 4.0). Relieve: Copernicus DEM GLO-90 (© DLR e.V. 2010–2014 y © Airbus Defence and Space GmbH 2014–2018, suministrado en el marco de COPERNICUS por la Unión Europea y la ESA).</p></div>
   <div><h3>Cómo está hecho</h3><p>Los datos se recogen y se publican con <a href="https://lakehousebox.com">LakehouseBox</a>. Tu navegador los consulta directamente, sin servidor intermedio.</p><p><a href="https://lakehousebox.com/examples/embalses/">Cómo está hecho ↗</a></p><p><a href="https://github.com/LakehouseBox/embalses">Proyecto abierto en GitHub ↗</a></p></div>
 </div></footer>
 
@@ -546,6 +546,8 @@ function fit(bb = target()) { BB = bb;
   const pc = muniProv(), ms = pc && MPROV[pc]; muniShown = Array.isArray(ms) ? ms.map(path) : [];
   if (pc && !ms) loadMuniProv(pc).then(r => { if (r && muniProv() === pc) { fit(BB); draw(); } }); }
 let backdrop = [], comSel = null;
+let RELIEF = null;   // relief.webp: hillshade of the Copernicus DEM (GLO-90), 300 m, drawn in the map's own projection
+function loadRelief() { const i = new Image(); i.src = 'relief.webp'; i.decode().then(() => { RELIEF = i; if (P && ANIM === 1) draw(); }).catch(() => {}); }
 function text(t, x, y, size, weight, color) { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
 function gauge(r, rad) { rad *= 0.45 + 0.55 * ANIM; const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
   ctx.beginPath(); ctx.arc(x, y, rad + 1.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();
@@ -557,6 +559,12 @@ function draw() { if (!P) return; ctx.clearRect(0, 0, P.W, P.H); marks = [];
   const free = b => { if (taken.some(t => b[0] < t[2] && b[2] > t[0] && b[1] < t[3] && b[3] > t[1])) return false; taken.push(b); return true; };
   for (const { a, p } of shownAreas) { const sel = !es && a.name === sk; ctx.fillStyle = layer === 'res' && (es || sel) && a.fill != null ? css('--a' + (stepOf(a.fill, BAND) + 1)) : css('--land'); ctx.globalAlpha = sel && layer === 'res' ? 0.55 : 1; ctx.fill(p, 'evenodd'); ctx.globalAlpha = 1; }
   for (const { a, p } of muniShown) { const f = a.w?.fill_pct; ctx.fillStyle = f != null ? css('--a' + (stepOf(f, BAND) + 1)) : '#e6eaee'; ctx.fill(p, 'evenodd'); ctx.strokeStyle = '#fff'; ctx.lineWidth = 0.7; ctx.stroke(p); }
+  if (RELIEF && !es) {   // terrain relief (Copernicus DEM), multiplied over the fills once a comunidad or province is open: plain around it, faint inside it (the national view stays clean)
+    const x0 = P.x(-10), y0 = P.y(45), w = P.x(5.001078) - x0, h = P.y(35.000464) - y0, inner = comSel?.p || shownAreas.find(x => !es && x.a.name === sk)?.p;
+    ctx.save(); ctx.globalCompositeOperation = 'multiply';
+    if (inner) { const out = new Path2D(); out.rect(-5, -5, P.W + 10, P.H + 10); out.addPath(inner); ctx.save(); ctx.clip(out, 'evenodd'); ctx.globalAlpha = 0.7; ctx.drawImage(RELIEF, x0, y0, w, h); ctx.restore();
+      ctx.clip(inner, 'evenodd'); ctx.globalAlpha = muniShown.length ? 0.22 : 0.35; ctx.drawImage(RELIEF, x0, y0, w, h); }
+    ctx.restore(); }
   if (layer === 'rain') { const A = [0.35, 0.55, 0.75, 0.9, 1, 1];
     for (const c of D.grid) { const mm = c['rain_' + win]; if (mm == null || mm < 0.2) continue; let b = bounds.get(c.h3_cell); if (!b) bounds.set(c.h3_cell, b = h3.cellToBoundary(c.h3_cell));
       const s = stepOf(mm, STEPS); ctx.beginPath(); b.forEach(([la, lo], i) => i ? ctx.lineTo(P.x(lo), P.y(la)) : ctx.moveTo(P.x(lo), P.y(la))); ctx.closePath(); ctx.globalAlpha = A[s]; ctx.fillStyle = css('--f' + (s + 1)); ctx.fill(); } ctx.globalAlpha = 1; }
@@ -1002,6 +1010,7 @@ function subhead() { const N0 = SER.es && stats(SER.es); if (!N0) return; const 
     showOutlines((await q(SQL.outlines)).rows);
     const res = (await q(SQL.res)).rows; showReservoirs(res);
     const weekly = (await q(SQL.weekly(''))).rows; showNational(weekly);
+    loadRelief();   // 0,5 MB, after the map and its data are on screen
     await loadH3();   // the rain grid's cells; only needed from here on, so the first paint does not wait for it
     D.grid = (await q(SQL.grid)).rows.filter(c => { const [la, lo] = h3.cellToLatLng(c.h3_cell); return !island(lo, la); }); gridIndex = new Map(D.grid.map(c => [c.h3_cell, c])); D.gauges = (await q(SQL.gauges)).rows.filter(g => !island(g.lon, g.lat));
     for (const w of ['1h', '6h', '12h', '24h']) $('w-' + w).disabled = !D.grid.some(c => c['rain_' + w] != null);
