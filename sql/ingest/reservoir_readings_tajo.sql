@@ -37,7 +37,7 @@ r AS MATERIALIZED (
 ),
 v AS (
   SELECT codigo, sig.tiposenal AS kind,
-         timezone('Europe/Madrid', strptime(x.tiempo, '%d/%m/%Y %H:%M')) AS observed_at, x.valor
+         timezone('Europe/Madrid', try_strptime(x.tiempo, '%d/%m/%Y %H:%M')) AS observed_at, x.valor   -- try_: a station now and then answers {} for a time
   FROM r, LATERAL (SELECT unnest(sig.valores) AS x)
 ),
 hourly AS (
@@ -52,5 +52,5 @@ SELECT 'saih-tajo:' || codigo AS station_id, NULL::INTEGER AS reservoir_id, obse
        water_level_masl, stored_volume_hm3, fill_pct, NULL::DOUBLE AS inflow_m3s, outflow_m3s,
        true AS is_provisional, 'saih-tajo' AS source
 FROM hourly
-WHERE stored_volume_hm3 IS NOT NULL
+WHERE stored_volume_hm3 IS NOT NULL AND observed_at IS NOT NULL
 QUALIFY row_number() OVER (PARTITION BY codigo ORDER BY observed_at DESC) = 1
