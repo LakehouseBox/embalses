@@ -546,8 +546,8 @@ function fit(bb = target()) { BB = bb;
   const pc = muniProv(), ms = pc && MPROV[pc]; muniShown = Array.isArray(ms) ? ms.map(path) : [];
   if (pc && !ms) loadMuniProv(pc).then(r => { if (r && muniProv() === pc) { fit(BB); draw(); } }); }
 let backdrop = [], comSel = null;
-let RELIEF = null;   // relief.webp: hillshade of the Copernicus DEM (GLO-90), 300 m, drawn in the map's own projection
-function loadRelief() { const i = new Image(); i.src = 'relief.webp'; i.decode().then(() => { RELIEF = i; if (P && ANIM === 1) draw(); }).catch(() => {}); }
+let RELIEF = null;   // assets/relief.webp: hillshade of the Copernicus DEM (GLO-90), 300 m, drawn in the map's own projection
+function loadRelief() { const i = new Image(); i.src = '../assets/relief.webp'; i.decode().then(() => { RELIEF = i; if (P && ANIM === 1) draw(); }).catch(() => {}); }
 function text(t, x, y, size, weight, color) { ctx.font = `${weight} ${size}px "Source Sans 3", system-ui, sans-serif`; ctx.textAlign = 'center'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(255,255,255,0.92)'; ctx.strokeText(t, x, y); ctx.fillStyle = color; ctx.fillText(t, x, y); }
 function gauge(r, rad) { rad *= 0.45 + 0.55 * ANIM; const x = P.x(r.lon), y = P.y(r.lat), f = Math.max(0, Math.min(100, r.fill_pct ?? 0)) / 100;
   ctx.beginPath(); ctx.arc(x, y, rad + 1.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill();

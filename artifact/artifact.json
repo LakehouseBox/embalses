@@ -1,11 +1,13 @@
 {
-  "artifact_id": "a_xfXMuSDMl2OvrKyGans2oA",
+  "artifact_id": "II58fpqq",
   "title": "Embalses: el agua en España",
   "catalogs": [
     "jatorre/embalses"
   ],
-  "url": "https://lakehousebox.com/app/a/a_xfXMuSDMl2OvrKyGans2oA",
+  "url": "https://lakehousebox.com/a/II58fpqq/embalses-el-agua-en-espana",
   "public_url": "https://lakehousebox.com/a/II58fpqq/embalses-el-agua-en-espana",
   "description": "El estado de los embalses de España, la lluvia y las cuencas, con datos oficiales abiertos que puedes consultar y descargar.",
-  "thumbnail": "card.png"
+  "thumbnail": "card.png",
+  "version": 49,
+  "note": "Map: soft terrain relief (Copernicus DEM GLO-90) around an open comunidad or province, faint inside it"
 }
